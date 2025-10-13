@@ -1,0 +1,29 @@
+{
+  "fileName": "Resume2.pdf",
+  "blocks": [
+    {
+      "block": "skills",
+      "content": "Front-end: ReactJs, NextJs, HTML, CSS, Typescript, Javascript, TailwindCss, Shadcn, Redux, Zustard, Vite. Back-end: NodeJs, Redis, Mongodb, PostgreSql, Sql, Mongoose, prisma, RESTful API, GraphQl, Flutter Integration, Paystack integration, Websocket, JWT.",
+      "startLine": 6,
+      "endLine": 11
+    },
+    {
+      "block": "experience",
+      "content": "Pasar — Full-Stack developer June 2025 - PRESENT ● Built and deployed a secure escrow system supporting both fiat and crypto transactions. ● Developed responsive front-end interfaces with React/Next.js and integrated Web3 wallet functionality. ● Implemented admin tools and monitoring dashboards to ensure transaction transparency and platform reliability. Fixeroni — Front-end Engineer June 2024 - Feb 2025 ● Developed user-friendly web interfaces connecting customers with verified handymen (electricians, plumbers, carpenters, etc.). ● Implemented search, booking, and profile features with React, improving service discovery and customer engagement. ● Optimized front-end performance and responsive design for cross-device usability.",
+      "startLine": 12,
+      "endLine": 30
+    },
+    {
+      "block": "projects",
+      "content": "Zipzen — Details A modern cloud storage solution designed to leverage the full power of any device. With focus on speed, accessibility and seamless synchronization, ZipZen offers an intuitive platform for storing, managing, and retrieving files across all your devices.",
+      "startLine": 31,
+      "endLine": 39
+    },
+    {
+      "block": "education",
+      "content": "KWASU, Kwara State — B.sc in Computer Science Expected Graduation, March, 2027 ● Concentrations: Intelligence and Modeling/Simulations. ● Related Coursework: Data Structures & Algorithms, Objects & Design, Computer Organization Programming, Combinatorics, Machine Learning, Artificial Intelligence, Object-Oriented Programming, Statistics & Applications",
+      "startLine": 40,
+      "endLine": 53
+    }
+  ]
+}

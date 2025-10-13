@@ -1,0 +1,95 @@
+[
+  {
+    "block": "Header",
+    "content": "FULLSTACK ENGINEER/ARCHITECT FAROOQ ASHIRU EMAIL: ashfaga2005f@gmail.com Tel: +2438064393200 Linkedin Github Portfolio",
+    "subBlocks": []
+  },
+  {
+    "block": "Skills",
+    "content": "Front-end: ReactJs, NextJs, HTML, CSS, Typescript, Javascript, TailwindCss, Shadcn, Redux, Zustard, Vite. Back-end: NodeJs, Redis, Mongodb, PostgreSql, Sql, Mongoose, prisma, RESTful API, GraphQl, Flutter Integration, Paystack integration, Websocket, JWT.",
+    "subBlocks": []
+  },
+  {
+    "block": "Experience",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "Pasar — Full-Stack developer",
+        "details": []
+      },
+      {
+        "title": "June 2025 - PRESENT",
+        "details": [
+          "● Built and deployed a secure escrow system supporting both fiat",
+          "and crypto transactions.",
+          "● Developed responsive front-end interfaces with React/Next.js",
+          "and integrated Web3 wallet functionality.",
+          "● Implemented admin tools and monitoring dashboards to",
+          "ensure transaction transparency and platform reliability."
+        ]
+      },
+      {
+        "title": "Fixeroni — Front-end Engineer",
+        "details": []
+      },
+      {
+        "title": "June 2024 - Feb 2025",
+        "details": [
+          "● Developed user-friendly web interfaces connecting",
+          "customers with verified handymen (electricians, plumbers,",
+          "carpenters, etc.).",
+          "● Implemented search, booking, and profile features with",
+          "React, improving service discovery and customer",
+          "engagement.",
+          "● Optimized front-end performance and responsive design for",
+          "cross-device usability."
+        ]
+      }
+    ]
+  },
+  {
+    "block": "Projects",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "Zipzen — Details",
+        "details": [
+          "A modern cloud storage solution",
+          "designed to leverage the full power of any",
+          "device. With focus on speed, accessibility",
+          "and seamless synchronization, ZipZen",
+          "offers an intuitive platform for storing,",
+          "managing, and retrieving files across all",
+          "your devices."
+        ]
+      }
+    ]
+  },
+  {
+    "block": "Education",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "KWASU, Kwara State — B.sc in",
+        "details": [
+          "Computer Science",
+          "Expected Graduation, March, 2027",
+          "● Concentrations: Intelligence and",
+          "Modeling/Simulations.",
+          "● Related Coursework: Data",
+          "Structures & Algorithms, Objects",
+          "& Design, Computer Organization",
+          "Programming, Combinatorics,",
+          "Machine Learning, Artificial"
+        ]
+      },
+      {
+        "title": "Intelligence, Object-Oriented",
+        "details": [
+          "Programming, Statistics &",
+          "Applications"
+        ]
+      }
+    ]
+  }
+]

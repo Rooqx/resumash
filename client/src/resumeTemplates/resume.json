@@ -1,0 +1,175 @@
+{
+  "basics": {
+    "name": "Ava Carter",
+    "label": "Full Stack Developer",
+    "image": "",
+    "email": "ava.carter@example.com",
+    "phone": "+1 (415) 555-0198",
+    "url": "https://avacarter.dev",
+    "summary": "Enthusiastic Full Stack Developer with 5+ years of experience designing, developing, and maintaining responsive web applications. Passionate about clean code, modern UI, and solving complex backend challenges.",
+    "location": {
+      "address": "432 Market Street",
+      "postalCode": "CA 94111",
+      "city": "San Francisco",
+      "countryCode": "US",
+      "region": "California"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "ava-carter",
+        "url": "https://linkedin.com/in/ava-carter"
+      },
+      {
+        "network": "GitHub",
+        "username": "avacarter",
+        "url": "https://github.com/avacarter"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "TechNova Solutions",
+      "position": "Senior Full Stack Developer",
+      "url": "https://technova.io",
+      "startDate": "2020-03-01",
+      "endDate": "",
+      "summary": "Lead developer for multiple SaaS products built with React, Node.js, and MongoDB.",
+      "highlights": [
+        "Architected and deployed scalable microservices on AWS.",
+        "Improved API response times by 40% through query optimization.",
+        "Led a team of 5 engineers in agile development cycles."
+      ]
+    },
+    {
+      "name": "PixelWorks Studio",
+      "position": "Frontend Developer",
+      "url": "https://pixelworks.com",
+      "startDate": "2017-05-01",
+      "endDate": "2020-02-01",
+      "summary": "Focused on developing responsive UI components using React and TypeScript.",
+      "highlights": [
+        "Collaborated with UX team to improve accessibility by 30%.",
+        "Developed and maintained a design system used across 4 projects."
+      ]
+    }
+  ],
+  "volunteer": [
+    {
+      "organization": "Girls Who Code",
+      "position": "Mentor",
+      "url": "https://girlswhocode.com",
+      "startDate": "2019-01-01",
+      "endDate": "2021-12-01",
+      "summary": "Mentored high school girls in web development and programming concepts.",
+      "highlights": ["Helped 10+ students launch their first websites."]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "url": "https://berkeley.edu",
+      "area": "Computer Science",
+      "studyType": "Bachelor",
+      "startDate": "2013-08-01",
+      "endDate": "2017-05-01",
+      "score": "3.9",
+      "courses": [
+        "CS61A - Structure and Interpretation of Computer Programs",
+        "CS170 - Efficient Algorithms and Intractable Problems"
+      ]
+    }
+  ],
+  "awards": [
+    {
+      "title": "Employee of the Year",
+      "date": "2022-11-01",
+      "awarder": "TechNova Solutions",
+      "summary": "Recognized for outstanding leadership and technical contributions to the company's flagship project."
+    }
+  ],
+  "certificates": [
+    {
+      "name": "AWS Certified Solutions Architect – Associate",
+      "date": "2023-03-15",
+      "issuer": "Amazon Web Services",
+      "url": "https://aws.amazon.com/certification/"
+    }
+  ],
+  "publications": [
+    {
+      "name": "Optimizing React Performance for Large Applications",
+      "publisher": "Medium",
+      "releaseDate": "2021-09-10",
+      "url": "https://medium.com/@avacarter/react-performance-tips",
+      "summary": "An in-depth guide to improving performance in React applications using memoization and lazy loading."
+    }
+  ],
+  "skills": [
+    {
+      "name": "Frontend Development",
+      "level": "Expert",
+      "keywords": ["React", "TypeScript", "Tailwind CSS", "Next.js"]
+    },
+    {
+      "name": "Backend Development",
+      "level": "Advanced",
+      "keywords": ["Node.js", "Express", "MongoDB", "PostgreSQL"]
+    },
+    {
+      "name": "DevOps & Cloud",
+      "level": "Intermediate",
+      "keywords": ["AWS", "Docker", "CI/CD", "GitHub Actions"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native speaker"
+    },
+    {
+      "language": "Spanish",
+      "fluency": "Conversational"
+    }
+  ],
+  "interests": [
+    {
+      "name": "Open Source",
+      "keywords": ["Contributing", "Community", "Hackathons"]
+    },
+    {
+      "name": "Travel",
+      "keywords": ["Hiking", "Photography", "Cultural Exploration"]
+    }
+  ],
+  "references": [
+    {
+      "name": "Marcus Lin",
+      "reference": "Ava consistently delivers high-quality code and demonstrates strong leadership in collaborative projects."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Taskify Pro",
+      "startDate": "2021-02-01",
+      "endDate": "2022-06-01",
+      "description": "A project management tool that helps remote teams collaborate efficiently with integrated chat and task boards.",
+      "highlights": [
+        "Used MERN stack with real-time WebSocket communication.",
+        "Won 'Best Productivity App' at Tech Innovators 2022."
+      ],
+      "url": "https://taskifypro.app"
+    },
+    {
+      "name": "FoodSnap AI",
+      "startDate": "2019-07-01",
+      "endDate": "2020-10-01",
+      "description": "An AI-powered nutrition tracking app that recognizes meals using image classification.",
+      "highlights": [
+        "Implemented TensorFlow.js for real-time food detection.",
+        "Featured in Product Hunt’s Top 10 Apps of the Month."
+      ],
+      "url": "https://foodsnap.ai"
+    }
+  ]
+}

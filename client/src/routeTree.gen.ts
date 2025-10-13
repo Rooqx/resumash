@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResumeIndexRouteImport } from './routes/Resume/index'
+import { Route as ResumeSkeletonRouteImport } from './routes/Resume/skeleton'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResumeIndexRoute = ResumeIndexRouteImport.update({
+  id: '/Resume/',
+  path: '/Resume/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResumeSkeletonRoute = ResumeSkeletonRouteImport.update({
+  id: '/Resume/skeleton',
+  path: '/Resume/skeleton',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/Resume/skeleton': typeof ResumeSkeletonRoute
+  '/Resume': typeof ResumeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/Resume/skeleton': typeof ResumeSkeletonRoute
+  '/Resume': typeof ResumeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/Resume/skeleton': typeof ResumeSkeletonRoute
+  '/Resume/': typeof ResumeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/Resume/skeleton' | '/Resume'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/Resume/skeleton' | '/Resume'
+  id: '__root__' | '/' | '/Resume/skeleton' | '/Resume/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ResumeSkeletonRoute: typeof ResumeSkeletonRoute
+  ResumeIndexRoute: typeof ResumeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Resume/': {
+      id: '/Resume/'
+      path: '/Resume'
+      fullPath: '/Resume'
+      preLoaderRoute: typeof ResumeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Resume/skeleton': {
+      id: '/Resume/skeleton'
+      path: '/Resume/skeleton'
+      fullPath: '/Resume/skeleton'
+      preLoaderRoute: typeof ResumeSkeletonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ResumeSkeletonRoute: ResumeSkeletonRoute,
+  ResumeIndexRoute: ResumeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

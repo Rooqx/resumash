@@ -1,4 +1,4 @@
-import { REDIS_URI } from "../src/configs/env.configs";
+import { REDIS_URI } from "../configs/env.configs";
 import { createClient } from "redis";
 
 if (!REDIS_URI || REDIS_URI === "") {

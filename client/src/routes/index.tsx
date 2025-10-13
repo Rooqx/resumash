@@ -1,39 +1,40 @@
 import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
+import { useState } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
+import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
+import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 
+const queryClient = new QueryClient()
 export const Route = createFileRoute('/')({
-  component: App,
+  component: RouteComponent,
 })
-
-function App() {
+function RouteComponent() {
+  const [value, setValue] = useState('Full name')
+  // const memoizeDoc = useMemo(() => <ResumeDocument value={value} />, [value])
   return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
+    <QueryClientProvider client={queryClient}>
+      <div className="App">
+        <h2>My Resume</h2>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="text-2xl"
         />
-        <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
-        </p>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn TanStack
-        </a>
-      </header>
-    </div>
+        <div className="w-full flex justify-center items-center">
+          <ResumeComponent />
+        </div>
+        {/*  <PDFViewer width="100%" height="600">
+          <ResumePDF />
+        </PDFViewer>
+
+        <br />
+
+        <PDFDownloadLink document={<ResumePDF />} fileName="Echo_Resume.pdf">
+          {({ loading }) => (loading ? 'Generating...' : 'Download PDF')}
+        </PDFDownloadLink>*/}
+      </div>
+    </QueryClientProvider>
   )
 }
