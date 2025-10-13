@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 interface InputState {
   inputValues: Record<string, string> // key value pairs for all input
-  setInputValues: (ame: string, value: string) => void
+  setInputValues: (name: string, value: string) => void
   reset: () => void
 }
 const useInputStore = create<InputState>((set) => ({

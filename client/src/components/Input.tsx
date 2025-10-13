@@ -1,10 +1,10 @@
 'use client'
 import { useState } from 'react'
-import Image from './Image'
 import { Link } from '@tanstack/react-router'
+import Image from './Image'
 import useInputStore from '@/lib/stores/useInputStores'
 
-interface FormInputProps {
+interface InputProps {
   inputTittle?: string
   inputWidth?: string
   value?: string // optional controlled value
@@ -22,7 +22,7 @@ interface FormInputProps {
   focusBorder?: boolean
 }
 
-export default function FormInput({
+export default function Input({
   inputTittle,
   // inputWidth = "full",
   value,
@@ -38,7 +38,7 @@ export default function FormInput({
   passwordVisibility = false,
   className,
   focusBorder = true,
-}: FormInputProps) {
+}: InputProps) {
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)
   // Zustand store selectors
