@@ -1,5 +1,7 @@
 import React from 'react'
+import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
 import resumeData from '../resume.json'
+import useInputStore from '@/lib/stores/useInputStores'
 // import './resume.css' // letter if you prefer moving styles to a CSS file
 
 const ResumeComponent: React.FC = () => {
@@ -18,9 +20,11 @@ const ResumeComponent: React.FC = () => {
     references,
   } = resumeData
 
+  const { inputValue, setInputValue } = useInputStore()
+  console.log('inputValues', inputValue)
   const styles = {
     page: {
-      width: '70vw',
+      width: '50vw',
       height: '1123px',
       border: '1px solid black',
       display: 'flex',
@@ -45,7 +49,7 @@ const ResumeComponent: React.FC = () => {
       marginBottom: '5px',
     },
     label: {
-      fontSize: '14px',
+      fontSize: '10px',
       color: '#4a4a4a',
       marginBottom: '8px',
       marginTop: '10px',
@@ -61,6 +65,9 @@ const ResumeComponent: React.FC = () => {
     contactItem: {
       fontSize: '9px',
       color: '#666666',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '5px',
     },
     section: {
       marginBottom: '10px',
@@ -80,14 +87,30 @@ const ResumeComponent: React.FC = () => {
       marginBottom: '3px',
     },
     company: { fontSize: '10px', fontWeight: 'bold' as const },
-    position: { fontSize: '10px', color: '#4a4a4a' },
-    date: { fontSize: '9px', color: '#666666' },
+    position: {
+      fontSize: '10px',
+      color: '#3a3a3a',
+      fontWeight: 'semibold' as const,
+    },
+    date: {
+      fontSize: '9px',
+      color: '#666666',
+      minWidth: '110px',
+    },
     jobSummary: {
       fontSize: '9px',
       color: '#333333',
       textAlign: 'justify' as const,
     },
-    educationItem: { marginBottom: '8px' },
+    jobHighlights: {
+      fontSize: '9px',
+      color: '#333333',
+      textAlign: 'justify' as const,
+      marginTop: '5px',
+    },
+    educationItem: {
+      marginBottom: '8px',
+    },
     institution: {
       fontSize: '10px',
       fontWeight: 'bold' as const,
@@ -123,14 +146,45 @@ const ResumeComponent: React.FC = () => {
     <div style={styles.page}>
       {/* Header Section */}
       <div style={styles.header}>
-        <div style={styles.name}>{basics.name}</div>
-        <div style={styles.label}>{basics.label}</div>
+        <div style={styles.name}>{inputValue.fullName || 'Full Name'}</div>
+        <div style={styles.label}>
+          {inputValue.label || 'Job Title (e.g Frontend Engineer)'}
+        </div>
         <div style={styles.contactInfo}>
-          <span style={styles.contactItem}>{basics.email}</span>
-          <span style={styles.contactItem}>{basics.phone}</span>
           <span style={styles.contactItem}>
-            {basics.location.city}, {basics.location.region}
+            {' '}
+            <Mail size={10} />
+            {inputValue.email || 'email (e.g user@example.com)'}
           </span>
+          <span style={styles.contactItem}>
+            <Phone size={10} />
+            {basics.phone}
+          </span>
+          <a
+            style={{ ...styles.contactItem, cursor: 'pointer' }}
+            href={inputValue.linkdlnUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Linkedin size={10} />
+            {'Linkdln'}
+          </a>
+          <a
+            style={{ ...styles.contactItem, cursor: 'pointer' }}
+            href={inputValue.githubUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Github size={10} />
+            {'GitHub'}
+          </a>
+          {inputValue.location && (
+            <span style={styles.contactItem}>
+              <MapPin size={10} />
+              {inputValue.city}, {inputValue.country}
+            </span>
+          )}
+
           {basics.url && (
             <a
               style={styles.contactItem}
@@ -145,10 +199,10 @@ const ResumeComponent: React.FC = () => {
       </div>
 
       {/* Summary */}
-      {basics.summary && (
+      {basics.summary && inputValue.summary && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Summary</div>
-          <div style={styles.jobSummary}>{basics.summary}</div>
+          <div style={styles.jobSummary}>{inputValue.summary}</div>
         </div>
       )}
 
@@ -189,35 +243,23 @@ const ResumeComponent: React.FC = () => {
             <div key={index} style={styles.jobItem}>
               <div style={styles.jobHeader}>
                 <div>
-                  <div style={styles.company}>{job.name}</div>
-                  <div style={styles.position}>{job.position}</div>
+                  <div style={styles.company}>
+                    {inputValue.companyName || 'XYZ Company'}
+                  </div>
+                  <div style={styles.position}>
+                    {inputValue.jobPosition || 'Senior Frontend Developer'}
+                  </div>
                 </div>
                 <div style={styles.date}>
                   {job.startDate} - {job.endDate || 'Present'}
                 </div>
               </div>
               <div style={styles.jobSummary}>{job.summary}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Volunteer */}
-      {volunteer.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Volunteer</div>
-          {volunteer.map((vol, index) => (
-            <div key={index} style={styles.jobItem}>
-              <div style={styles.jobHeader}>
-                <div>
-                  <div style={styles.company}>{vol.organization}</div>
-                  <div style={styles.position}>{vol.position}</div>
-                </div>
-                <div style={styles.date}>
-                  {vol.startDate} - {vol.endDate || 'Present'}
-                </div>
+              <div style={styles.jobHighlights}>
+                {job.highlights.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
               </div>
-              <div style={styles.jobSummary}>{vol.summary}</div>
             </div>
           ))}
         </div>
@@ -230,11 +272,13 @@ const ResumeComponent: React.FC = () => {
           {education.map((edu, index) => (
             <div key={index} style={styles.educationItem}>
               <div style={styles.institution}>{edu.institution}</div>
-              <div style={styles.studyType}>
-                {edu.studyType} in {edu.area}
-              </div>
-              <div style={styles.date}>
-                {edu.startDate} - {edu.endDate || 'Present'}
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={styles.studyType}>
+                  {edu.studyType} in {edu.area}
+                </div>
+                <div style={styles.date}>
+                  {edu.startDate} - {edu.endDate || 'Present'}
+                </div>
               </div>
             </div>
           ))}

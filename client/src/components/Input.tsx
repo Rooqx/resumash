@@ -42,12 +42,12 @@ export default function Input({
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)
   // Zustand store selectors
-  const { inputValues, setInputValues } = useInputStore()
+  const { inputValue, setInputValue } = useInputStore()
 
   // Handle input change and update store
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValues(labelFor, e.target.value)
-    console.log(inputValues)
+    setInputValue(labelFor, e.target.value)
+    console.log(inputValue)
   }
 
   return (
@@ -74,7 +74,7 @@ export default function Input({
             value={
               value !== undefined
                 ? value // controlled input case
-                : inputValues[labelFor] || '' // Zustand fallback
+                : inputValue[labelFor] || '' // Zustand fallback
             }
             onChange={(e) => {
               if (onChange) {
