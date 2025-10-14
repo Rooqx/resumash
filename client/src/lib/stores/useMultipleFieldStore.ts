@@ -1,18 +1,14 @@
 import { create } from 'zustand'
 
-interface FieldData {
-  [key: string]: string
-}
-
 interface MultipleFieldStores {
-  fields: Array<FieldData>
+  fields: Array<any>
   addField: () => void
   updateField: (index: number, field: string, value: string) => void
   deleteField: (index: number) => void
 }
 
 const useFieldStores = create<MultipleFieldStores>((set) => ({
-  fields: [{}], // Array<FieldData> inferred from the type
+  fields: [{}], // Array<any> inferred from the type
   addField: () =>
     set((state) => ({
       fields: [...state.fields, {}],

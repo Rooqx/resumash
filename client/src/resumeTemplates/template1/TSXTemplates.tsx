@@ -2,7 +2,7 @@ import React from 'react'
 import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
 import resumeData from '../resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
-// import './resume.css' // letter if you prefer moving styles to a CSS file
+import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 
 const ResumeComponent: React.FC = () => {
   const {
@@ -12,16 +12,20 @@ const ResumeComponent: React.FC = () => {
     skills,
     projects,
     languages,
-    volunteer,
+    /* volunteer,
     awards,
     certificates,
     publications,
     interests,
-    references,
+    references,*/
   } = resumeData
 
-  const { inputValue, setInputValue } = useInputStore()
+  const { inputValue } = useInputStore()
+  const { fields } = useFieldStores()
+
   console.log('inputValues', inputValue)
+  console.log('fieldValues', fields)
+
   const styles = {
     page: {
       width: '50vw',
@@ -33,7 +37,6 @@ const ResumeComponent: React.FC = () => {
       padding: '30px',
       fontFamily: 'Helvetica, Arial, sans-serif',
       fontSize: '16px',
-
       lineHeight: '1.4',
       color: '#000',
     },
@@ -146,45 +149,48 @@ const ResumeComponent: React.FC = () => {
     <div style={styles.page}>
       {/* Header Section */}
       <div style={styles.header}>
-        <div style={styles.name}>{inputValue.fullName || 'Full Name'}</div>
+        <div style={styles.name}>
+          {inputValue.fullName || basics.name || 'Full Name'}
+        </div>
         <div style={styles.label}>
-          {inputValue.label || 'Job Title (e.g Frontend Engineer)'}
+          {inputValue.label ||
+            basics.label ||
+            'Job Title (e.g Frontend Engineer)'}
         </div>
         <div style={styles.contactInfo}>
           <span style={styles.contactItem}>
-            {' '}
             <Mail size={10} />
-            {inputValue.email || 'email (e.g user@example.com)'}
+            {inputValue.email || basics.email || 'email@example.com'}
           </span>
           <span style={styles.contactItem}>
             <Phone size={10} />
-            {basics.phone}
+            {inputValue.phone || basics.phone || '(123) 456-7890'}
           </span>
           <a
             style={{ ...styles.contactItem, cursor: 'pointer' }}
-            href={inputValue.linkdlnUrl}
+            href={inputValue.linkdlnUrl || basics.profiles[0].url || '#'}
             target="_blank"
             rel="noreferrer"
           >
             <Linkedin size={10} />
-            {'Linkdln'}
+            {'LinkedIn'}
           </a>
           <a
             style={{ ...styles.contactItem, cursor: 'pointer' }}
-            href={inputValue.githubUrl}
+            href={inputValue.githubUrl || basics.profiles[1].url || '#'}
             target="_blank"
             rel="noreferrer"
           >
             <Github size={10} />
             {'GitHub'}
           </a>
-          {inputValue.location && (
+          {(inputValue.city || inputValue.country || basics.location.city) && (
             <span style={styles.contactItem}>
               <MapPin size={10} />
-              {inputValue.city}, {inputValue.country}
+              {inputValue.city || basics.location.city || 'City'},{' '}
+              {inputValue.country || basics.location.countryCode || 'Country'}
             </span>
           )}
-
           {basics.url && (
             <a
               style={styles.contactItem}
@@ -199,20 +205,24 @@ const ResumeComponent: React.FC = () => {
       </div>
 
       {/* Summary */}
-      {basics.summary && inputValue.summary && (
+      {(inputValue.summary || basics.summary) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Summary</div>
-          <div style={styles.jobSummary}>{inputValue.summary}</div>
+          <div style={styles.jobSummary}>
+            {inputValue.summary || basics.summary}
+          </div>
         </div>
       )}
 
-      {/* Skills */}
-      {skills.length > 0 && (
+      {/* Skills - Use fields array for skills data */}
+      {(fields.length > 0 || skills.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Skills</div>
-          {skills.map((skill, index) => (
+          {(fields.length > 0 ? fields : skills).map((skill, index) => (
             <div key={index} style={styles.skillItem}>
-              <div style={styles.skillName}>{skill.name}</div>
+              <div style={styles.skillName}>
+                {skill.name || skill.skillName || 'Skill Name'}
+              </div>
               {skill.level && (
                 <div style={styles.skillLevel}>
                   Level:{' '}
@@ -221,7 +231,7 @@ const ResumeComponent: React.FC = () => {
                   </span>
                 </div>
               )}
-              {skill.keywords.length > 0 && (
+              {skill.keywords && skill.keywords.length > 0 && (
                 <div style={styles.skillLevel}>
                   Technologies:
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
@@ -235,49 +245,60 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Work Experience */}
-      {work.length > 0 && (
+      {/* Work Experience - Use fields array for work experience */}
+      {(fields.length > 0 || work.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Work Experience</div>
-          {work.map((job, index) => (
+          {(fields.length > 0 ? fields : work).map((job, index) => (
             <div key={index} style={styles.jobItem}>
               <div style={styles.jobHeader}>
                 <div>
                   <div style={styles.company}>
-                    {inputValue.companyName || 'XYZ Company'}
+                    {job.companyName || job.name || 'Company Name'}
                   </div>
                   <div style={styles.position}>
-                    {inputValue.jobPosition || 'Senior Frontend Developer'}
+                    {job.jobPosition || job.position || 'Job Position'}
                   </div>
                 </div>
                 <div style={styles.date}>
-                  {job.startDate} - {job.endDate || 'Present'}
+                  {job.startDate || 'Start Date'} - {job.endDate || 'Present'}
                 </div>
               </div>
-              <div style={styles.jobSummary}>{job.summary}</div>
-              <div style={styles.jobHighlights}>
-                {job.highlights.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </div>
+              {job.summary && (
+                <div style={styles.jobSummary}>{job.summary}</div>
+              )}
+              {job.highlights && (
+                <div style={styles.jobHighlights}>
+                  {Array.isArray(job.highlights) ? (
+                    job.highlights.map((item: any, i: number) => (
+                      <li key={i}>{item}</li>
+                    ))
+                  ) : (
+                    <li>{job.highlights}</li>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Education */}
-      {education.length > 0 && (
+      {/* Education - Use fields array for education data */}
+      {(fields.length > 0 || education.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Education</div>
-          {education.map((edu, index) => (
+          {(fields.length > 0 ? fields : education).map((edu, index) => (
             <div key={index} style={styles.educationItem}>
-              <div style={styles.institution}>{edu.institution}</div>
+              <div style={styles.institution}>
+                {edu.institution || edu.school || 'Institution Name'}
+              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={styles.studyType}>
-                  {edu.studyType} in {edu.area}
+                  {edu.studyType || edu.degree} in{' '}
+                  {edu.area || edu.fieldOfStudy || 'Field of Study'}
                 </div>
                 <div style={styles.date}>
-                  {edu.startDate} - {edu.endDate || 'Present'}
+                  {edu.startDate || 'Start'} - {edu.endDate || 'Present'}
                 </div>
               </div>
             </div>
@@ -285,7 +306,7 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Projects */}
+      {/* Projects - Only use resume.json data since fields array is used for other sections */}
       {projects.length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Projects</div>
@@ -308,104 +329,13 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Awards */}
-      {awards.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Awards</div>
-          {awards.map((award, index) => (
-            <div key={index} style={styles.educationItem}>
-              <div style={styles.institution}>{award.title}</div>
-              <div style={styles.studyType}>
-                {award.awarder} — {award.date}
-              </div>
-              <div style={styles.jobSummary}>{award.summary}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Certificates */}
-      {certificates.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Certificates</div>
-          {certificates.map((cert, index) => (
-            <div key={index} style={styles.educationItem}>
-              <div style={styles.institution}>{cert.name}</div>
-              <div style={styles.studyType}>
-                {cert.issuer} — {cert.date}
-              </div>
-              {cert.url && (
-                <a
-                  style={styles.contactItem}
-                  href={cert.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View Certificate
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Publications */}
-      {publications.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Publications</div>
-          {publications.map((pub, index) => (
-            <div key={index} style={styles.educationItem}>
-              <div style={styles.institution}>{pub.name}</div>
-              <div style={styles.studyType}>
-                {pub.publisher} — {pub.releaseDate}
-              </div>
-              <div style={styles.jobSummary}>{pub.summary}</div>
-              {pub.url && (
-                <a
-                  style={styles.contactItem}
-                  href={pub.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View Publication
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Languages */}
+      {/* Languages - Only use resume.json data */}
       {languages.length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Languages</div>
           {languages.map((lang, index) => (
             <div key={index} style={styles.languageItem}>
               {lang.language}: {lang.fluency}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Interests */}
-      {interests.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Interests</div>
-          {interests.map((int, index) => (
-            <div key={index} style={styles.languageItem}>
-              {int.name}: {int.keywords.join(', ')}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* References */}
-      {references.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>References</div>
-          {references.map((ref, index) => (
-            <div key={index} style={styles.languageItem}>
-              {ref.name}: {ref.reference}
             </div>
           ))}
         </div>
