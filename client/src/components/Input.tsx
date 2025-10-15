@@ -85,7 +85,7 @@ export default function Input({
             }}
             className={`${
               !className
-                ? `bg-[${inputBG}] text-[#2F2F30] font-[500] w-full rounded-[12px] border border-[#E5E7EB] py-[10px] pr-[16px] ${
+                ? `bg-[${inputBG}] text-[#ededed] font-[500] w-full rounded-[4px] border border-[#E5E7EB] py-[10px] pr-[16px] ${
                     imgSrc ? 'pl-[44px]' : 'pl-[16px]'
                   } `
                 : className

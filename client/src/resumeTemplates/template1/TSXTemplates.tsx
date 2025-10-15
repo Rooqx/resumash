@@ -12,10 +12,11 @@ const ResumeComponent: React.FC = () => {
     education,
     skills,
     projects,
-    languages,
+
+    certificates,
     /* volunteer,
     awards,
-    certificates,
+  languages,
     publications,
     interests,
     references,*/
@@ -31,7 +32,7 @@ const ResumeComponent: React.FC = () => {
   const styles = {
     page: {
       width: '50vw',
-      height: '1123px',
+      height: '800px',
       border: '1px solid black',
       display: 'flex',
       flexDirection: 'column' as const,
@@ -304,7 +305,7 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Projects - Only use resume.json data since fields array is used for other sections */}
+      {/* Projects  sections */}
       {(fields.length > 0 || projects.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Projects</div>
@@ -330,13 +331,54 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Languages - Only use resume.json data */}
-      {languages.length > 0 && (
+      {/* ================== Certificates ================== */}
+      {(fields.length > 0 || certificates.length > 0) && (
         <div style={styles.section}>
-          <div style={styles.sectionTitle}>Languages</div>
-          {languages.map((lang, index) => (
-            <div key={index} style={styles.languageItem}>
-              {lang.language}: {lang.fluency}
+          <div style={styles.sectionTitle}>Certifications</div>
+          {(fields.length > 0 ? fields : certificates).map(
+            (certificate, index) => (
+              <div key={index} style={styles.projectItem}>
+                <div style={styles.projectName}>
+                  {certificate.certificateName || certificate.name}
+                </div>
+                <div style={styles.projectDescription}>
+                  {certificate.certificateIssuer && (
+                    <>Issued by {certificate.certificateIssuer} – </>
+                  )}
+                  {certificate.certificateDate && (
+                    <>({certificate.certificateDate}) </>
+                  )}
+                </div>
+                {certificate.certificateUrl && (
+                  <a
+                    style={styles.contactItem}
+                    href={certificate.certificateUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View Certificate
+                  </a>
+                )}
+              </div>
+            ),
+          )}
+        </div>
+      )}
+
+      {/* ================== Awards ================== */}
+      {fields.length > 0 && (
+        <div style={styles.section}>
+          <div style={styles.sectionTitle}>Awards</div>
+          {fields.map((award, index) => (
+            <div key={index} style={styles.projectItem}>
+              <div style={styles.projectName}>
+                {award.awardTitle || award.title}
+              </div>
+              <div style={styles.projectDescription}>
+                {award.awarder && <>Awarded by {award.awarder} – </>}
+                {award.awardDate && <>({award.awardDate})</>}
+                {award.awardSummary && <div>{award.awardSummary}</div>}
+              </div>
             </div>
           ))}
         </div>
