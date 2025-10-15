@@ -31,12 +31,12 @@ function RouteComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className={`App p-6 space-y-4 bg-black text-white `}>
+      <div className={`App  space-y-4 bg-black text-white `}>
         <h2 className="text-2xl font-semibold mb-2 mx-auto">My Resume</h2>
         <div className="flex items-start">
           {/* ================== Input Containter  ================== */}
 
-          <div className="">
+          <div className="border border-white rounded-[1px] py-2 px-6 max-h-screen overflow-y-auto">
             {/* ================== Basic Info ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold"> Basic Info</h3>
