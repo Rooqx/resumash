@@ -1,42 +1,128 @@
+// src/stores/useTagStore.ts
 import { create } from 'zustand'
-import type { Tag } from 'emblor'
 
-interface TagsState {
-  tags: Record<string, Array<Tag>>
-  setTags: (key: string, tags: Array<string> | Array<Tag>) => void
-  getTags: (key: string) => Array<Tag>
-  resetTags: (key?: string) => void
+type TagFieldData = {
+  tags: string[]
+  input: string
+  suggestions: Array<string>
 }
 
-export const useTagsStore = create<TagsState>((set, get) => ({
-  tags: {},
+type TagStore = {
+  fields: Record<string, TagFieldData>
+  setInput: (name: string, value: string) => void
+  addTag: (name: string, tag: string) => void
+  addTags: (name: string, tags: string[]) => void
+  removeTag: (name: string, tag: string) => void
+  clearTags: (name: string) => void
+  setSuggestions: (name: string, suggestions: string[]) => void
+  getTags: (name: string) => string[]
+  removeField: (name: string) => void
+}
 
-  // Convert string array to Tag array if needed
-  setTags: (key, newTags) =>
+export const useTagStore = create<TagStore>((set, get) => ({
+  fields: {},
+
+  // ✅ Initialize if missing before setting input
+  setInput: (name, value) =>
     set((state) => {
-      const formattedTags = Array.isArray(newTags)
-        ? newTags.map((tag) =>
-            typeof tag === 'string'
-              ? { id: Math.random().toString(36).substr(2, 9), text: tag }
-              : tag,
-          )
-        : []
+      const current = state.fields[name] || {
+        tags: [],
+        input: '',
+        suggestions: [],
+      }
       return {
-        tags: { ...state.tags, [key]: formattedTags },
+        fields: {
+          ...state.fields,
+          [name]: { ...current, input: value },
+        },
       }
     }),
 
-  // Retrieve tags safely (return empty array if not defined)
-  getTags: (key) => get().tags[key],
-
-  // Reset one tag group or all
-  resetTags: (key) =>
+  // ✅ Initialize if missing before adding tag
+  addTag: (name, tag) =>
     set((state) => {
-      if (key) {
-        const updated = { ...state.tags }
-        delete updated[key]
-        return { tags: updated }
+      const current = state.fields[name] || {
+        tags: [],
+        input: '',
+        suggestions: [],
       }
-      return { tags: {} }
+      const clean = tag.trim()
+      if (!clean || current.tags.includes(clean)) return state
+
+      return {
+        fields: {
+          ...state.fields,
+          [name]: { ...current, tags: [...current.tags, clean], input: '' },
+        },
+      }
+    }),
+
+  // ✅ Initialize if missing before removing tag
+  removeTag: (name, tag) =>
+    set((state) => {
+      const current = state.fields[name] || {
+        tags: [],
+        input: '',
+        suggestions: [],
+      }
+      return {
+        fields: {
+          ...state.fields,
+          [name]: { ...current, tags: current.tags.filter((t) => t !== tag) },
+        },
+      }
+    }),
+
+  clearTags: (name) =>
+    set((state) => ({
+      fields: {
+        ...state.fields,
+        [name]: { tags: [], input: '', suggestions: [] },
+      },
+    })),
+
+  setSuggestions: (name, suggestions) =>
+    set((state) => {
+      const current = state.fields[name] || {
+        tags: [],
+        input: '',
+        suggestions: [],
+      }
+      return {
+        fields: {
+          ...state.fields,
+          [name]: { ...current, suggestions },
+        },
+      }
+    }),
+
+  addTags: (name, tags) =>
+    set((state) => {
+      const current = state.fields[name] || {
+        tags: [],
+        input: '',
+        suggestions: [],
+      }
+      const cleanTags = tags
+        .map((tag) => tag.trim())
+        .filter((tag) => tag && !current.tags.includes(tag))
+
+      return {
+        fields: {
+          ...state.fields,
+          [name]: {
+            ...current,
+            tags: [...current.tags, ...cleanTags],
+            input: '',
+          },
+        },
+      }
+    }),
+
+  getTags: (name) => get().fields[name]?.tags || [],
+  removeField: (name: string) =>
+    set((state) => {
+      const { [name]: _, ...rest } = state.fields
+      return { fields: rest }
     }),
 }))

@@ -1,14 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Plus, Trash } from 'lucide-react'
-import { TagInput, type Tag } from 'emblor'
+import { Key, Plus, Trash } from 'lucide-react'
+
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
-import { useTagsStore } from '@/lib/stores/useInputTags'
+import { useTagStore } from '@/lib/stores/useInputTags'
 import Input from '@/components/Input'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
+import { TagInput } from '@/components/TagInput'
 
 const queryClient = new QueryClient()
 
@@ -19,10 +20,13 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   const { inputValue, setInputValue } = useInputStore()
   const { fields, addField, updateField, deleteField } = useFieldStores()
-  const [activeTagIndex, setActiveTagIndex] = useState<number>(-1)
-  console.log(fields)
-  const { tags, setTags } = useTagsStore()
-  //  const tags = getTags(category)
+
+  const setSuggestions = useTagStore((s) => s.setSuggestions)
+
+  useEffect(() => {
+    setSuggestions('skills', ['React', 'Vue', 'Angular', 'Next.js'])
+    setSuggestions('languages', ['Harvard', 'MIT', 'Stanford', 'Yale'])
+  }, [setSuggestions])
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -153,56 +157,52 @@ function RouteComponent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
                   type="text"
-                  labelFor="startDate"
-                  value={field.startDate}
+                  labelFor="jobStartDate"
+                  value={field.jobStartDate}
                   onChange={(e) =>
                     updateField(i, e.target.name, e.target.value)
                   }
                   inputTittle="Start Date"
-                  placeholder="MM/YYYY"
+                  placeholder="MM YYYY(March 2025)"
                 />
                 <Input
                   type="text"
-                  labelFor="endDate"
-                  value={field.endDate}
+                  labelFor="jobEndDate"
+                  value={field.jobEndDate}
                   onChange={(e) =>
                     updateField(i, e.target.name, e.target.value)
                   }
                   inputTittle="End Date"
-                  placeholder="MM/YYYY or Present"
+                  placeholder="MM YYYY(March 2025) or Present"
                 />
               </div>
               <Input
                 type="textarea"
-                labelFor="summary"
-                value={field.summary}
+                labelFor="jobSummary"
+                value={field.jobSummary}
                 onChange={(e) => updateField(i, e.target.name, e.target.value)}
                 inputTittle="Job Description"
                 placeholder="Describe your responsibilities and achievements"
               />
-              <Input
-                type="text"
-                labelFor="highlights"
-                value={field.highlights}
-                onChange={(e) => updateField(i, e.target.name, e.target.value)}
-                inputTittle="Key Achievements"
-                placeholder="List key achievements separated by commas"
+              <TagInput
+                name={`jobHighlights-${i}`}
+                tagTitle="Key Achievements"
+                placeholder="List key achievements"
               />
-
               <button
                 className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
                 onClick={() => deleteField(i)}
               >
                 <Trash size={16} /> Delete Experience
+              </button>{' '}
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'experience')}
+              >
+                <Plus size={16} /> Add New Experience
               </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add New Experience
-          </button>
         </div>
 
         {/* ================== Education ================== */}
@@ -283,14 +283,14 @@ function RouteComponent() {
               >
                 <Trash size={16} /> Delete Education
               </button>
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'education')}
+              >
+                <Plus size={16} /> Add Education
+              </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add Education
-          </button>
         </div>
 
         {/* ================== Skills ================== */}
@@ -306,21 +306,28 @@ function RouteComponent() {
                 inputTittle="Skill Category"
                 placeholder="e.g., Frontend Development, Cybersecurity, DevOps"
               />
-
+              <TagInput
+                key={field.i}
+                name={`skills-${i}`} // unique per field
+                onChange={(t) => console.log(`skills-${i}:`, t)}
+              />
               <button
                 className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                onClick={() => deleteField(i)}
+                onClick={() => {
+                  useTagStore.getState().removeField(`skills-${i}`) // 💥 cleanup here;
+                  deleteField(i)
+                }}
               >
                 <Trash size={16} /> Delete Skill
               </button>
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'skill')}
+              >
+                <Plus size={16} /> Add Skill
+              </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add Skill
-          </button>
         </div>
 
         {/* ================== Projects ================== */}
@@ -330,16 +337,16 @@ function RouteComponent() {
             <div key={i} className="border p-4 rounded-md space-y-3">
               <Input
                 type="text"
-                labelFor="projectName"
-                value={field.projectName}
+                labelFor="name"
+                value={field.name}
                 onChange={(e) => updateField(i, e.target.name, e.target.value)}
                 inputTittle="Project Name"
                 placeholder="Enter project name"
               />
               <Input
                 type="textarea"
-                labelFor="projectDescription"
-                value={field.projectDescription}
+                labelFor="description"
+                value={field.description}
                 onChange={(e) => updateField(i, e.target.name, e.target.value)}
                 inputTittle="Project Description"
                 placeholder="Describe the project, your role, and key features"
@@ -347,23 +354,22 @@ function RouteComponent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
                   type="url"
-                  labelFor="projectUrl"
-                  value={field.projectUrl}
+                  labelFor="url"
+                  value={field.url}
                   onChange={(e) =>
                     updateField(i, e.target.name, e.target.value)
                   }
                   inputTittle="Project URL"
                   placeholder="Enter live demo or repository URL"
                 />
-                <Input
-                  type="text"
+
+                <TagInput
+                  tagTitle="Technologies Used"
                   labelFor="projectTechnologies"
-                  value={field.projectTechnologies}
-                  onChange={(e) =>
-                    updateField(i, e.target.name, e.target.value)
-                  }
-                  inputTittle="Technologies Used"
-                  placeholder="List technologies separated by commas"
+                  key={field.i}
+                  name={`projectTechnologies-${i}`} // unique per field
+                  placeholder="List technologies used in your project"
+                  onChange={(t) => console.log(`projectTechnologies-${i}:`, t)}
                 />
               </div>
 
@@ -373,14 +379,14 @@ function RouteComponent() {
               >
                 <Trash size={16} /> Delete Project
               </button>
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'project')}
+              >
+                <Plus size={16} /> Add Project
+              </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add Project
-          </button>
         </div>
 
         {/* ================== Certifications ================== */}
@@ -433,14 +439,14 @@ function RouteComponent() {
               >
                 <Trash size={16} /> Delete Certificate
               </button>
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'certificate')}
+              >
+                <Plus size={16} /> Add Certificate
+              </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add Certificate
-          </button>
         </div>
 
         {/* ================== Awards ================== */}
@@ -493,14 +499,14 @@ function RouteComponent() {
               >
                 <Trash size={16} /> Delete Award
               </button>
+              <button
+                className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                onClick={() => addField(i, 'award')}
+              >
+                <Plus size={16} /> Add Award
+              </button>
             </div>
           ))}
-          <button
-            className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-            onClick={() => addField()}
-          >
-            <Plus size={16} /> Add Award
-          </button>
         </div>
 
         {/* ================== Resume Preview ================== */}

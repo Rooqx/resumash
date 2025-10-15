@@ -3,6 +3,7 @@ import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
 import resumeData from '../resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
+import { useTagStore } from '@/lib/stores/useInputTags'
 
 const ResumeComponent: React.FC = () => {
   const {
@@ -23,9 +24,10 @@ const ResumeComponent: React.FC = () => {
   const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
 
-  console.log('inputValues', inputValue)
-  console.log('fieldValues', fields)
+  const tagFields = useTagStore((s) => s.fields)
+  console.log('tagField', tagFields)
 
+  // Move this to a seperate file later
   const styles = {
     page: {
       width: '50vw',
@@ -215,28 +217,21 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Skills - Use fields array for skills data */}
-      {(fields.length > 0 || skills.length > 0) && (
+      {fields.length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Skills</div>
-          {(fields.length > 0 ? fields : skills).map((skill, index) => (
+
+          {fields.map((field, index) => (
             <div key={index} style={styles.skillItem}>
               <div style={styles.skillName}>
-                {skill.name || skill.skillName || 'Skill Name'}
+                {field.skillName || 'Skill Name'}
               </div>
-              {skill.level && (
+
+              {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 && (
                 <div style={styles.skillLevel}>
-                  Level:{' '}
-                  <span style={{ fontWeight: 'bold', color: '#1a1a1a' }}>
-                    {skill.level}
-                  </span>
-                </div>
-              )}
-              {skill.keywords && skill.keywords.length > 0 && (
-                <div style={styles.skillLevel}>
-                  Technologies:
+                  Technologies:{' '}
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
-                    {' '}
-                    {skill.keywords.join(', ')}
+                    {tagFields[`skills-${index}`]?.tags.join(', ')}
                   </span>
                 </div>
               )}
@@ -257,22 +252,25 @@ const ResumeComponent: React.FC = () => {
                     {job.companyName || job.name || 'Company Name'}
                   </div>
                   <div style={styles.position}>
+                    {/** Make text smaller */}
                     {job.jobPosition || job.position || 'Job Position'}
                   </div>
                 </div>
                 <div style={styles.date}>
-                  {job.startDate || 'Start Date'} - {job.endDate || 'Present'}
+                  {job.jobStartDate || 'Start Date'} -{' '}
+                  {job.endDate || 'Present'}
                 </div>
               </div>
-              {job.summary && (
-                <div style={styles.jobSummary}>{job.summary}</div>
+              {/** Shift this closer */}
+              {job.jobSummary && (
+                <div style={styles.jobSummary}>{job.jobSummary}</div>
               )}
-              {job.highlights && (
+              {tagFields[`jobHighlights-${index}`] && (
                 <div style={styles.jobHighlights}>
-                  {Array.isArray(job.highlights) ? (
-                    job.highlights.map((item: any, i: number) => (
-                      <li key={i}>{item}</li>
-                    ))
+                  {Array.isArray(tagFields[`jobHighlights-${index}`].tags) ? (
+                    tagFields[`jobHighlights-${index}`].tags.map(
+                      (item: string, i: number) => <li key={i}>{item}</li>,
+                    )
                   ) : (
                     <li>{job.highlights}</li>
                   )}
@@ -307,13 +305,16 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Projects - Only use resume.json data since fields array is used for other sections */}
-      {projects.length > 0 && (
+      {(fields.length > 0 || projects.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Projects</div>
-          {projects.map((project, index) => (
+          {(fields.length > 0 ? fields : projects).map((project, index) => (
             <div key={index} style={styles.projectItem}>
               <div style={styles.projectName}>{project.name}</div>
-              <div style={styles.projectDescription}>{project.description}</div>
+              <div style={styles.projectDescription}>
+                {project.description}{' '}
+                {/* project[`projectTechnologies-${index}`].join(', ')*/}
+              </div>
               {project.url && (
                 <a
                   style={styles.contactItem}
