@@ -1,44 +1,54 @@
 import { create } from 'zustand'
 
 interface MultipleFieldStores {
-  fields: Array<any>
-  addField: (index: number, field: string) => void
-  updateField: (index: number, field: string, value: string) => void
-  deleteField: (index: number) => void
+  fields: Record<string, Array<any>> // dynamic sections, no typing headache
+  addField: (section: string, index?: number) => void
+  updateField: (
+    section: string,
+    index: number,
+    key: string,
+    value: string,
+  ) => void
+  deleteField: (section: string, index: number) => void
 }
 
 const useFieldStores = create<MultipleFieldStores>((set) => ({
-  fields: [{}], // Array<any> inferred from the type
-  addField: (index, fieldType = 'default') =>
-    set((state) => {
-      const newField = { type: fieldType }
-      const fields = [...state.fields]
+  fields: {},
 
+  addField: (section, index) =>
+    set((state) => {
+      const currentFields = state.fields[section] || []
+      const newField = {}
+
+      // clone array
+      const fields = [...currentFields]
+
+      // insert new field after index if valid
       if (typeof index === 'number' && index >= 0 && index < fields.length) {
-        // Insert after the given index
         fields.splice(index + 1, 0, newField)
       } else {
-        // Default: append to end
         fields.push(newField)
       }
 
-      return { fields }
+      return { fields: { ...state.fields, [section]: fields } }
     }),
 
-  updateField: (index: number, field: string, value: string) =>
+  updateField: (section, index, key, value) =>
     set((state) => {
-      const updatedFields = [...state.fields]
-      updatedFields[index] = {
-        ...updatedFields[index],
-        [field]: value,
-      }
-      return { fields: updatedFields }
+      const sectionFields = state.fields[section] || []
+      const updatedFields = [...sectionFields]
+      updatedFields[index] = { ...updatedFields[index], [key]: value }
+
+      return { fields: { ...state.fields, [section]: updatedFields } }
     }),
 
-  deleteField: (index: number) =>
-    set((state) => ({
-      fields: state.fields.filter((_, i) => i !== index),
-    })),
+  deleteField: (section, index) =>
+    set((state) => {
+      const sectionFields = state.fields[section] || []
+      const updatedFields = sectionFields.filter((_, i) => i !== index)
+
+      return { fields: { ...state.fields, [section]: updatedFields } }
+    }),
 }))
 
 export default useFieldStores

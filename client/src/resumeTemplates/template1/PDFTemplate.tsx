@@ -280,10 +280,10 @@ const ResumePDF: React.FC = () => {
       )}
 
       {/* Skills */}
-      {fields.length > 0 && (
+      {fields['skills']?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Skills</Text>
-          {fields.map((field, index) => (
+          {fields['skills'].map((field, index) => (
             <View key={index} style={styles.skillItem}>
               <Text style={styles.skillName}>
                 {field.skillName || 'Skill Name'}
@@ -298,40 +298,37 @@ const ResumePDF: React.FC = () => {
           ))}
         </View>
       )}
-
       {/* Work Experience */}
-      {(fields.length > 0 || work.length > 0) && (
+      {fields['experience']?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Work Experience</Text>
-          {(fields.length > 0 ? fields : work).map((job, index) => (
+          {fields['experience'].map((job, index) => (
             <View key={index} style={styles.jobItem}>
               <View style={styles.jobHeader}>
                 <View>
                   <Text style={styles.company}>
-                    {job.companyName || job.name || 'Company Name'}
+                    {job.companyName || 'Company Name'}
                   </Text>
                   <Text style={styles.position}>
-                    {job.jobPosition || job.position || 'Job Position'}
+                    {job.jobPosition || 'Job Position'}
                   </Text>
                 </View>
                 <Text style={styles.date}>
                   {job.jobStartDate || 'Start Date'} -{' '}
-                  {job.endDate || 'Present'}
+                  {job.jobEndDate || 'Present'}
                 </Text>
               </View>
+
               {job.jobSummary && (
                 <Text style={styles.jobSummary}>{job.jobSummary}</Text>
               )}
-              {tagFields[`jobHighlights-${index}`] && (
+
+              {tagFields[`jobHighlights-${index}`]?.tags?.length > 0 && (
                 <View style={styles.jobHighlights}>
-                  {Array.isArray(tagFields[`jobHighlights-${index}`].tags) ? (
-                    tagFields[`jobHighlights-${index}`].tags.map(
-                      (item: string, i: number) => (
-                        <Text key={i}>• {item}</Text>
-                      ),
-                    )
-                  ) : (
-                    <Text>• {job.highlights}</Text>
+                  {tagFields[`jobHighlights-${index}`].tags.map(
+                    (item: string, i: number) => (
+                      <Text key={i}>• {item}</Text>
+                    ),
                   )}
                 </View>
               )}
@@ -341,10 +338,10 @@ const ResumePDF: React.FC = () => {
       )}
 
       {/* Education */}
-      {(fields.length > 0 || education.length > 0) && (
+      {fields['education']?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Education</Text>
-          {(fields.length > 0 ? fields : education).map((edu, index) => (
+          {fields['education'].map((edu, index) => (
             <View
               key={index}
               style={{
@@ -374,10 +371,10 @@ const ResumePDF: React.FC = () => {
       )}
 
       {/* Projects */}
-      {fields.length > 0 && (
+      {fields['projects']?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Projects</Text>
-          {fields.map((project, index) => (
+          {fields['projects'].map((project, index) => (
             <View key={index} style={styles.projectItem}>
               <Text style={styles.projectName}>
                 {project.name || 'Project Name'}

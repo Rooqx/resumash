@@ -113,6 +113,7 @@ const ResumeComponent: React.FC = () => {
       color: '#333333',
       textAlign: 'justify' as const,
       marginTop: '5px',
+      marginLeft: '15px',
     },
     educationItem: {
       marginBottom: '8px',
@@ -216,24 +217,25 @@ const ResumeComponent: React.FC = () => {
           </div>
         </div>
       )}
-
       {/* Skills - Use fields array for skills data */}
-      {fields.length > 0 && (
+      {fields['skills'] && fields['skills'].length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Skills</div>
 
-          {fields.map((field, index) => (
+          {fields['skills'].map((field, index) => (
             <div key={index} style={styles.skillItem}>
               <div style={styles.skillName}>
-                {field.skillName || 'Skill Name'}
+                {field.skillName || 'Skill Category'}
               </div>
 
               <div style={styles.skillLevel}>
                 Technologies:{' '}
-                {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 && (
+                {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 ? (
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
                     {tagFields[`skills-${index}`].tags.join(', ')}
                   </span>
+                ) : (
+                  <span style={{ color: '#777' }}>No technologies added</span>
                 )}
               </div>
             </div>
@@ -242,10 +244,15 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Work Experience - Use fields array for work experience */}
-      {(fields.length > 0 || work.length > 0) && (
+      {((fields['experience'] && fields['experience'].length > 0) ||
+        work.length > 0) && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Work Experience</div>
-          {(fields.length > 0 ? fields : work).map((job, index) => (
+
+          {(fields['experience'] && fields['experience'].length > 0
+            ? fields['experience']
+            : work
+          ).map((job, index) => (
             <div key={index} style={styles.jobItem}>
               <div style={styles.jobHeader}>
                 <div>
@@ -253,19 +260,20 @@ const ResumeComponent: React.FC = () => {
                     {job.companyName || job.name || 'Company Name'}
                   </div>
                   <div style={styles.position}>
-                    {/** Make text smaller */}
                     {job.jobPosition || job.position || 'Job Position'}
                   </div>
                 </div>
                 <div style={styles.date}>
-                  {job.jobStartDate || 'Start Date'} -{' '}
-                  {job.endDate || 'Present'}
+                  {(job.jobStartDate || job.startDate || 'Start Date') +
+                    ' - ' +
+                    (job.jobEndDate || job.endDate || 'Present')}
                 </div>
               </div>
-              {/** Shift this closer */}
+
               {job.jobSummary && (
                 <div style={styles.jobSummary}>{job.jobSummary}</div>
               )}
+
               {tagFields[`jobHighlights-${index}`] && (
                 <div style={styles.jobHighlights}>
                   {Array.isArray(tagFields[`jobHighlights-${index}`].tags) ? (
@@ -283,21 +291,30 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Education - Use fields array for education data */}
-      {(fields.length > 0 || education.length > 0) && (
+      {fields['education'] && fields['education'].length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Education</div>
-          {(fields.length > 0 ? fields : education).map((edu, index) => (
+
+          {fields['education'].map((edu, index) => (
             <div key={index} style={styles.educationItem}>
+              {/* Institution Name */}
               <div style={styles.institution}>
-                {edu.institution || edu.school || 'Institution Name'}
+                {edu.institution || 'Institution Name'}
               </div>
+
+              {/* Degree, Field of Study, and Dates */}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={styles.studyType}>
-                  {edu.studyType || edu.degree} in{' '}
-                  {edu.area || edu.fieldOfStudy || 'Field of Study'}
+                  {edu.studyType || 'Degree Type'} in{' '}
+                  {edu.area || 'Field of Study'}
+                  {edu.gpa && (
+                    <span style={{ color: '#666', marginLeft: 6 }}>
+                      — GPA: {edu.gpa}
+                    </span>
+                  )}
                 </div>
                 <div style={styles.date}>
-                  {edu.startDate || 'Start'} - {edu.endDate || 'Present'}
+                  {edu.startDate || 'Start Date'} - {edu.endDate || 'Present'}
                 </div>
               </div>
             </div>
@@ -305,19 +322,33 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* Projects  sections */}
-      {fields.length > 0 && (
+      {/* Projects Section */}
+      {fields['projects'] && fields['projects'].length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Projects</div>
-          {fields.map((project, index) => (
+
+          {fields['projects'].map((project, index) => (
             <div key={index} style={styles.projectItem}>
+              {/* Project Name */}
               <div style={styles.projectName}>
                 {project.name || 'Project Name'}
               </div>
+
+              {/* Description + Technologies */}
               <div style={styles.projectDescription}>
-                {project.description || 'Project description'}{' '}
-                {project[`projectTechnologies-${index}`]?.join(', ')}
+                {project.description || 'Project description'}
+
+                {/* Technologies from TagInput */}
+                {tagFields[`projectTechnologies-${index}`]?.tags?.length >
+                  0 && (
+                  <span style={{ display: 'block', marginTop: 4 }}>
+                    <strong>Technologies:</strong>{' '}
+                    {tagFields[`projectTechnologies-${index}`].tags.join(', ')}
+                  </span>
+                )}
               </div>
+
+              {/* Project Link */}
               {project.url && (
                 <a
                   style={styles.contactItem}
@@ -333,27 +364,34 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* ================== Certificates ================== */}
-      {fields.length > 0 &&
-        fields.some(
-          (field) =>
-            field.certificateName && field.certificateName.trim() !== '',
-        ) && (
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>Certifications</div>
-            {fields.map((certificate, index) => (
+      {/* ================== Certifications ================== */}
+      {fields['certifications'] && fields['certifications'].length > 0 && (
+        <div style={styles.section}>
+          <div style={styles.sectionTitle}>Certifications</div>
+
+          {fields['certifications']
+            .filter(
+              (cert) =>
+                cert.certificateName && cert.certificateName.trim() !== '',
+            )
+            .map((certificate, index) => (
               <div key={index} style={styles.projectItem}>
+                {/* Certificate Name */}
                 <div style={styles.projectName}>
-                  {certificate.certificateName || certificate.name}
+                  {certificate.certificateName || 'Certificate Name'}
                 </div>
+
+                {/* Issuer + Date */}
                 <div style={styles.projectDescription}>
                   {certificate.certificateIssuer && (
-                    <>Issued by {certificate.certificateIssuer} – </>
+                    <>Issued by {certificate.certificateIssuer} </>
                   )}
                   {certificate.certificateDate && (
-                    <>({certificate.certificateDate}) </>
+                    <span>({certificate.certificateDate})</span>
                   )}
                 </div>
+
+                {/* Verification URL */}
                 {certificate.certificateUrl && (
                   <a
                     style={styles.contactItem}
@@ -366,30 +404,41 @@ const ResumeComponent: React.FC = () => {
                 )}
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
 
       {/* ================== Awards ================== */}
-      {fields.length > 0 &&
-        fields.some(
-          (field) => field.awardTitle && field.awardTitle.trim() !== '',
-        ) && (
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>Awards</div>
-            {fields.map((award, index) => (
+      {fields['awards'] && fields['awards'].length > 0 && (
+        <div style={styles.section}>
+          <div style={styles.sectionTitle}>Awards</div>
+
+          {fields['awards']
+            .filter(
+              (award) => award.awardTitle && award.awardTitle.trim() !== '',
+            )
+            .map((award, index) => (
               <div key={index} style={styles.projectItem}>
+                {/* Award Title */}
                 <div style={styles.projectName}>
-                  {award.awardTitle || award.title}
+                  {award.awardTitle || 'Award Title'}
                 </div>
+
+                {/* Awarder + Date */}
                 <div style={styles.projectDescription}>
-                  {award.awarder && <>Awarded by {award.awarder} – </>}
-                  {award.awardDate && <>({award.awardDate})</>}
-                  {award.awardSummary && <div>{award.awardSummary}</div>}
+                  {award.awarder && <>Awarded by {award.awarder} </>}
+                  {award.awardDate && <span>({award.awardDate})</span>}
                 </div>
+
+                {/* Award Summary */}
+                {award.awardSummary && (
+                  <div style={styles.projectDescription}>
+                    {award.awardSummary}
+                  </div>
+                )}
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
     </div>
   )
 }

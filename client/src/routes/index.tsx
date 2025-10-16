@@ -21,8 +21,26 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   const { inputValue, setInputValue } = useInputStore()
-  const { fields, addField, updateField, deleteField } = useFieldStores()
+  const {
+    fields: storeFields,
+    addField,
+    updateField,
+    deleteField,
+  } = useFieldStores()
 
+  // your local defaults (just initial placeholders)
+  const defaultFields = {
+    experience: [{}],
+    education: [{}],
+    certificates: [{}],
+    awards: [{}],
+    skills: [{}],
+    projects: [{}],
+    references: [{}],
+  }
+
+  // merge Zustand fields with local defaults
+  const fields = { ...defaultFields, ...storeFields }
   const setSuggestions = useTagStore((s) => s.setSuggestions)
 
   useEffect(() => {
@@ -161,7 +179,7 @@ function RouteComponent() {
             {/* ================== Work Experience ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Work Experience</h3>
-              {fields.map((field, i) => (
+              {fields['experience']?.map((field: any, i: number) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <Input
@@ -169,7 +187,12 @@ function RouteComponent() {
                       labelFor="companyName"
                       value={field.companyName}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'experience',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Company Name"
                       placeholder="Enter company name"
@@ -179,7 +202,12 @@ function RouteComponent() {
                       labelFor="jobPosition"
                       value={field.jobPosition}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'experience',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Job Position"
                       placeholder="Enter your job title"
@@ -191,7 +219,12 @@ function RouteComponent() {
                       labelFor="jobStartDate"
                       value={field.jobStartDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'experience',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Start Date"
                       placeholder="MM YYYY(March 2025)"
@@ -201,7 +234,12 @@ function RouteComponent() {
                       labelFor="jobEndDate"
                       value={field.jobEndDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'experience',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="End Date"
                       placeholder="MM YYYY(March 2025) or Present"
@@ -212,7 +250,12 @@ function RouteComponent() {
                     labelFor="jobSummary"
                     value={field.jobSummary}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField(
+                        'experience',
+                        i,
+                        e.target.name,
+                        e.target.value,
+                      )
                     }
                     inputTittle="Job Description"
                     placeholder="Describe your responsibilities and achievements"
@@ -224,13 +267,13 @@ function RouteComponent() {
                   />
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField(i)}
+                    onClick={() => deleteField('experience', i)}
                   >
                     <Trash size={16} /> Delete Experience
                   </button>{' '}
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'experience')}
+                    onClick={() => addField('experience', i)}
                   >
                     <Plus size={16} /> Add New Experience
                   </button>
@@ -241,7 +284,7 @@ function RouteComponent() {
             {/* ================== Education ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Education</h3>
-              {fields.map((field, i) => (
+              {fields['education']?.map((field, i) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <Input
@@ -249,7 +292,12 @@ function RouteComponent() {
                       labelFor="institution"
                       value={field.institution}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Institution Name"
                       placeholder="Enter school or university name"
@@ -259,7 +307,12 @@ function RouteComponent() {
                       labelFor="studyType"
                       value={field.studyType}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Degree Type"
                       placeholder="e.g., Bachelor's, Master's, PhD"
@@ -271,7 +324,12 @@ function RouteComponent() {
                       labelFor="area"
                       value={field.area}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Field of Study"
                       placeholder="e.g., Computer Science, Business Administration"
@@ -281,7 +339,12 @@ function RouteComponent() {
                       labelFor="gpa"
                       value={field.gpa}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="GPA"
                       placeholder="e.g., 3.8/4.0"
@@ -293,7 +356,12 @@ function RouteComponent() {
                       labelFor="startDate"
                       value={field.startDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Start Date"
                       placeholder="MM/YYYY"
@@ -303,7 +371,12 @@ function RouteComponent() {
                       labelFor="endDate"
                       value={field.endDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'education',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="End Date"
                       placeholder="MM/YYYY or Present"
@@ -312,13 +385,13 @@ function RouteComponent() {
 
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField(i)}
+                    onClick={() => deleteField('education', i)}
                   >
                     <Trash size={16} /> Delete Education
                   </button>
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'education')}
+                    onClick={() => addField('education', i)}
                   >
                     <Plus size={16} /> Add Education
                   </button>
@@ -329,14 +402,14 @@ function RouteComponent() {
             {/* ================== Skills ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Skills</h3>
-              {fields.map((field, i) => (
+              {fields['skills']?.map((field, i) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
                     labelFor="skillName"
                     value={field.skillName}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField('skills', i, e.target.name, e.target.value)
                     }
                     inputTittle="Skill Category"
                     placeholder="e.g., Frontend Development, Cybersecurity, DevOps"
@@ -350,14 +423,14 @@ function RouteComponent() {
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
                     onClick={() => {
                       useTagStore.getState().removeField(`skills-${i}`) // 💥 cleanup here;
-                      deleteField(i)
+                      deleteField('skills', i)
                     }}
                   >
                     <Trash size={16} /> Delete Skill
                   </button>
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'skill')}
+                    onClick={() => addField('skills', i)}
                   >
                     <Plus size={16} /> Add Skill
                   </button>
@@ -368,14 +441,14 @@ function RouteComponent() {
             {/* ================== Projects ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Projects</h3>
-              {fields.map((field, i) => (
+              {fields['projects']?.map((field, i) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
                     labelFor="name"
                     value={field.name}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField('projects', i, e.target.name, e.target.value)
                     }
                     inputTittle="Project Name"
                     placeholder="Enter project name"
@@ -385,7 +458,7 @@ function RouteComponent() {
                     labelFor="description"
                     value={field.description}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField('projects', i, e.target.name, e.target.value)
                     }
                     inputTittle="Project Description"
                     placeholder="Describe the project, your role, and key features"
@@ -396,7 +469,12 @@ function RouteComponent() {
                       labelFor="url"
                       value={field.url}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'projects',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Project URL"
                       placeholder="Enter live demo or repository URL"
@@ -416,13 +494,13 @@ function RouteComponent() {
 
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField(i)}
+                    onClick={() => deleteField('projects', i)}
                   >
                     <Trash size={16} /> Delete Project
                   </button>
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'project')}
+                    onClick={() => addField('projects', i)}
                   >
                     <Plus size={16} /> Add Project
                   </button>
@@ -433,14 +511,19 @@ function RouteComponent() {
             {/* ================== Certifications ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Certifications</h3>
-              {fields.map((field, i) => (
+              {(fields['certifications'] || []).map((field, i) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
                     labelFor="certificateName"
                     value={field.certificateName}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField(
+                        'certifications',
+                        i,
+                        e.target.name,
+                        e.target.value,
+                      )
                     }
                     inputTittle="Certificate Name"
                     placeholder="Enter certification name"
@@ -451,7 +534,12 @@ function RouteComponent() {
                       labelFor="certificateIssuer"
                       value={field.certificateIssuer}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'certifications',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Issuing Organization"
                       placeholder="e.g., Google, Microsoft, AWS"
@@ -461,7 +549,12 @@ function RouteComponent() {
                       labelFor="certificateDate"
                       value={field.certificateDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField(
+                          'certifications',
+                          i,
+                          e.target.name,
+                          e.target.value,
+                        )
                       }
                       inputTittle="Issue Date"
                       placeholder="MM/YYYY"
@@ -472,7 +565,12 @@ function RouteComponent() {
                     labelFor="certificateUrl"
                     value={field.certificateUrl}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField(
+                        'certifications',
+                        i,
+                        e.target.name,
+                        e.target.value,
+                      )
                     }
                     inputTittle="Certificate URL"
                     placeholder="Enter verification URL"
@@ -480,13 +578,13 @@ function RouteComponent() {
 
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField(i)}
+                    onClick={() => deleteField('certifications', i)}
                   >
                     <Trash size={16} /> Delete Certificate
                   </button>
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'certificate')}
+                    onClick={() => addField('certifications', i)}
                   >
                     <Plus size={16} /> Add Certificate
                   </button>
@@ -497,14 +595,14 @@ function RouteComponent() {
             {/* ================== Awards ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Awards</h3>
-              {fields.map((field, i) => (
+              {(fields['awards'] || []).map((field, i) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
                     labelFor="awardTitle"
                     value={field.awardTitle}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField('awards', i, e.target.name, e.target.value)
                     }
                     inputTittle="Award Title"
                     placeholder="Enter award name"
@@ -515,7 +613,7 @@ function RouteComponent() {
                       labelFor="awarder"
                       value={field.awarder}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField('awards', i, e.target.name, e.target.value)
                       }
                       inputTittle="Awarding Organization"
                       placeholder="Organization that gave the award"
@@ -525,7 +623,7 @@ function RouteComponent() {
                       labelFor="awardDate"
                       value={field.awardDate}
                       onChange={(e) =>
-                        updateField(i, e.target.name, e.target.value)
+                        updateField('awards', i, e.target.name, e.target.value)
                       }
                       inputTittle="Award Date"
                       placeholder="MM/YYYY"
@@ -536,7 +634,7 @@ function RouteComponent() {
                     labelFor="awardSummary"
                     value={field.awardSummary}
                     onChange={(e) =>
-                      updateField(i, e.target.name, e.target.value)
+                      updateField('awards', i, e.target.name, e.target.value)
                     }
                     inputTittle="Award Description"
                     placeholder="Describe the award and significance"
@@ -544,13 +642,13 @@ function RouteComponent() {
 
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField(i)}
+                    onClick={() => deleteField('awards', i)}
                   >
                     <Trash size={16} /> Delete Award
                   </button>
                   <button
                     className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField(i, 'award')}
+                    onClick={() => addField('awards', i)}
                   >
                     <Plus size={16} /> Add Award
                   </button>
@@ -562,16 +660,44 @@ function RouteComponent() {
           <div className="">
             <ResumeComponent />
           </div>
-          <div className="h-auto bg-white w-[300px] ml-10">
-            <h3>Template</h3>
+          <div className="h-auto space-y-5 w-[300px] ml-10 mr-10">
+            <div>
+              <button className="py-2 px-4 bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-5">
+                Preview PDF
+              </button>
+              <PDFDownloadLink
+                className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
+                document={
+                  <Document>
+                    <ResumePDF />
+                  </Document>
+                }
+                fileName="Echo_Resume.pdf"
+              >
+                {({ loading }) => (loading ? 'Generating...' : 'Download PDF')}
+              </PDFDownloadLink>
+            </div>
+            {/* ==================More PDF Templates (optional) ==================*/}
+            <div className="bg-[#2c5530] p-4 rounded-md mt-15">
+              <h3 className="text-lg font-semibold text-white text-nowrap">
+                Other Templates
+              </h3>
+              <div className="py-6">
+                <button className="text-base text-white">
+                  More Templates comming soon
+                </button>
+              </div>
+            </div>
           </div>
         </div>{' '}
         {/* ================== PDF Actions (optional) ==================*/}
-        {/* <PDFViewer width="100%" height="600">
-          <Document>
-            <ResumePDF />
-          </Document>
-        </PDFViewer> */}
+        {
+          <PDFViewer width="100%" height="600">
+            <Document>
+              <ResumePDF />
+            </Document>
+          </PDFViewer>
+        }
         <br />
         <PDFDownloadLink
           document={
