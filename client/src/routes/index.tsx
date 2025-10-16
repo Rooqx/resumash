@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Key, Plus, Trash } from 'lucide-react'
-
+import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 import { useTagStore } from '@/lib/stores/useInputTags'
@@ -11,6 +11,7 @@ import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
 import Textarea from '@/components/Textarea'
+import Image from '@/components/Image'
 
 const queryClient = new QueryClient()
 
@@ -33,10 +34,10 @@ function RouteComponent() {
     <QueryClientProvider client={queryClient}>
       <div className={`App  space-y-4 bg-black text-white `}>
         <h2 className="text-2xl font-semibold mb-2 mx-auto">My Resume</h2>
-        <div className="flex items-start">
-          {/* ================== Input Containter  ================== */}
-
-          <div className="border border-white rounded-[1px] py-2 px-6 max-h-screen overflow-y-auto">
+        {/* ================== Wrapper  ================== */}
+        <div className="w-full flex items-start justify-between">
+          {/* ================== Input Container  ================== */}
+          <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] rounded-[1px] py-2 pb-6 px-6 max-h-screen overflow-y-auto mr-10 scroll-bar">
             {/* ================== Basic Info ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold"> Basic Info</h3>
@@ -558,10 +559,30 @@ function RouteComponent() {
             </div>
           </div>
           {/* ================== Resume Preview ================== */}
-          <div className="w-full flex justify-center items-center mt-8">
+          <div className="">
             <ResumeComponent />
           </div>
-        </div>
+          <div className="h-auto bg-white w-[300px] ml-10">
+            <h3>Template</h3>
+          </div>
+        </div>{' '}
+        {/* ================== PDF Actions (optional) ==================*/}
+        {/* <PDFViewer width="100%" height="600">
+          <Document>
+            <ResumePDF />
+          </Document>
+        </PDFViewer> */}
+        <br />
+        <PDFDownloadLink
+          document={
+            <Document>
+              <ResumePDF />
+            </Document>
+          }
+          fileName="Echo_Resume.pdf"
+        >
+          {({ loading }) => (loading ? 'Generating...' : 'Download PDF')}
+        </PDFDownloadLink>
       </div>
     </QueryClientProvider>
   )

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
+import { Award, Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
 import resumeData from '../resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
@@ -26,7 +26,7 @@ const ResumeComponent: React.FC = () => {
   const { fields } = useFieldStores()
 
   const tagFields = useTagStore((s) => s.fields)
-  console.log('tagField', tagFields)
+  console.log('field', fields)
 
   // Move this to a seperate file later
   const styles = {
@@ -51,7 +51,7 @@ const ResumeComponent: React.FC = () => {
     name: {
       fontSize: '24px',
       fontWeight: 'bold' as const,
-      color: '#2c5530',
+      color: 'black',
       marginBottom: '5px',
     },
     label: {
@@ -81,7 +81,7 @@ const ResumeComponent: React.FC = () => {
     sectionTitle: {
       fontSize: '12px',
       fontWeight: 'bold' as const,
-      color: '#2c5530',
+      color: 'black',
       marginBottom: '2px',
       textTransform: 'uppercase' as const,
       paddingBottom: '3px',
@@ -228,14 +228,14 @@ const ResumeComponent: React.FC = () => {
                 {field.skillName || 'Skill Name'}
               </div>
 
-              {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 && (
-                <div style={styles.skillLevel}>
-                  Technologies:{' '}
+              <div style={styles.skillLevel}>
+                Technologies:{' '}
+                {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 && (
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
-                    {tagFields[`skills-${index}`]?.tags.join(', ')}
+                    {tagFields[`skills-${index}`].tags.join(', ')}
                   </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -306,15 +306,17 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Projects  sections */}
-      {(fields.length > 0 || projects.length > 0) && (
+      {fields.length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Projects</div>
-          {(fields.length > 0 ? fields : projects).map((project, index) => (
+          {fields.map((project, index) => (
             <div key={index} style={styles.projectItem}>
-              <div style={styles.projectName}>{project.name}</div>
+              <div style={styles.projectName}>
+                {project.name || 'Project Name'}
+              </div>
               <div style={styles.projectDescription}>
-                {project.description}{' '}
-                {/* project[`projectTechnologies-${index}`].join(', ')*/}
+                {project.description || 'Project description'}{' '}
+                {project[`projectTechnologies-${index}`]?.join(', ')}
               </div>
               {project.url && (
                 <a
@@ -332,11 +334,14 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* ================== Certificates ================== */}
-      {(fields.length > 0 || certificates.length > 0) && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Certifications</div>
-          {(fields.length > 0 ? fields : certificates).map(
-            (certificate, index) => (
+      {fields.length > 0 &&
+        fields.some(
+          (field) =>
+            field.certificateName && field.certificateName.trim() !== '',
+        ) && (
+          <div style={styles.section}>
+            <div style={styles.sectionTitle}>Certifications</div>
+            {fields.map((certificate, index) => (
               <div key={index} style={styles.projectItem}>
                 <div style={styles.projectName}>
                   {certificate.certificateName || certificate.name}
@@ -360,29 +365,31 @@ const ResumeComponent: React.FC = () => {
                   </a>
                 )}
               </div>
-            ),
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
       {/* ================== Awards ================== */}
-      {fields.length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Awards</div>
-          {fields.map((award, index) => (
-            <div key={index} style={styles.projectItem}>
-              <div style={styles.projectName}>
-                {award.awardTitle || award.title}
+      {fields.length > 0 &&
+        fields.some(
+          (field) => field.awardTitle && field.awardTitle.trim() !== '',
+        ) && (
+          <div style={styles.section}>
+            <div style={styles.sectionTitle}>Awards</div>
+            {fields.map((award, index) => (
+              <div key={index} style={styles.projectItem}>
+                <div style={styles.projectName}>
+                  {award.awardTitle || award.title}
+                </div>
+                <div style={styles.projectDescription}>
+                  {award.awarder && <>Awarded by {award.awarder} – </>}
+                  {award.awardDate && <>({award.awardDate})</>}
+                  {award.awardSummary && <div>{award.awardSummary}</div>}
+                </div>
               </div>
-              <div style={styles.projectDescription}>
-                {award.awarder && <>Awarded by {award.awarder} – </>}
-                {award.awardDate && <>({award.awardDate})</>}
-                {award.awardSummary && <div>{award.awardSummary}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
     </div>
   )
 }

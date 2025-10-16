@@ -131,4 +131,24 @@ code {
   body {
     @apply bg-background text-foreground;
   }
+  .scroll-bar {
+    scrollbar-width: 8px;
+    scrollbar-color: rgba(80, 79, 79, 0.514) transparent;
+    overflow-y: scroll;
+  }
+  .scroll-bar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scroll-bar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  .scroll-bar::-webkit-scrollbar-thumb {
+    width: 8px;
+    background-color: rgba(80, 79, 79, 0.514);
+  }
+  .scroll-bar::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
