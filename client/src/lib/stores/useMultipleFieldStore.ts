@@ -42,13 +42,13 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
       return { fields: { ...state.fields, [section]: updatedFields } }
     }),
 
-  deleteField: (section, index) =>
+  deleteField: (section, index: number) => {
     set((state) => {
       const sectionFields = state.fields[section] || []
       const updatedFields = sectionFields.filter((_, i) => i !== index)
 
       return { fields: { ...state.fields, [section]: updatedFields } }
-    }),
+    })
+  },
 }))
-
 export default useFieldStores

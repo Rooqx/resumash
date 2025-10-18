@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Key, Plus, Trash } from 'lucide-react'
+import { ChevronLeft, Key, Plus, Trash } from 'lucide-react'
 import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
@@ -20,6 +20,7 @@ export const Route = createFileRoute('/')({
 })
 
 function RouteComponent() {
+  const [displayPdf, setDisplayPdf] = useState(false)
   const { inputValue, setInputValue } = useInputStore()
   const {
     fields: storeFields,
@@ -50,12 +51,12 @@ function RouteComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className={`App  space-y-4 bg-black text-white `}>
+      <div className={`App  space-y-4 bg-black text-white relative`}>
         <h2 className="text-2xl font-semibold mb-2 mx-auto">My Resume</h2>
         {/* ================== Wrapper  ================== */}
-        <div className="w-full flex items-start justify-between">
+        <div className="w-full flex items-start justify-between h-[800px]">
           {/* ================== Input Container  ================== */}
-          <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] rounded-[1px] py-2 pb-6 px-6 max-h-screen overflow-y-auto mr-10 scroll-bar">
+          <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] rounded-[1px] py-2 pb-6 px-6 max-h-full overflow-y-auto mr-10 scroll-bar">
             {/* ================== Basic Info ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold"> Basic Info</h3>
@@ -176,6 +177,52 @@ function RouteComponent() {
                 />
               </div>
             </div>
+
+            {/* ================== Skills ================== */}
+            <div className="space-y-4 mt-6">
+              <h3 className="text-lg font-semibold">Skills</h3>
+              {fields['skills']?.map((field: any, i) => (
+                <div key={i} className="border p-4 rounded-md space-y-3">
+                  <Input
+                    type="text"
+                    labelFor="skillName"
+                    value={field.skillName}
+                    onChange={(e) =>
+                      updateField('skills', i, e.target.name, e.target.value)
+                    }
+                    inputTittle="Skill Category"
+                    placeholder="e.g., Frontend Development, Cybersecurity, DevOps"
+                  />
+                  <TagInput
+                    key={field.i}
+                    name={`skills-${i}`} // unique per field
+                    onChange={(t) => console.log(`skills-${i}:`, t)}
+                  />{' '}
+                  <button
+                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
+                    onClick={() => {
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('skills', i)
+                    }}
+                  >
+                    <Trash className="hover:text-black z-1" size={16} />
+                    <p className="z-2 hover:text-black "> Delete Skill</p>
+                  </button>{' '}
+                  <button
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
+                    onClick={() => addField('skills', i)}
+                  >
+                    <Plus size={16} /> Add Skill
+                  </button>
+                </div>
+              ))}
+            </div>
+
             {/* ================== Work Experience ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Work Experience</h3>
@@ -266,13 +313,22 @@ function RouteComponent() {
                     placeholder="List key achievements"
                   />
                   <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField('experience', i)}
+                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
+                    onClick={() => {
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('experience', i)
+                    }}
                   >
-                    <Trash size={16} /> Delete Experience
+                    <Trash className="hover:text-black z-1" size={16} />
+                    <p className="z-2 hover:text-black "> Delete Experience</p>
                   </button>{' '}
                   <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('experience', i)}
                   >
                     <Plus size={16} /> Add New Experience
@@ -284,7 +340,7 @@ function RouteComponent() {
             {/* ================== Education ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Education</h3>
-              {fields['education']?.map((field, i) => (
+              {fields['education']?.map((field: any, i: number) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <Input
@@ -382,57 +438,26 @@ function RouteComponent() {
                       placeholder="MM/YYYY or Present"
                     />
                   </div>
-
                   <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField('education', i)}
-                  >
-                    <Trash size={16} /> Delete Education
-                  </button>
-                  <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField('education', i)}
-                  >
-                    <Plus size={16} /> Add Education
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* ================== Skills ================== */}
-            <div className="space-y-4 mt-6">
-              <h3 className="text-lg font-semibold">Skills</h3>
-              {fields['skills']?.map((field, i) => (
-                <div key={i} className="border p-4 rounded-md space-y-3">
-                  <Input
-                    type="text"
-                    labelFor="skillName"
-                    value={field.skillName}
-                    onChange={(e) =>
-                      updateField('skills', i, e.target.name, e.target.value)
-                    }
-                    inputTittle="Skill Category"
-                    placeholder="e.g., Frontend Development, Cybersecurity, DevOps"
-                  />
-                  <TagInput
-                    key={field.i}
-                    name={`skills-${i}`} // unique per field
-                    onChange={(t) => console.log(`skills-${i}:`, t)}
-                  />
-                  <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
+                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
                     onClick={() => {
-                      useTagStore.getState().removeField(`skills-${i}`) // 💥 cleanup here;
-                      deleteField('skills', i)
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('education', i)
                     }}
                   >
-                    <Trash size={16} /> Delete Skill
-                  </button>
+                    <Trash className="hover:text-black z-1" size={16} />
+                    <p className="z-2 hover:text-black "> Delete Education</p>
+                  </button>{' '}
                   <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
-                    onClick={() => addField('skills', i)}
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
+                    onClick={() => addField('education', i)}
                   >
-                    <Plus size={16} /> Add Skill
+                    <Plus size={16} /> Add New Education
                   </button>
                 </div>
               ))}
@@ -441,7 +466,7 @@ function RouteComponent() {
             {/* ================== Projects ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Projects</h3>
-              {fields['projects']?.map((field, i) => (
+              {fields['projects']?.map((field: any, i: number) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
@@ -494,7 +519,13 @@ function RouteComponent() {
 
                   <button
                     className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField('projects', i)}
+                    onClick={() => {
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('projects', i)
+                    }}
                   >
                     <Trash size={16} /> Delete Project
                   </button>
@@ -511,7 +542,7 @@ function RouteComponent() {
             {/* ================== Certifications ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Certifications</h3>
-              {(fields['certifications'] || []).map((field, i) => (
+              {(fields['certificates'] || []).map((field: any, i: number) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
@@ -575,15 +606,23 @@ function RouteComponent() {
                     inputTittle="Certificate URL"
                     placeholder="Enter verification URL"
                   />
-
                   <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField('certifications', i)}
+                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
+                    onClick={() => {
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('certifications', i)
+                    }}
                   >
-                    <Trash size={16} /> Delete Certificate
-                  </button>
+                    <Trash className="hover:text-black z-1" size={16} />
+                    <p className="z-2 hover:text-black "> Delete Certificate</p>
+                  </button>{' '}
                   <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('certifications', i)}
                   >
                     <Plus size={16} /> Add Certificate
@@ -595,7 +634,7 @@ function RouteComponent() {
             {/* ================== Awards ================== */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold">Awards</h3>
-              {(fields['awards'] || []).map((field, i) => (
+              {(fields['awards'] || []).map((field: any, i: number) => (
                 <div key={i} className="border p-4 rounded-md space-y-3">
                   <Input
                     type="text"
@@ -639,15 +678,23 @@ function RouteComponent() {
                     inputTittle="Award Description"
                     placeholder="Describe the award and significance"
                   />
-
                   <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
-                    onClick={() => deleteField('awards', i)}
+                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
+                    onClick={() => {
+                      if (i === 0) {
+                        console.log('cannot delete field')
+                        return
+                      }
+                      deleteField('awards', i)
+                    }}
                   >
-                    <Trash size={16} /> Delete Award
-                  </button>
+                    <Trash className="hover:text-black z-1" size={16} />
+                    <p className="z-2 hover:text-black "> Delete Award</p>
+                  </button>{' '}
                   <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('awards', i)}
                   >
                     <Plus size={16} /> Add Award
@@ -662,8 +709,13 @@ function RouteComponent() {
           </div>
           <div className="h-auto space-y-5 w-[300px] ml-10 mr-10">
             <div>
-              <button className="py-2 px-4 bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-5">
-                Preview PDF
+              <button
+                className="py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
+              hover:before:w-full hover:text-black border border-white"
+                onClick={() => setDisplayPdf(!displayPdf)}
+              >
+                <p className="z-2 hover:text-black "> Preview PDF</p>
               </button>
               <PDFDownloadLink
                 className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
@@ -684,7 +736,7 @@ function RouteComponent() {
               </h3>
               <div className="py-6">
                 <button className="text-base text-white">
-                  More Templates comming soon
+                  More Templates coming soon
                 </button>
               </div>
             </div>
@@ -692,23 +744,25 @@ function RouteComponent() {
         </div>{' '}
         {/* ================== PDF Actions (optional) ==================*/}
         {
-          <PDFViewer width="100%" height="600">
-            <Document>
-              <ResumePDF />
-            </Document>
-          </PDFViewer>
+          <div
+            className="fixed top-0 w-full h-full bg-black z-10"
+            style={{
+              display: displayPdf ? 'block' : 'none',
+            }}
+          >
+            <button
+              className="text-lg flex gap-3 font-medium items-center px-6 py-3 bg-white rounded-xl text-black cursor-pointer"
+              onClick={() => setDisplayPdf(!displayPdf)}
+            >
+              <ChevronLeft size={24} /> Back
+            </button>
+            <PDFViewer width="100%" height="600">
+              <Document>
+                <ResumePDF />
+              </Document>
+            </PDFViewer>
+          </div>
         }
-        <br />
-        <PDFDownloadLink
-          document={
-            <Document>
-              <ResumePDF />
-            </Document>
-          }
-          fileName="Echo_Resume.pdf"
-        >
-          {({ loading }) => (loading ? 'Generating...' : 'Download PDF')}
-        </PDFDownloadLink>
       </div>
     </QueryClientProvider>
   )
