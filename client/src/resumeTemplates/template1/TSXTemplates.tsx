@@ -347,7 +347,8 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* ================== Certificates ================== */}
-      {fields['certificates']?.length > 0 &&
+      {fields['certificates'] &&
+        fields['certificates'].length > 0 &&
         fields['certificates'].some(
           (f) => f.certificateName && f.certificateName.trim() !== '',
         ) && (

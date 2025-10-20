@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Image, Link, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
-import email from '../../../public/icons/mail.png'
-import github from '../../../public/icons/github.png'
-import mapPin from '../../../public/icons/map-pin.png'
-import phone from '../../../public/icons/phone.png'
-import linkdln from '../../../public/icons/linkedin.png'
-import portfolio from '../../../public/icons/briefcase-business.png'
+import email from '/icons/mail.png'
+import github from '/icons/github.png'
+import mapPin from '/icons/map-pin.png'
+import phone from '/icons/phone.png'
+import linkdln from '/icons/linkedin.png'
+import portfolio from '/icons/briefcase-business.png'
 import resumeData from '@/components/resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
@@ -168,6 +168,19 @@ const ResumePDF: React.FC = () => {
 
   console.log('Tag Fields:', tagFields)
   console.log('Fields:', fields)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // put your logic here — this runs 1s after the last change
+      console.log('Triggered after 1 second delay:', {
+        inputValue,
+        tagFields,
+        fields,
+      })
+    }, 1000)
+
+    return () => clearTimeout(timer) // clear old timer if dependencies change
+  }, [inputValue, tagFields, fields])
   return (
     <Page size="A4" style={styles.page}>
       {/* Header */}
@@ -267,6 +280,7 @@ const ResumePDF: React.FC = () => {
           )}
         </View>
       </View>
+
       {/* Summary */}
       {inputValue.summary && (
         <View style={styles.section}>
@@ -274,6 +288,7 @@ const ResumePDF: React.FC = () => {
           <Text style={styles.jobSummary}>{inputValue.summary}</Text>
         </View>
       )}
+
       {/* Skills */}
       {fields['skills']?.length > 0 && (
         <View style={{ ...styles.section }}>
@@ -293,6 +308,7 @@ const ResumePDF: React.FC = () => {
           ))}
         </View>
       )}
+
       {/* Work Experience */}
       {fields['experience']?.length > 0 && (
         <View style={styles.section}>
@@ -374,7 +390,7 @@ const ResumePDF: React.FC = () => {
               </Text>
               <Text style={styles.projectDescription}>
                 {project.description || 'Project description'}{' '}
-                {(project as any)[`projectTechnologies-${index}`]?.join(', ')}
+                {project[`projectTechnologies-${index}`]?.join(', ')}
               </Text>
               {project.url && (
                 <Link
@@ -390,7 +406,8 @@ const ResumePDF: React.FC = () => {
       )}
       {/** #ToDO fix */}
       {/* Certificates */}
-      {fields['certificates']?.length > 0 &&
+      {fields['certificates'] &&
+        fields['certificates']?.length > 0 &&
         fields['certificates'].some(
           (f) => f.certificateName && f.certificateName.trim() !== '',
         ) && (

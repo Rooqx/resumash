@@ -52,7 +52,7 @@ export default function Input({
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
-      <div className="flex flex-col gap-[8px] w-full text-[14px] urbanist">
+      <div className="flex flex-col gap-[8px] w-full text-xs urbanist">
         <label htmlFor={labelFor} className="p-1 font-[500]">
           {inputTittle}
         </label>

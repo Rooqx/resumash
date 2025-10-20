@@ -50,7 +50,7 @@ export default function Textarea({
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
-      <div className="flex flex-col gap-[8px] w-full text-[14px] urbanist">
+      <div className="flex flex-col gap-[8px] w-full text-xs urbanist">
         <label htmlFor={labelFor} className="p-1 font-[500]">
           {inputTittle}
         </label>
@@ -103,7 +103,7 @@ export default function Textarea({
           )}
         </div>
       </div>
-      <p className="w-full text-[14px] font-[400] mt-1 text-[#2F2F30] urbanist">
+      <p className="w-full text-xs font-[400] mt-1 text-[#2F2F30] urbanist">
         {userInputContent}
       </p>
       <div className="flex items-center justify-end w-full">

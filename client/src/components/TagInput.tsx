@@ -75,7 +75,7 @@ export const TagInput: React.FC<TagInputProps> = ({
 
   return (
     <div
-      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-[14px] text-white urbanist ${className}`}
+      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-xs text-white urbanist ${className}`}
     >
       <label htmlFor={labelFor} className="p-1 font-[500]">
         {tagTitle}
@@ -91,7 +91,7 @@ export const TagInput: React.FC<TagInputProps> = ({
             key={t}
             className="
               flex items-center gap-1 rounded-full bg-zinc-900 
-              text-white text-sm px-3 py-2
+              text-white text-xs px-3 py-2
             "
           >
             <span>{t}</span>
@@ -119,7 +119,7 @@ export const TagInput: React.FC<TagInputProps> = ({
           className={`${
             !className
               ? ` text-[white] font-[500] 
-            flex-1 bg-transparent outline-none border-none text-sm
+            flex-1 bg-transparent outline-none border-none text-xs
             min-w-[100px] placeholder-gray-400
                      } `
               : className
@@ -145,7 +145,7 @@ export const TagInput: React.FC<TagInputProps> = ({
                   addTag(name, s)
                 }}
                 onMouseEnter={() => setFocusedSuggestion(idx)}
-                className={`px-3 py-2 text-sm cursor-pointer ${
+                className={`px-3 py-2 text-xs cursor-pointer ${
                   isActive ? 'bg-gray-100' : 'hover:bg-gray-50'
                 }`}
               >
