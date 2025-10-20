@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 interface MultipleFieldStores {
-  fields: Record<string, Array<any>> // dynamic sections, no typing headache
+  fields: Record<string, Array<any>>
   addField: (section: string, index?: number) => void
   updateField: (
     section: string,
@@ -13,17 +13,22 @@ interface MultipleFieldStores {
 }
 
 const useFieldStores = create<MultipleFieldStores>((set) => ({
-  fields: {},
+  fields: {
+    experience: [{}],
+    education: [{}],
+    certificates: [{}],
+    awards: [{}],
+    skills: [{}],
+    projects: [{}],
+    references: [{}],
+  },
 
   addField: (section, index) =>
     set((state) => {
-      const currentFields = state.fields[section] || []
+      const currentFields = state.fields[section] || [{}] // fallback to empty object
       const newField = {}
 
-      // clone array
       const fields = [...currentFields]
-
-      // insert new field after index if valid
       if (typeof index === 'number' && index >= 0 && index < fields.length) {
         fields.splice(index + 1, 0, newField)
       } else {
@@ -42,13 +47,20 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
       return { fields: { ...state.fields, [section]: updatedFields } }
     }),
 
-  deleteField: (section, index: number) => {
+  deleteField: (section, index) =>
     set((state) => {
       const sectionFields = state.fields[section] || []
       const updatedFields = sectionFields.filter((_, i) => i !== index)
 
-      return { fields: { ...state.fields, [section]: updatedFields } }
-    })
-  },
+      const newFields = { ...state.fields }
+      if (updatedFields.length > 0) {
+        newFields[section] = updatedFields
+      } else {
+        delete newFields[section]
+      }
+
+      return { fields: newFields }
+    }),
 }))
+
 export default useFieldStores

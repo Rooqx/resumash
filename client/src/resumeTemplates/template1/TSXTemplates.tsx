@@ -1,27 +1,12 @@
 import React from 'react'
-import { Award, Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
-import resumeData from '../resume.json'
+import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
+import resumeData from '@/components/resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 
 const ResumeComponent: React.FC = () => {
-  const {
-    basics,
-    work,
-    education,
-    skills,
-    projects,
-
-    certificates,
-    /* volunteer,
-    awards,
-  languages,
-    publications,
-    interests,
-    references,*/
-  } = resumeData
-
+  //  const { inputValue, fields, tagFields } = resumeData
   const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
 
@@ -153,26 +138,22 @@ const ResumeComponent: React.FC = () => {
     <div style={styles.page}>
       {/* Header Section */}
       <div style={styles.header}>
-        <div style={styles.name}>
-          {inputValue.fullName || basics.name || 'Full Name'}
-        </div>
+        <div style={styles.name}>{inputValue.fullName || 'Full Name'}</div>
         <div style={styles.label}>
-          {inputValue.label ||
-            basics.label ||
-            'Job Title (e.g Frontend Engineer)'}
+          {inputValue.label || 'Job Title (e.g Frontend Engineer)'}
         </div>
         <div style={styles.contactInfo}>
           <span style={styles.contactItem}>
             <Mail size={10} />
-            {inputValue.email || basics.email || 'email@example.com'}
+            {inputValue.email || 'email@example.com'}
           </span>
           <span style={styles.contactItem}>
             <Phone size={10} />
-            {inputValue.phone || basics.phone || '(123) 456-7890'}
+            {inputValue.phone || '(123) 456-7890'}
           </span>
           <a
             style={{ ...styles.contactItem, cursor: 'pointer' }}
-            href={inputValue.linkdlnUrl || basics.profiles[0].url || '#'}
+            href={inputValue.linkdlnUrl || '#'}
             target="_blank"
             rel="noreferrer"
           >
@@ -181,24 +162,23 @@ const ResumeComponent: React.FC = () => {
           </a>
           <a
             style={{ ...styles.contactItem, cursor: 'pointer' }}
-            href={inputValue.githubUrl || basics.profiles[1].url || '#'}
+            href={inputValue.githubUrl || '#'}
             target="_blank"
             rel="noreferrer"
           >
             <Github size={10} />
             {'GitHub'}
           </a>
-          {(inputValue.city || inputValue.country || basics.location.city) && (
+          {(inputValue.city || inputValue.country) && (
             <span style={styles.contactItem}>
               <MapPin size={10} />
-              {inputValue.city || basics.location.city || 'City'},{' '}
-              {inputValue.country || basics.location.countryCode || 'Country'}
+              {inputValue.city || 'City'}, {inputValue.country || 'Country'}
             </span>
           )}
-          {basics.url && (
+          {inputValue.portfolioUrl && (
             <a
               style={styles.contactItem}
-              href={basics.url}
+              href={inputValue.portfolioUrl}
               target="_blank"
               rel="noreferrer"
             >
@@ -209,14 +189,15 @@ const ResumeComponent: React.FC = () => {
       </div>
 
       {/* Summary */}
-      {(inputValue.summary || basics.summary) && (
-        <div style={styles.section}>
+      {
+        /* inputValue.summary && */ <div style={styles.section}>
           <div style={styles.sectionTitle}>Summary</div>
           <div style={styles.jobSummary}>
-            {inputValue.summary || basics.summary}
+            {inputValue.summary ||
+              'Write Professional a summary (e.g i am a frontend developer with x years of experience...)'}
           </div>
         </div>
-      )}
+      }
       {/* Skills - Use fields array for skills data */}
       {fields['skills'] && fields['skills'].length > 0 && (
         <div style={styles.section}>
@@ -230,9 +211,10 @@ const ResumeComponent: React.FC = () => {
 
               <div style={styles.skillLevel}>
                 Technologies:{' '}
-                {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0 ? (
+                {((tagFields as any)[`skills-${index}`]?.tags?.length ?? 0) >
+                0 ? (
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
-                    {tagFields[`skills-${index}`].tags.join(', ')}
+                    {(tagFields as any)[`skills-${index}`].tags.join(', ')}
                   </span>
                 ) : (
                   <span style={{ color: '#777' }}>No technologies added</span>
@@ -244,29 +226,25 @@ const ResumeComponent: React.FC = () => {
       )}
 
       {/* Work Experience - Use fields array for work experience */}
-      {((fields['experience'] && fields['experience'].length > 0) ||
-        work.length > 0) && (
+      {fields['experience'] && fields['experience'].length > 0 && (
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Work Experience</div>
 
-          {(fields['experience'] && fields['experience'].length > 0
-            ? fields['experience']
-            : work
-          ).map((job, index) => (
+          {fields['experience'].map((job, index) => (
             <div key={index} style={styles.jobItem}>
               <div style={styles.jobHeader}>
                 <div>
                   <div style={styles.company}>
-                    {job.companyName || job.name || 'Company Name'}
+                    {job.companyName || 'Company Name'}
                   </div>
                   <div style={styles.position}>
-                    {job.jobPosition || job.position || 'Job Position'}
+                    {job.jobPosition || 'Job Position'}
                   </div>
                 </div>
                 <div style={styles.date}>
-                  {(job.jobStartDate || job.startDate || 'Start Date') +
+                  {(job.jobStartDate || 'Start Date') +
                     ' - ' +
-                    (job.jobEndDate || job.endDate || 'Present')}
+                    (job.jobEndDate || 'Present')}
                 </div>
               </div>
 
@@ -274,14 +252,16 @@ const ResumeComponent: React.FC = () => {
                 <div style={styles.jobSummary}>{job.jobSummary}</div>
               )}
 
-              {tagFields[`jobHighlights-${index}`] && (
+              {(tagFields as any)[`jobHighlights-${index}`] && (
                 <div style={styles.jobHighlights}>
-                  {Array.isArray(tagFields[`jobHighlights-${index}`].tags) ? (
-                    tagFields[`jobHighlights-${index}`].tags.map(
+                  {Array.isArray(
+                    (tagFields as any)[`jobHighlights-${index}`].tags,
+                  ) ? (
+                    (tagFields as any)[`jobHighlights-${index}`].tags.map(
                       (item: string, i: number) => <li key={i}>{item}</li>,
                     )
                   ) : (
-                    <li>{job.highlights}</li>
+                    <li>{(job as any).highlights}</li>
                   )}
                 </div>
               )}
@@ -339,11 +319,13 @@ const ResumeComponent: React.FC = () => {
                 {project.description || 'Project description'}
 
                 {/* Technologies from TagInput */}
-                {tagFields[`projectTechnologies-${index}`]?.tags?.length >
-                  0 && (
+                {(tagFields as any)[`projectTechnologies-${index}`]?.tags
+                  ?.length > 0 && (
                   <span style={{ display: 'block', marginTop: 4 }}>
                     <strong>Technologies:</strong>{' '}
-                    {tagFields[`projectTechnologies-${index}`].tags.join(', ')}
+                    {(tagFields as any)[
+                      `projectTechnologies-${index}`
+                    ].tags.join(', ')}
                   </span>
                 )}
               </div>
@@ -364,34 +346,26 @@ const ResumeComponent: React.FC = () => {
         </div>
       )}
 
-      {/* ================== Certifications ================== */}
-      {fields['certifications'] && fields['certifications'].length > 0 && (
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Certifications</div>
-
-          {fields['certifications']
-            .filter(
-              (cert) =>
-                cert.certificateName && cert.certificateName.trim() !== '',
-            )
-            .map((certificate, index) => (
+      {/* ================== Certificates ================== */}
+      {fields['certificates']?.length > 0 &&
+        fields['certificates'].some(
+          (f) => f.certificateName && f.certificateName.trim() !== '',
+        ) && (
+          <div style={styles.section}>
+            <div style={styles.sectionTitle}>Certifications</div>
+            {fields['certificates'].map((certificate, index) => (
               <div key={index} style={styles.projectItem}>
-                {/* Certificate Name */}
                 <div style={styles.projectName}>
-                  {certificate.certificateName || 'Certificate Name'}
+                  {certificate.certificateName}
                 </div>
-
-                {/* Issuer + Date */}
                 <div style={styles.projectDescription}>
                   {certificate.certificateIssuer && (
-                    <>Issued by {certificate.certificateIssuer} </>
+                    <>Issued by {certificate.certificateIssuer} – </>
                   )}
                   {certificate.certificateDate && (
-                    <span>({certificate.certificateDate})</span>
+                    <>({certificate.certificateDate}) </>
                   )}
                 </div>
-
-                {/* Verification URL */}
                 {certificate.certificateUrl && (
                   <a
                     style={styles.contactItem}
@@ -404,8 +378,8 @@ const ResumeComponent: React.FC = () => {
                 )}
               </div>
             ))}
-        </div>
-      )}
+          </div>
+        )}
 
       {/* ================== Awards ================== */}
       {fields['awards'] && fields['awards'].length > 0 && (

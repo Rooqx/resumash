@@ -73,11 +73,11 @@ export default function Textarea({
                 ? value // controlled input case
                 : inputValue[labelFor] || '' // Zustand fallback
             }
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
               if (onChange) {
-                onChange(e) // controlled case
+                onChange(e as any) // controlled case
               } else {
-                handleChange(e) // Zustand fallback
+                handleChange(e as any) // Zustand fallback
               }
             }}
             className={`${

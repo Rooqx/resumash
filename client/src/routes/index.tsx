@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ChevronLeft, Key, Plus, Trash } from 'lucide-react'
+import { ChevronLeft, Plus, Trash } from 'lucide-react'
 import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
@@ -11,7 +11,6 @@ import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
 import Textarea from '@/components/Textarea'
-import Image from '@/components/Image'
 
 const queryClient = new QueryClient()
 
@@ -20,28 +19,10 @@ export const Route = createFileRoute('/')({
 })
 
 function RouteComponent() {
-  const [displayPdf, setDisplayPdf] = useState(false)
+  const [displayPdf, setDisplayPdf] = useState(true)
   const { inputValue, setInputValue } = useInputStore()
-  const {
-    fields: storeFields,
-    addField,
-    updateField,
-    deleteField,
-  } = useFieldStores()
+  const { fields, addField, updateField, deleteField } = useFieldStores()
 
-  // your local defaults (just initial placeholders)
-  const defaultFields = {
-    experience: [{}],
-    education: [{}],
-    certificates: [{}],
-    awards: [{}],
-    skills: [{}],
-    projects: [{}],
-    references: [{}],
-  }
-
-  // merge Zustand fields with local defaults
-  const fields = { ...defaultFields, ...storeFields }
   const setSuggestions = useTagStore((s) => s.setSuggestions)
 
   useEffect(() => {
@@ -199,14 +180,12 @@ function RouteComponent() {
                     onChange={(t) => console.log(`skills-${i}:`, t)}
                   />{' '}
                   <button
-                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
                       deleteField('skills', i)
                     }}
                   >
@@ -217,7 +196,7 @@ function RouteComponent() {
                     className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('skills', i)}
                   >
-                    <Plus size={16} /> Add Skill
+                    <Plus size={16} /> Add new skill
                   </button>
                 </div>
               ))}
@@ -292,8 +271,7 @@ function RouteComponent() {
                       placeholder="MM YYYY(March 2025) or Present"
                     />
                   </div>
-                  <Input
-                    type="textarea"
+                  <Textarea
                     labelFor="jobSummary"
                     value={field.jobSummary}
                     onChange={(e) =>
@@ -313,14 +291,12 @@ function RouteComponent() {
                     placeholder="List key achievements"
                   />
                   <button
-                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
                       deleteField('experience', i)
                     }}
                   >
@@ -439,14 +415,12 @@ function RouteComponent() {
                     />
                   </div>
                   <button
-                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
                       deleteField('education', i)
                     }}
                   >
@@ -518,22 +492,22 @@ function RouteComponent() {
                   </div>
 
                   <button
-                    className="mt-2 py-2 px-4 bg-red-500 rounded-md text-white text-sm flex gap-2 items-center"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
                       deleteField('projects', i)
                     }}
                   >
                     <Trash size={16} /> Delete Project
                   </button>
                   <button
-                    className="py-2 px-4 bg-purple-500 rounded-md text-white text-sm font-medium flex gap-2 items-center"
+                    className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('projects', i)}
                   >
-                    <Plus size={16} /> Add Project
+                    <Plus size={16} /> Add new project
                   </button>
                 </div>
               ))}
@@ -550,7 +524,7 @@ function RouteComponent() {
                     value={field.certificateName}
                     onChange={(e) =>
                       updateField(
-                        'certifications',
+                        'certificates',
                         i,
                         e.target.name,
                         e.target.value,
@@ -566,7 +540,7 @@ function RouteComponent() {
                       value={field.certificateIssuer}
                       onChange={(e) =>
                         updateField(
-                          'certifications',
+                          'certificates',
                           i,
                           e.target.name,
                           e.target.value,
@@ -581,7 +555,7 @@ function RouteComponent() {
                       value={field.certificateDate}
                       onChange={(e) =>
                         updateField(
-                          'certifications',
+                          'certificates',
                           i,
                           e.target.name,
                           e.target.value,
@@ -597,7 +571,7 @@ function RouteComponent() {
                     value={field.certificateUrl}
                     onChange={(e) =>
                       updateField(
-                        'certifications',
+                        'certificates',
                         i,
                         e.target.name,
                         e.target.value,
@@ -607,15 +581,13 @@ function RouteComponent() {
                     placeholder="Enter verification URL"
                   />
                   <button
-                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
-                      deleteField('certifications', i)
+                      deleteField('certificates', i)
                     }}
                   >
                     <Trash className="hover:text-black z-1" size={16} />
@@ -623,9 +595,9 @@ function RouteComponent() {
                   </button>{' '}
                   <button
                     className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-                    onClick={() => addField('certifications', i)}
+                    onClick={() => addField('certificates', i)}
                   >
-                    <Plus size={16} /> Add Certificate
+                    <Plus size={16} /> Add new certificate
                   </button>
                 </div>
               ))}
@@ -679,14 +651,12 @@ function RouteComponent() {
                     placeholder="Describe the award and significance"
                   />
                   <button
-                    className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
+                    className={`${
+                      i === 0
+                        ? 'hidden'
+                        : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+                    }`}
                     onClick={() => {
-                      if (i === 0) {
-                        console.log('cannot delete field')
-                        return
-                      }
                       deleteField('awards', i)
                     }}
                   >
@@ -697,7 +667,7 @@ function RouteComponent() {
                     className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                     onClick={() => addField('awards', i)}
                   >
-                    <Plus size={16} /> Add Award
+                    <Plus size={16} /> Add new award
                   </button>
                 </div>
               ))}
@@ -707,6 +677,27 @@ function RouteComponent() {
           <div className="">
             <ResumeComponent />
           </div>
+          {/* ================== PDF Actions (optional) ==================*/}
+          {
+            <div
+              className="fixed top-0 w-full h-full bg-black z-10"
+              style={{
+                display: displayPdf ? 'block' : 'none',
+              }}
+            >
+              <button
+                className="text-lg flex gap-3 font-medium items-center px-6 py-3 bg-white rounded-xl text-black cursor-pointer"
+                onClick={() => setDisplayPdf(!displayPdf)}
+              >
+                <ChevronLeft size={24} /> Back
+              </button>
+              <PDFViewer width="100%" height="600">
+                <Document>
+                  <ResumePDF />
+                </Document>
+              </PDFViewer>
+            </div>
+          }
           <div className="h-auto space-y-5 w-[300px] ml-10 mr-10">
             <div>
               <button
@@ -742,27 +733,6 @@ function RouteComponent() {
             </div>
           </div>
         </div>{' '}
-        {/* ================== PDF Actions (optional) ==================*/}
-        {
-          <div
-            className="fixed top-0 w-full h-full bg-black z-10"
-            style={{
-              display: displayPdf ? 'block' : 'none',
-            }}
-          >
-            <button
-              className="text-lg flex gap-3 font-medium items-center px-6 py-3 bg-white rounded-xl text-black cursor-pointer"
-              onClick={() => setDisplayPdf(!displayPdf)}
-            >
-              <ChevronLeft size={24} /> Back
-            </button>
-            <PDFViewer width="100%" height="600">
-              <Document>
-                <ResumePDF />
-              </Document>
-            </PDFViewer>
-          </div>
-        }
       </div>
     </QueryClientProvider>
   )

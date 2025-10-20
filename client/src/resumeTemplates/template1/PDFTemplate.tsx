@@ -1,7 +1,12 @@
 import React from 'react'
 import { Image, Link, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
-
-import resumeData from '../resume.json'
+import email from '../../../public/icons/mail.png'
+import github from '../../../public/icons/github.png'
+import mapPin from '../../../public/icons/map-pin.png'
+import phone from '../../../public/icons/phone.png'
+import linkdln from '../../../public/icons/linkedin.png'
+import portfolio from '../../../public/icons/briefcase-business.png'
+import resumeData from '@/components/resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
@@ -19,9 +24,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    marginBottom: 20,
+    marginBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#2c5530',
+    borderBottomColor: 'black',
     borderBottomStyle: 'solid',
   },
 
@@ -57,9 +62,10 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#666666',
     marginRight: 5,
-    marginBottom: 3,
+    marginBottom: -8,
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'center',
   },
 
   section: {
@@ -88,7 +94,7 @@ const styles = StyleSheet.create({
   company: { fontSize: 10, fontWeight: 'bold' },
 
   position: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#3a3a3a',
     fontWeight: 'bold', // changed from semibold (unsupported)
   },
@@ -103,6 +109,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#333333',
     textAlign: 'justify',
+    lineHeight: 1.2,
   },
 
   jobHighlights: {
@@ -115,14 +122,14 @@ const styles = StyleSheet.create({
   educationItem: { marginBottom: 8 },
 
   institution: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
     marginBottom: 2,
   },
 
   studyType: { fontSize: 9, color: '#4a4a4a' },
 
-  skillItem: { marginBottom: 5 },
+  skillItem: { marginBottom: 2 },
 
   skillName: {
     fontSize: 9,
@@ -136,10 +143,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  projectItem: { marginBottom: 8 },
+  projectItem: { lineHeight: 0.65, marginBottom: 8 },
 
   projectName: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
     marginBottom: 2,
   },
@@ -154,7 +161,7 @@ const styles = StyleSheet.create({
 })
 
 const ResumePDF: React.FC = () => {
-  const { basics, work, education, skills, projects, certificates } = resumeData
+  // const { inputValue, fields, tagFields } = resumeData
   const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
   const tagFields = useTagStore((s) => s.fields)
@@ -165,30 +172,24 @@ const ResumePDF: React.FC = () => {
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.name}>
-          {inputValue.fullName || basics.name || 'Full Name'}
-        </Text>
+        <Text style={styles.name}>{inputValue.fullName || 'Full Name'}</Text>
         <Text style={styles.label}>
-          {inputValue.label ||
-            basics.label ||
-            'Job Title (e.g Frontend Engineer)'}
+          {inputValue.label || 'Job Title (e.g Frontend Engineer)'}
         </Text>
         <View style={styles.contactInfo}>
           <View style={styles.contactItem}>
             <Image
-              src="/icons/mail.png"
+              src={email}
               style={{ width: 10, height: 10, marginRight: 3 }}
             />
-            <Text>
-              {inputValue.email || basics.email || 'email@example.com'}
-            </Text>
+            <Text>{inputValue.email || 'email@example.com'}</Text>
           </View>
           <View style={styles.contactItem}>
             <Image
-              src="/icons/phone.png"
+              src={phone}
               style={{ width: 10, height: 10, marginRight: 3 }}
             />
-            <Text>{inputValue.phone || basics.phone || '(123) 456-7890'}</Text>
+            <Text>{inputValue.phone || '(123) 456-7890'}</Text>
           </View>
           <Link
             style={{
@@ -204,7 +205,7 @@ const ResumePDF: React.FC = () => {
               }}
             >
               <Image
-                src="/icons/linkedin.png"
+                src={linkdln}
                 style={{ width: 10, height: 10, marginRight: 3 }}
               />{' '}
               <Text>LinkedIn</Text>
@@ -215,7 +216,7 @@ const ResumePDF: React.FC = () => {
               textDecoration: 'none',
               ...styles.contactItem,
             }}
-            src={inputValue.githubUrl || basics.profiles[1].url || '#'}
+            src={inputValue.githubUrl || '#'}
           >
             <View
               style={{
@@ -224,26 +225,25 @@ const ResumePDF: React.FC = () => {
               }}
             >
               <Image
-                src="/icons/github.png"
+                src={github}
                 style={{ width: 10, height: 10, marginRight: 5 }}
               />
               <Text>GitHub</Text>
             </View>
           </Link>
-          {(inputValue.city || inputValue.country || basics.location.city) && (
+          {(inputValue.city || inputValue.country) && (
             <View style={styles.contactItem}>
               <Image
-                src="/icons/map-pin.png"
+                src={mapPin}
                 style={{ width: 10, height: 10, marginRight: 3 }}
               />
               <Text>
                 {' '}
-                {inputValue.city || basics.location.city || 'City'},{' '}
-                {inputValue.country || basics.location.countryCode || 'Country'}
+                {inputValue.city || 'City'}, {inputValue.country || 'Country'}
               </Text>
             </View>
           )}
-          {basics.url && (
+          {inputValue.portfolioUrl && (
             <Link
               style={{
                 textDecoration: 'none',
@@ -258,41 +258,36 @@ const ResumePDF: React.FC = () => {
                 }}
               >
                 <Image
-                  src="/icons/briefcase-business.png"
+                  src={portfolio}
                   style={{ width: 10, height: 10, marginRight: 5 }}
                 />
                 <Text>Portfolio</Text>
               </View>
-              Portfolio
             </Link>
           )}
         </View>
       </View>
-
       {/* Summary */}
-      {(inputValue.summary || basics.summary) && (
+      {inputValue.summary && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Summary</Text>
-          <Text style={styles.jobSummary}>
-            {inputValue.summary || basics.summary}
-          </Text>
+          <Text style={styles.jobSummary}>{inputValue.summary}</Text>
         </View>
       )}
-
       {/* Skills */}
       {fields['skills']?.length > 0 && (
-        <View style={styles.section}>
+        <View style={{ ...styles.section }}>
           <Text style={styles.sectionTitle}>Skills</Text>
           {fields['skills'].map((field, index) => (
-            <View key={index} style={styles.skillItem}>
+            <View key={index} style={{ lineHeight: 0.75, ...styles.skillItem }}>
               <Text style={styles.skillName}>
                 {field.skillName || 'Skill Name'}
               </Text>
               <Text style={styles.skillLevel}>
                 Technologies:{' '}
-                {(tagFields[`skills-${index}`]?.tags?.length ?? 0) > 0
-                  ? tagFields[`skills-${index}`].tags.join(', ')
-                  : ''}
+                {((tagFields as any)[`skills-${index}`]?.tags?.length ?? 0) > 0
+                  ? (tagFields as any)[`skills-${index}`].tags.join(', ')
+                  : 'No technologies added'}
               </Text>
             </View>
           ))}
@@ -323,9 +318,10 @@ const ResumePDF: React.FC = () => {
                 <Text style={styles.jobSummary}>{job.jobSummary}</Text>
               )}
 
-              {tagFields[`jobHighlights-${index}`]?.tags?.length > 0 && (
+              {(tagFields as any)[`jobHighlights-${index}`]?.tags?.length >
+                0 && (
                 <View style={styles.jobHighlights}>
-                  {tagFields[`jobHighlights-${index}`].tags.map(
+                  {(tagFields as any)[`jobHighlights-${index}`].tags.map(
                     (item: string, i: number) => (
                       <Text key={i}>• {item}</Text>
                     ),
@@ -336,7 +332,6 @@ const ResumePDF: React.FC = () => {
           ))}
         </View>
       )}
-
       {/* Education */}
       {fields['education']?.length > 0 && (
         <View style={styles.section}>
@@ -353,11 +348,10 @@ const ResumePDF: React.FC = () => {
             >
               <View>
                 <Text style={styles.institution}>
-                  {edu.institution || edu.school || 'Institution Name'}
+                  {edu.institution || 'Institution Name'}
                 </Text>
                 <Text style={styles.studyType}>
-                  {edu.studyType || edu.degree} in{' '}
-                  {edu.area || edu.fieldOfStudy || 'Field of Study'}
+                  {edu.studyType || 'Study Type'} in {edu.area || 'Area'}
                 </Text>
               </View>
               <View>
@@ -369,7 +363,6 @@ const ResumePDF: React.FC = () => {
           ))}
         </View>
       )}
-
       {/* Projects */}
       {fields['projects']?.length > 0 && (
         <View style={styles.section}>
@@ -381,10 +374,13 @@ const ResumePDF: React.FC = () => {
               </Text>
               <Text style={styles.projectDescription}>
                 {project.description || 'Project description'}{' '}
-                {project[`projectTechnologies-${index}`]?.join(', ')}
+                {(project as any)[`projectTechnologies-${index}`]?.join(', ')}
               </Text>
               {project.url && (
-                <Link style={styles.contactItem} src={project.url}>
+                <Link
+                  style={{ marginTop: 5, ...styles.contactItem }}
+                  src={project.url}
+                >
                   View Project
                 </Link>
               )}
@@ -392,26 +388,26 @@ const ResumePDF: React.FC = () => {
           ))}
         </View>
       )}
-
+      {/** #ToDO fix */}
       {/* Certificates */}
-      {fields.length > 0 &&
-        fields.some(
+      {fields['certificates']?.length > 0 &&
+        fields['certificates'].some(
           (f) => f.certificateName && f.certificateName.trim() !== '',
         ) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Certifications</Text>
-            {fields.map((certificate, index) => (
+            {fields['certificates'].map((certificate, index) => (
               <View key={index} style={styles.projectItem}>
                 <Text style={styles.projectName}>
-                  {certificate.certificateName || certificate.name}
+                  {certificate.certificateName}
                 </Text>
                 <Text style={styles.projectDescription}>
-                  {certificate.certificateIssuer && (
-                    <>Issued by {certificate.certificateIssuer} – </>
-                  )}
-                  {certificate.certificateDate && (
-                    <>({certificate.certificateDate})</>
-                  )}
+                  {certificate.certificateIssuer
+                    ? `Issued by ${certificate.certificateIssuer} – `
+                    : ''}
+                  {certificate.certificateDate
+                    ? `(${certificate.certificateDate})`
+                    : ''}
                 </Text>
                 {certificate.certificateUrl && (
                   <Link
@@ -425,13 +421,14 @@ const ResumePDF: React.FC = () => {
             ))}
           </View>
         )}
-
       {/* Awards */}
-      {fields.length > 0 &&
-        fields.some((f) => f.awardTitle && f.awardTitle.trim() !== '') && (
+      {fields['awards']?.length > 0 &&
+        fields['awards'].some(
+          (f: any) => f.awardTitle && f.awardTitle.trim() !== '',
+        ) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Awards</Text>
-            {fields.map((award, index) => (
+            {fields['awards'].map((award: any, index: number) => (
               <View key={index} style={styles.projectItem}>
                 <Text style={styles.projectName}>
                   {award.awardTitle || award.title}
@@ -440,7 +437,11 @@ const ResumePDF: React.FC = () => {
                   {award.awarder && `Awarded by ${award.awarder} – `}
                   {award.awardDate && `(${award.awardDate})`}
                 </Text>
-                {award.awardSummary && <Text>{award.awardSummary}</Text>}
+                {award.awardSummary && (
+                  <Text style={styles.projectDescription}>
+                    {award.awardSummary}
+                  </Text>
+                )}
               </View>
             ))}
           </View>

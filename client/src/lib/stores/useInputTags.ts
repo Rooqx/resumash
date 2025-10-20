@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 
 type TagFieldData = {
-  tags: string[]
+  tags: Array<string>
   input: string
   suggestions: Array<string>
 }
@@ -11,11 +11,11 @@ type TagStore = {
   fields: Record<string, TagFieldData>
   setInput: (name: string, value: string) => void
   addTag: (name: string, tag: string) => void
-  addTags: (name: string, tags: string[]) => void
+  addTags: (name: string, tags: Array<string>) => void
   removeTag: (name: string, tag: string) => void
   clearTags: (name: string) => void
-  setSuggestions: (name: string, suggestions: string[]) => void
-  getTags: (name: string) => string[]
+  setSuggestions: (name: string, suggestions: Array<string>) => void
+  getTags: (name: string) => Array<string>
   removeField: (name: string) => void
 }
 

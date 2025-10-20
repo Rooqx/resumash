@@ -75,30 +75,30 @@ export const TagInput: React.FC<TagInputProps> = ({
 
   return (
     <div
-      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-[14px] urbanist ${className}`}
+      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-[14px] text-white urbanist ${className}`}
     >
       <label htmlFor={labelFor} className="p-1 font-[500]">
         {tagTitle}
       </label>
       <div
         className="
-          flex flex-wrap items-center gap-2 rounded-xl border border-gray-300 
-          bg-white px-3 py-[10px] focus-within:ring-2 focus-within:ring-blue-500
+          flex flex-wrap items-center gap-2 rounded-[4px] text-white border border-gray-300 
+          bg-transparent px-3 py-[10px] focus-within:ring-2 focus-within:ring-gray-500
         "
       >
         {tags.map((t) => (
           <div
             key={t}
             className="
-              flex items-center gap-1 rounded-full bg-blue-100 
-              text-blue-700 text-sm px-3 py-1
+              flex items-center gap-1 rounded-full bg-zinc-900 
+              text-white text-sm px-3 py-2
             "
           >
             <span>{t}</span>
             <button
               type="button"
               onClick={() => removeTag(name, t)}
-              className="text-blue-500 hover:text-blue-700 focus:outline-none"
+              className="text-white hover:text-white focus:outline-none"
             >
               ×
             </button>
@@ -118,7 +118,7 @@ export const TagInput: React.FC<TagInputProps> = ({
           placeholder={placeholder}
           className={`${
             !className
-              ? ` text-[#2F2F30] font-[500] 
+              ? ` text-[white] font-[500] 
             flex-1 bg-transparent outline-none border-none text-sm
             min-w-[100px] placeholder-gray-400
                      } `
