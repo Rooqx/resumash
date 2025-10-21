@@ -166,17 +166,9 @@ const ResumePDF: React.FC = () => {
   const { fields } = useFieldStores()
   const tagFields = useTagStore((s) => s.fields)
 
-  console.log('Tag Fields:', tagFields)
-  console.log('Fields:', fields)
-
   useEffect(() => {
     const timer = setTimeout(() => {
       // put your logic here — this runs 1s after the last change
-      console.log('Triggered after 1 second delay:', {
-        inputValue,
-        tagFields,
-        fields,
-      })
     }, 1000)
 
     return () => clearTimeout(timer) // clear old timer if dependencies change

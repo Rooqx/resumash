@@ -11,7 +11,6 @@ const ResumeComponent: React.FC = () => {
   const { fields } = useFieldStores()
 
   const tagFields = useTagStore((s) => s.fields)
-  console.log('field', fields)
 
   // Move this to a seperate file later
   const styles = {
