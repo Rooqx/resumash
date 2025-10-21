@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
+import fs from "fs";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/error.middleware";
 import { ENV, HF_TOKEN, PORT } from "./configs/env.configs";
@@ -7,17 +9,21 @@ import { connectToRedis } from "./db/redis";
 import { connectToMongo } from "./db/mongo";
 import Job from "./services/job.service";
 import { extractLayout } from "./controllers/prac";
+import resumeRouter from "./routers/resume.router";
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
-app.use(errorHandler);
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (_req, res) => {
   res.send("Hello from Server (Express + TS) 👋");
 });
 
+const folder = fs.existsSync("uploads/176105325841-Resume.pdf");
+console.log("folder:", folder);
+/*
 const job = new Job(
   `Job title : Front End Developer
 Job Location : Lagos Deadline : October 10, 2025 Quick Recommended Links
@@ -40,7 +46,7 @@ Bonus: Experience with Angular.`,
   "Resume2.pdf"
 );
 console.log("HF_TOKEN", HF_TOKEN);
-job.extractResumeBlocks();
+job.extractResumeBlocks();*/
 /*job
   .test({
     messages: [
@@ -54,6 +60,11 @@ job.extractResumeBlocks();
   .then((response) => {
     console.log(JSON.stringify(response));
   });*/
+
+app.use("/api/v1/resumes", resumeRouter);
+
+app.use(errorHandler);
+
 app.listen(PORT, async () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
   await connectToMongo();

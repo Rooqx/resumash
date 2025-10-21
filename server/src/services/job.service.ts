@@ -6,6 +6,8 @@ import * as pdfjsLib from "pdfjs-dist";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import path from "path";
 import fontkit from "@pdf-lib/fontkit";
+import multer from "multer";
+import { AppError } from "../middlewares/error.middleware";
 export interface ResumeBlock {
   block: string;
   content: string;
@@ -107,6 +109,9 @@ ${JSON.stringify(resumeBlocks, null, 2)}
       "profile",
       "achievements",
     ];
+    if (!this.resume) {
+      throw new AppError("file missing", 400);
+    }
     const dataBuffer = fs.readFileSync(this.resume as string);
 
     try {
@@ -249,44 +254,6 @@ ${JSON.stringify(resumeBlocks, null, 2)}
     );
   }
 
-  public async rebuildPDFWithLayout(
-    layout: any[],
-    replacements: Record<string, string>,
-    pageHeights: Record<number, number>,
-    outputPath: string
-  ) {
-    const pdfDoc = await PDFDocument.create();
-    pdfDoc.registerFontkit(fontkit);
-
-    const fontPath = path.resolve(
-      __dirname,
-      "../../fonts/NotoSans-Regular.ttf"
-    );
-    const fontBytes = fs.readFileSync(fontPath);
-    const unicodeFont = await pdfDoc.embedFont(fontBytes);
-
-    // Group by page
-    const pages = new Map<number, any[]>();
-    for (const block of layout) {
-      if (!pages.has(block.page)) pages.set(block.page, []);
-      pages.get(block.page)?.push(block);
-    }
-
-    for (const [pageNumber, blocks] of pages.entries()) {
-      const pageHeight = pageHeights[pageNumber] || 842;
-      const pageWidth = 595; // A4 default
-      const page = pdfDoc.addPage([pageWidth, pageHeight]);
-
-      for (const block of blocks) {
-        let content =
-          replacements?.[block.text] ||
-          replacements?.[block.block] ||
-          block.text ||
-          "";
-      }
-    }
-    fs.writeFileSync(outputPath, pdfDoc.save);
-  }
   public async returnUpdatedResume() {
     //  const updatedResume = await this.updateResume();
   }
