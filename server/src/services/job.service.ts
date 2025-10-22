@@ -41,9 +41,9 @@ class Job {
       baseURL: "https://api.fireworks.ai/inference/v1",
       apiKey: "fw_3ZZScoGVZuD8RgwN8mgUrn3p", //Save to .env
     });
-
+    // accounts/fireworks/models/qwen2p5-vl-32b-instruct
     const chatCompletion = await client.chat.completions.create({
-      model: "accounts/fireworks/models/llama-v3p1-8b-instruct",
+      model: "accounts/fireworks/models/qwen2p5-vl-32b-instruct",
       messages: [
         {
           role: "system",
@@ -104,41 +104,62 @@ Return **only one valid JSON object** that follows this schema exactly:
 
 --------------------
 ⚙️ TAILORING RULES:
-1. **Dynamic alignment**  
-   - Extract keywords, skills, tools, and frameworks from the job_description.  
-   - Rewrite candidate’s summary, skills, and experience to reflect those, emphasizing matching terms.  
-   - Rephrase transferable experience (e.g., if job says *Vue.js* and candidate has *React*, write “Built component-based UI using React, transferable to Vue.js”).  
+1. **Dynamic Alignment**
+   - Extract keywords, skills, tools, and frameworks from the job_description.
+   - Rewrite the candidate’s summary, skills, and experience to strongly reflect those terms.
+   - Adapt transferable experience (e.g., if the job requires Vue.js and the candidate has React, write “Built reusable UI components in React, transferable to Vue.js”).
 
 2. **Summary**
-   - Rewrite 2–4 sentences focused on alignment with the job’s core technologies, role scope, and soft skills.
+   - Always generate a professional, concise summary aligned with the job description.
+   - Use 2–4 sentences written in a confident, senior-level tone.
+   - Clearly highlight the candidate’s main strengths, relevant experience, and technical expertise.
+   - Ensure the language matches the target role’s seniority and tech stack.
+   - Example:
+     “Results-driven Frontend Developer with 5+ years of experience building responsive and scalable web interfaces using React and TypeScript. Adept at collaborating in agile teams and optimizing UI performance for better user engagement.”
+
 
 3. **Skills**
-   - 6–12 relevant items only. Use exact terms or close synonyms from the job description.
-   - Order by importance to the role.
-   - Each \`skillName\` should represent a **broad professional skill area** (e.g., “Frontend Development”, “Backend Development”, “Cybersecurity”, “Data Analysis”) — not individual tools or frameworks.
-   - Specific technologies and tools (e.g., Angular, Python, Docker) should instead appear as **tags** under the related skill in \`tagFields\`.
+   - Include **a maximum of 5 total skillName entries**.
+   - Prioritize skills that are **most relevant to the job description**.
+   - Each skillName must represent a **broad professional area**, not a specific tool.
+     Examples:
+       - Frontend Development
+       - Backend Development
+       - Cybersecurity
+       - Cloud Engineering
+       - UI/UX Design
+       - Data Analysis
+   - Place specific technologies and frameworks as **tags** under the corresponding skill key in \`tagFields\`.
 
 4. **Experience**
-   - Include 2–3 top experiences most relevant to the target job.
-   - Use concise, measurable bullet points.
-   - Rewrite each to mirror the job’s technical and teamwork requirements.
+   - Include only the 2–3 most relevant roles.
+   - Set each \`jobSummary\` to an empty string ("").
+   - Instead, extract the main achievements or contributions from the summary and include them as bullet points inside the corresponding \`jobHighlights-{index}\` tags.
+   - Each jobHighlights array should include **3–4 short, action-based bullet points**.
 
-5. **Label Field**
-   - The \`label\` should always match the **main job title** from the job_description.
-   - If the job title includes extra details (e.g., “Job Title: Frontend Developer (AngularJS)” or “Frontend Developer – Remote”), only use the **core role name** (e.g., “Frontend Developer”).
+5. **Label (Job Title)**
+   - The "label" must match only the core job title from the job description.
+   - Remove extra details like level, location, or text in parentheses.
+     Examples:
+       - “Job Title: Frontend Developer (AngularJS)” → "Frontend Developer"
+       - “Senior Backend Developer – Remote” → "Backend Developer"
 
-6. **tagFields (strict mapping)**
-   - For every skill in the \`fields.skills\` array, create a corresponding key like \`skills-0\`, \`skills-1\`, etc.
-   - For every experience, include a matching \`jobHighlights-0\`, \`jobHighlights-1\`, etc.
-   - For every project, include \`projectTechnologies-0\`, \`projectTechnologies-1\`, etc.
-   - Each tag array must contain 3–6 concise bullet points or technologies relevant to that section.
-   - Ensure numbering matches array indexes exactly. (e.g., first skill → skills-0)
-   - If no tags are applicable, return an empty array, but keep the key.
+6. **Respect Input Structure**
+   - Do not add new sections (e.g., projects, certificates, awards) that were not in the inputBlocks.
+   - Output structure must mirror the input exactly — modify existing blocks only.
+   - If a block is missing in the input, omit it from the output JSON.
 
-7. **Language & Tone**
-   - Confident, senior-level, metric-driven.
-   - No filler, no redundancy.
-   - Focus on achievements, performance, impact, and alignment.
+7. **tagFields (Strict Mapping)**
+   - Each skill → skills-0, skills-1, etc.
+   - Each experience → jobHighlights-0, jobHighlights-1, etc.
+   - Each project (if exists) → projectTechnologies-0, projectTechnologies-1, etc.
+   - Each tag array should include 3–6 concise items.
+   - Maintain proper numeric indexing that matches the corresponding array.
+
+8. **Language & Tone**
+   - Confident, senior-level, and metric-driven.
+   - Avoid filler or redundancy.
+   - Emphasize measurable achievements, performance, and technical depth.
 
 --------------------
 📦 OUTPUT RULES:
@@ -204,11 +225,13 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
         .filter((l: any) => l);
       const blocks: { block: string; content: string; subBlocks: any[] }[] = [];
 
+      //This is to arrange the extracted text into blocks so we get block name, content and subblocks.
       let currentBlock = "";
       let currentContent: string[] = [];
       let currentSubBlocks: any[] = [];
       let headerCollected = false;
 
+      //This is to check if the line starts with a section header
       for (const line of lines) {
         const normalized = line.toLowerCase();
         const matchedSection = SECTION_HEADERS.find((header) =>
