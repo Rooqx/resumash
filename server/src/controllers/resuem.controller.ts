@@ -8,15 +8,24 @@ import Job from "../services/job.service";
 
 export const uploadResume = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const jd = "";
+    const { jobDescription } = req.body;
+
+    if (!jobDescription)
+      throw new AppError("Job description missing in the request body", 400);
+
+    //Stringy Job description best practice for ai prompting
+    const formattedJobDesc = JSON.stringify(jobDescription);
+
     if (!req.file) {
       throw new AppError("No file added", 400);
     }
-    const fileUrl = await `uploads/${req?.file?.filename}`;
-    console.log("fileUrl", fileUrl);
-    const newResume = new Job(jd, fileUrl);
 
-    const data = await newResume.extractResumeBlocks();
+    //Get file path
+    const fileUrl = await `uploads/${req?.file?.filename}`;
+
+    const newResume = new Job(formattedJobDesc, fileUrl);
+
+    const data = await newResume.returnTailorResume();
     if (!data) {
       throw new AppError("Data not added", 404);
     }
