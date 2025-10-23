@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
@@ -12,6 +12,10 @@ import Certificate from './Resume/components/Certificate'
 import BasicInfoAndSummary from './Resume/components/BasicInfoandSumary'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
+import resumeData from '@/components/resume.json'
+import useInputStore from '@/lib/stores/useInputStores'
+import useFieldStores from '@/lib/stores/useMultipleFieldStore'
+import { useTagStore } from '@/lib/stores/useInputTags'
 
 const queryClient = new QueryClient()
 
@@ -21,6 +25,15 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   const [displayPdf, setDisplayPdf] = useState(false)
+  const { setInputData } = useInputStore()
+  const { setFields } = useFieldStores()
+  const { setTags } = useTagStore()
+
+  useEffect(() => {
+    setInputData(resumeData.inputValue)
+    setFields(resumeData.fields)
+    setTags(resumeData.tagFields as any)
+  }, [resumeData])
 
   return (
     <QueryClientProvider client={queryClient}>
