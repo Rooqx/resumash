@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TailorResumeIndexRouteImport } from './routes/tailor-resume/index'
-import { Route as ResumeIndexRouteImport } from './routes/Resume/index'
-import { Route as ResumeSkeletonRouteImport } from './routes/Resume/skeleton'
+import { Route as BuildResumeIndexRouteImport } from './routes/build-resume/index'
+import { Route as BuildResumeSkeletonRouteImport } from './routes/build-resume/skeleton'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,48 +24,53 @@ const TailorResumeIndexRoute = TailorResumeIndexRouteImport.update({
   path: '/tailor-resume/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResumeIndexRoute = ResumeIndexRouteImport.update({
-  id: '/Resume/',
-  path: '/Resume/',
+const BuildResumeIndexRoute = BuildResumeIndexRouteImport.update({
+  id: '/build-resume/',
+  path: '/build-resume/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResumeSkeletonRoute = ResumeSkeletonRouteImport.update({
-  id: '/Resume/skeleton',
-  path: '/Resume/skeleton',
+const BuildResumeSkeletonRoute = BuildResumeSkeletonRouteImport.update({
+  id: '/build-resume/skeleton',
+  path: '/build-resume/skeleton',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/Resume/skeleton': typeof ResumeSkeletonRoute
-  '/Resume': typeof ResumeIndexRoute
+  '/build-resume/skeleton': typeof BuildResumeSkeletonRoute
+  '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/Resume/skeleton': typeof ResumeSkeletonRoute
-  '/Resume': typeof ResumeIndexRoute
+  '/build-resume/skeleton': typeof BuildResumeSkeletonRoute
+  '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/Resume/skeleton': typeof ResumeSkeletonRoute
-  '/Resume/': typeof ResumeIndexRoute
+  '/build-resume/skeleton': typeof BuildResumeSkeletonRoute
+  '/build-resume/': typeof BuildResumeIndexRoute
   '/tailor-resume/': typeof TailorResumeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Resume/skeleton' | '/Resume' | '/tailor-resume'
+  fullPaths: '/' | '/build-resume/skeleton' | '/build-resume' | '/tailor-resume'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Resume/skeleton' | '/Resume' | '/tailor-resume'
-  id: '__root__' | '/' | '/Resume/skeleton' | '/Resume/' | '/tailor-resume/'
+  to: '/' | '/build-resume/skeleton' | '/build-resume' | '/tailor-resume'
+  id:
+    | '__root__'
+    | '/'
+    | '/build-resume/skeleton'
+    | '/build-resume/'
+    | '/tailor-resume/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ResumeSkeletonRoute: typeof ResumeSkeletonRoute
-  ResumeIndexRoute: typeof ResumeIndexRoute
+  BuildResumeSkeletonRoute: typeof BuildResumeSkeletonRoute
+  BuildResumeIndexRoute: typeof BuildResumeIndexRoute
   TailorResumeIndexRoute: typeof TailorResumeIndexRoute
 }
 
@@ -85,18 +90,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TailorResumeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/Resume/': {
-      id: '/Resume/'
-      path: '/Resume'
-      fullPath: '/Resume'
-      preLoaderRoute: typeof ResumeIndexRouteImport
+    '/build-resume/': {
+      id: '/build-resume/'
+      path: '/build-resume'
+      fullPath: '/build-resume'
+      preLoaderRoute: typeof BuildResumeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/Resume/skeleton': {
-      id: '/Resume/skeleton'
-      path: '/Resume/skeleton'
-      fullPath: '/Resume/skeleton'
-      preLoaderRoute: typeof ResumeSkeletonRouteImport
+    '/build-resume/skeleton': {
+      id: '/build-resume/skeleton'
+      path: '/build-resume/skeleton'
+      fullPath: '/build-resume/skeleton'
+      preLoaderRoute: typeof BuildResumeSkeletonRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -104,8 +109,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ResumeSkeletonRoute: ResumeSkeletonRoute,
-  ResumeIndexRoute: ResumeIndexRoute,
+  BuildResumeSkeletonRoute: BuildResumeSkeletonRoute,
+  BuildResumeIndexRoute: BuildResumeIndexRoute,
   TailorResumeIndexRoute: TailorResumeIndexRoute,
 }
 export const routeTree = rootRouteImport

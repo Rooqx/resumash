@@ -130,6 +130,12 @@ code {
   }
   body {
     @apply bg-background text-foreground;
+    background-color: black;
+  }
+  .tailor-resume::before {
+    content: '';
+    width: 10px;
+    background-color: white;
   }
   .scroll-bar {
     scrollbar-width: 8px;
