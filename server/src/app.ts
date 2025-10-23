@@ -67,7 +67,7 @@ app.use(errorHandler);
 
 app.listen(PORT, async () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
-  //await connectToMongo();
-  //  await connectToRedis();
+  await connectToMongo();
+  await connectToRedis();
   console.log(`Environment:${ENV}`);
 });

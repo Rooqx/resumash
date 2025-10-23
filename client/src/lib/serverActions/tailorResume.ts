@@ -5,7 +5,7 @@ export const getTailoredResume = async ({
   file,
 }: {
   jobDescription: string
-  file: File | null
+  file: any | null
 }) => {
   if (!file || jobDescription.trim() === '') {
     alert('Please provide both a job description and a resume file.')
@@ -14,15 +14,20 @@ export const getTailoredResume = async ({
   try {
     const formData = new FormData()
     formData.append('jobDescription', jobDescription)
-    formData.append('file', file)
+    formData.append('resume', file)
 
-    const response = await axios('http://localhost:4000/api/v1/upload', {
-      data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    console.log('formData', formData)
+
+    const response = await axios.post(
+      'http://localhost:4000/api/v1/resumes/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    })
-    console.log('response', response.data)
+    )
+    return response.data
   } catch (err) {
     console.error('Error tailoring resume:', err)
   }

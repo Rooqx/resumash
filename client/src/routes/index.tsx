@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import App from '@/components/Layout'
 
 export const Route = createFileRoute('/')({

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import { ChevronLeft } from 'lucide-react'
 import BasicInfoAndSummary from './components/BasicInfoAndSummary'
@@ -10,10 +11,11 @@ import Project from './components/Project'
 import Certificate from './components/Certificate'
 import Award from './components/Awards'
 import App from '@/components/Layout'
+// import resumeData from '@/components/resume.json'
+
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
-import resumeData from '@/components/resume.json'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 
@@ -26,11 +28,16 @@ function RouteComponent() {
   const { setInputData } = useInputStore()
   const { setFields } = useFieldStores()
   const { setTags } = useTagStore()
+  const queryClient = useQueryClient()
+
+  const resumeData: any = queryClient.getQueryData(['tailoredResume'])
 
   useEffect(() => {
-    setInputData(resumeData.inputValue)
-    setFields(resumeData.fields)
-    setTags(resumeData.tagFields as any)
+    if (resumeData) {
+      setInputData(resumeData.inputValue)
+      setFields(resumeData.fields)
+      setTags(resumeData.tagFields)
+    }
   }, [resumeData])
 
   return (

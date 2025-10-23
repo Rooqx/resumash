@@ -8,6 +8,9 @@ import Job from "../services/job.service";
 
 export const uploadResume = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) {
+      throw new AppError("No body added", 400);
+    }
     const { jobDescription } = req.body;
 
     if (!jobDescription)

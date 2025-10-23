@@ -1,35 +1,42 @@
 {
   "inputValue": {
     "fullName": "Farooq Goodluck Ashiru",
-    "label": "Frontend Developer",
+    "label": "Full Stack Developer",
     "email": "ashfaga2005f@gmail.com",
     "phone": "08064393200",
     "linkdlnUrl": "Farooq",
     "githubUrl": "Rooqx",
-    "city": "",
-    "country": "",
+    "city": "Ilorin",
+    "country": "Nigeria",
     "portfolioUrl": "farooqportfolioo.netlify.app",
-    "summary": "Skilled Frontend Developer with a strong foundation in AngularJS and modern web technologies. Experienced in building responsive, high-performance web applications, optimizing UI/UX, and collaborating with cross-functional teams. Proficient in HTML5, CSS3, JavaScript, TypeScript, and RESTful APIs, with a focus on delivering intuitive user experiences. Committed to staying updated with emerging frontend technologies and best practices."
+    "summary": "Dynamic Full Stack Developer with a proven track record of designing, developing, and maintaining scalable full-stack applications for high-volume eCommerce platforms. Skilled in modern web technologies, including JavaScript, TypeScript, React.js, Next.js, Node.js, and GraphQL. Experienced in integrating multiple platforms into cohesive solutions, optimizing performance, and collaborating with distributed teams to deliver high-quality user experiences. Strong problem-solving skills and a proactive approach to mentoring and knowledge sharing."
   },
   "fields": {
     "skills": [
       {
+        "skillName": "Full Stack Development"
+      },
+      {
         "skillName": "Frontend Development"
       },
       {
-        "skillName": "UI/UX Design"
+        "skillName": "Backend Development"
       },
       {
-        "skillName": "JavaScript Development"
+        "skillName": "Database Management"
       },
       {
-        "skillName": "API Integration"
-      },
-      {
-        "skillName": "Performance Optimization"
+        "skillName": "DevOps and CI/CD"
       }
     ],
     "experience": [
+      {
+        "companyName": "Mafawas Kiddies Store",
+        "jobPosition": "Full Stack Developer",
+        "jobStartDate": "May 2025",
+        "jobEndDate": "Present",
+        "jobSummary": ""
+      },
       {
         "companyName": "Kobold AI",
         "jobPosition": "Frontend Developer",
@@ -38,10 +45,10 @@
         "jobSummary": ""
       },
       {
-        "companyName": "Mafawas Kiddies Store",
-        "jobPosition": "FullStack Developer",
-        "jobStartDate": "May 2025",
-        "jobEndDate": "Present",
+        "companyName": "Neurloom",
+        "jobPosition": "Backend Engineer Intern",
+        "jobStartDate": "Jan 2022",
+        "jobEndDate": "Aug 2022",
         "jobSummary": ""
       }
     ],
@@ -50,7 +57,7 @@
         "institution": "Kwara State University",
         "studyType": "B.S. & M.S. in Computer Science",
         "area": "Intelligence and Modeling/Simulations",
-        "startDate": "2021",
+        "startDate": "2022",
         "endDate": "2027"
       }
     ],
@@ -61,65 +68,59 @@
   "tagFields": {
     "skills-0": {
       "tags": [
-        "AngularJS",
-        "React.js",
+        "JavaScript",
         "TypeScript",
-        "HTML5",
-        "CSS3",
-        "Tailwind CSS"
+        "Node.js",
+        "React.js",
+        "Next.js",
+        "GraphQL"
       ]
     },
     "skills-1": {
       "tags": [
-        "UI/UX Design",
+        "HTML5",
+        "CSS3",
+        "Tailwind CSS",
         "Responsive Design",
-        "Cross-Browser Compatibility",
-        "Accessibility",
-        "Pixel-Perfect Interfaces"
+        "Cross-Browser Compatibility"
       ]
     },
     "skills-2": {
-      "tags": [
-        "JavaScript (ES6+)",
-        "TypeScript",
-        "RESTful APIs",
-        "GraphQL",
-        "JSON",
-        "API Integration"
-      ]
+      "tags": ["RESTful APIs", "PostgreSQL", "MongoDB", "Docker", "Kubernetes"]
     },
     "skills-3": {
-      "tags": [
-        "Performance Optimization",
-        "Code Splitting",
-        "Lazy Loading",
-        "Webpack",
-        "Lighthouse Scores"
-      ]
+      "tags": ["Elasticsearch", "AWS", "GCP", "CI/CD", "DevOps"]
     },
     "skills-4": {
       "tags": [
-        "Git",
-        "Agile Methodologies",
-        "Code Reviews",
-        "Debugging",
-        "Testing"
+        "Unit Testing",
+        "End-to-End Testing",
+        "Code Optimization",
+        "Performance Tuning"
       ]
     },
     "jobHighlights-0": {
       "tags": [
-        "Developed high-performance, responsive web applications using React.js and TypeScript, achieving a 30% improvement in load times.",
-        "Integrated RESTful APIs and GraphQL with frontend systems for seamless data flow and real-time updates.",
-        "Enhanced application performance through code splitting and lazy loading, improving Lighthouse scores by 10+ points.",
-        "Conducted unit and end-to-end testing using Jest and Cypress, increasing code reliability and reducing production bugs by 25%."
+        "Developed high-conversion eCommerce platforms using Next.js, Tailwind CSS, PostgreSQL, and Redux Toolkit.",
+        "Optimized product search and recommendations with Elasticsearch, increasing average order value by 22%.",
+        "Implemented microservices architecture (Docker, Kubernetes) to support up to 10k+ users.",
+        "Automated personalized email/SMS campaigns (Upstash integration), boosting repeat purchases by 10%."
       ]
     },
     "jobHighlights-1": {
       "tags": [
-        "Built and scaled high-conversion e-commerce platforms using Next.js, Tailwind CSS, PostgreSQL, and the Redux toolkit.",
-        "Developed custom checkout flows with fraud detection (PayStack integrations), reducing payment failures by 35%.",
-        "Optimized product search and recommendations using Elasticsearch, increasing average order value by 22%.",
-        "Implemented microservices architecture (Docker, Kubernetes) to support up to 10k+ users."
+        "Built high-performance, responsive web applications using React.js, TypeScript, and GraphQL, achieving a 30% improvement in load times.",
+        "Collaborated with UI/UX designers to deliver pixel-perfect, accessible interfaces with full cross-browser compatibility.",
+        "Enhanced application performance through code splitting, lazy loading, and Webpack optimizations, improving Lighthouse scores by 10+ points.",
+        "Conducted unit and end-to-end testing using Jest and Cypress, reducing production bugs by 25%."
+      ]
+    },
+    "jobHighlights-2": {
+      "tags": [
+        "Developed RESTful APIs in Node.js to process real-time EEG/neuro-sensor data streams.",
+        "Optimized AWS Lambda functions for data pipeline efficiency, reducing latency by 15%.",
+        "Containerized microservices using Docker and orchestrated via Kubernetes.",
+        "Collaborated with neuroscience teams to structure NoSQL database schemas (MongoDB) for experimental metadata."
       ]
     }
   }

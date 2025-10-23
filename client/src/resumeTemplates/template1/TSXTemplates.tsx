@@ -213,7 +213,7 @@ const ResumeComponent: React.FC = () => {
                 {((tagFields as any)[`skills-${index}`]?.tags?.length ?? 0) >
                 0 ? (
                   <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
-                    {(tagFields as any)[`skills-${index}`].tags.join(', ')}
+                    {(tagFields as any)[`skills-${index}`]?.tags?.join(', ')}
                   </span>
                 ) : (
                   <span style={{ color: '#777' }}>No technologies added</span>

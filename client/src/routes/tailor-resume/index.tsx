@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Send, Upload } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 import Textarea from '@/components/Textarea'
 import App from '@/components/Layout'
-import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 
 export const Route = createFileRoute('/tailor-resume/')({
   component: RouteComponent,
@@ -14,12 +16,31 @@ function RouteComponent() {
     jobDescription: '',
     file: null,
   })
-  console.log('data', data)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  // Mutation
+  const mutation = useMutation({
+    mutationFn: (resumeData: { jobDescription: string; file: any | null }) =>
+      getTailoredResume(resumeData),
+    onSuccess: (resumeData) => {
+      console.log('Success:', resumeData.data.data.inputValue.fullName)
+      //  Store it globally in React Query cache
+      queryClient.setQueryData(['tailoredResume'], resumeData.data.data)
+      navigate({ to: '/build-resume' })
+    },
+    onError: (err: any) => {
+      console.error('Upload failed:', err)
+    },
+  })
   return (
     <App>
       <form
         className="bg-black text-white h-screen relative flex items-center justify-center flex-col gap-0"
-        onSubmit={() => getTailoredResume(data)}
+        onSubmit={(e) => {
+          e.preventDefault()
+          mutation.mutate(data)
+        }}
       >
         <div className="w-[60%]">
           {' '}
@@ -68,7 +89,7 @@ function RouteComponent() {
                "
         >
           <span className="z-2 flex gap-2 items-center justify-center">
-            <Send /> Tailor
+            <Send /> {mutation.isPending ? 'Tailoring' : 'Tailor'}
           </span>
         </button>
       </form>
