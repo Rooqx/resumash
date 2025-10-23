@@ -24,8 +24,8 @@ export const TagInput: React.FC<TagInputProps> = ({
 }) => {
   const { fields, setInput, addTag, addTags, removeTag } = useTagStore((s) => s)
 
-  const data = fields[name] || { tags: [], input: '', suggestions: [] }
-  const { tags, input, suggestions } = data
+  const data = fields?.[name] ?? { tags: [], input: '', suggestions: [] }
+  const { tags = [], input = '', suggestions = [] } = data
 
   const [focusedSuggestion, setFocusedSuggestion] = useState<number>(-1)
   const [isFocused, setIsFocused] = useState(false)
@@ -109,8 +109,8 @@ export const TagInput: React.FC<TagInputProps> = ({
           ref={inputRef}
           id={labelFor}
           name={name}
-          value={input}
-          onChange={(e) => setInput(name, e.target.value)}
+          value={input || ''}
+          onChange={(e) => setInput(name, e.target.value || '')}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           onFocus={() => setIsFocused(true)}

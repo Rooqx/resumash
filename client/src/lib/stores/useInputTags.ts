@@ -1,4 +1,3 @@
-// src/stores/useTagStore.ts
 import { create } from 'zustand'
 
 type TagFieldData = {
