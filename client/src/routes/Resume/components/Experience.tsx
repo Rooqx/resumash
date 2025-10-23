@@ -6,16 +6,37 @@ import Textarea from '@/components/Textarea'
 
 export default function Experience() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
+
+  const isEmpty = fields['experience']?.length === 0
+  /**  */
   return (
     <div className="space-y-4 mt-6">
-      <h3 className="text-sm font-semibold">Work Experience</h3>
+      <span className="w-full flex justify-between items-start">
+        <h3 className="text-sm font-semibold">Experiences</h3>
+        {isEmpty && (
+          <button
+            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
+             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
+             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
+              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+            onClick={() => {
+              addField('experience', 0)
+            }}
+          >
+            <span className="flex gap-2 items-center z-10">
+              <Plus size={12} />
+              Add Experience
+            </span>
+          </button>
+        )}
+      </span>
       {fields['experience']?.map((field: any, i: number) => (
         <div key={i} className="border p-4 rounded-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="text"
               labelFor="companyName"
-              value={field.companyName}
+              value={field?.companyName}
               onChange={(e) =>
                 updateField('experience', i, e.target.name, e.target.value)
               }
@@ -25,7 +46,7 @@ export default function Experience() {
             <Input
               type="text"
               labelFor="jobPosition"
-              value={field.jobPosition}
+              value={field?.jobPosition}
               onChange={(e) =>
                 updateField('experience', i, e.target.name, e.target.value)
               }
@@ -37,7 +58,7 @@ export default function Experience() {
             <Input
               type="text"
               labelFor="jobStartDate"
-              value={field.jobStartDate}
+              value={field?.jobStartDate}
               onChange={(e) =>
                 updateField('experience', i, e.target.name, e.target.value)
               }
@@ -47,7 +68,7 @@ export default function Experience() {
             <Input
               type="text"
               labelFor="jobEndDate"
-              value={field.jobEndDate}
+              value={field?.jobEndDate}
               onChange={(e) =>
                 updateField('experience', i, e.target.name, e.target.value)
               }
@@ -57,7 +78,7 @@ export default function Experience() {
           </div>
           <Textarea
             labelFor="jobSummary"
-            value={field.jobSummary}
+            value={field?.jobSummary}
             onChange={(e) =>
               updateField('experience', i, e.target.name, e.target.value)
             }
@@ -71,11 +92,7 @@ export default function Experience() {
           />
           <div className="mt-4 space-y-3">
             <button
-              className={`${
-                i === 0
-                  ? 'hidden'
-                  : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
-              }`}
+              className={`py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white`}
               onClick={() => {
                 deleteField('experience', i)
               }}

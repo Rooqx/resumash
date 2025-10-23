@@ -10,6 +10,7 @@ type TagFieldData = {
 type TagStore = {
   fields: Record<string, TagFieldData>
   setInput: (name: string, value: string) => void
+  setTags: (data: Record<string, TagFieldData>) => void
   addTag: (name: string, tag: string) => void
   addTags: (name: string, tags: Array<string>) => void
   removeTag: (name: string, tag: string) => void
@@ -22,7 +23,7 @@ type TagStore = {
 export const useTagStore = create<TagStore>((set, get) => ({
   fields: {},
 
-  // ✅ Initialize if missing before setting input
+  //  Initialize if missing before setting input
   setInput: (name, value) =>
     set((state) => {
       const current = state.fields[name] || {
@@ -38,7 +39,8 @@ export const useTagStore = create<TagStore>((set, get) => ({
       }
     }),
 
-  // ✅ Initialize if missing before adding tag
+  setTags: (data) => set({ fields: data }),
+  //  Initialize if missing before adding tag
   addTag: (name, tag) =>
     set((state) => {
       const current = state.fields[name] || {

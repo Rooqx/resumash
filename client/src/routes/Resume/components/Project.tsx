@@ -5,9 +5,29 @@ import { TagInput } from '@/components/TagInput'
 
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
+  const isEmpty = fields['projects']?.length === 0
+  console.log('isEmpty', isEmpty)
   return (
     <div className="space-y-4 mt-6">
-      <h3 className="text-sm font-semibold">Projects</h3>
+      <span className="w-full flex justify-between items-start">
+        <h3 className="text-sm font-semibold">Projects</h3>
+        {isEmpty && (
+          <button
+            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
+             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
+             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
+              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+            onClick={() => {
+              addField('projects', 0)
+            }}
+          >
+            <span className="flex gap-2 items-center z-10">
+              <Plus size={12} />
+              Add project
+            </span>
+          </button>
+        )}
+      </span>
       {fields['projects']?.map((field: any, i: number) => (
         <div key={i} className="border p-4 rounded-md">
           <Input
@@ -53,16 +73,13 @@ export default function Project() {
           </div>
           <div className="mt-4 space-y-3">
             <button
-              className={`${
-                i === 0
-                  ? 'hidden'
-                  : "py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
-              }`}
+              className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
               onClick={() => {
                 deleteField('projects', i)
               }}
             >
-              <Trash size={16} /> Delete Project
+              <Trash className="hover:text-black z-1" size={16} />
+              <p className="z-2 hover:text-black "> Delete Project</p>
             </button>
             <button
               className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"

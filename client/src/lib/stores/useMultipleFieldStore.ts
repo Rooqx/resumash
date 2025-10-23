@@ -3,6 +3,7 @@ import { create } from 'zustand'
 interface MultipleFieldStores {
   fields: Record<string, Array<any>>
   addField: (section: string, index?: number) => void
+  setFields: (data: Record<string, Array<any>>) => void
   updateField: (
     section: string,
     index: number,
@@ -14,18 +15,18 @@ interface MultipleFieldStores {
 
 const useFieldStores = create<MultipleFieldStores>((set) => ({
   fields: {
-    experience: [{}],
-    education: [{}],
-    certificates: [{}],
-    awards: [{}],
-    skills: [{}],
-    projects: [{}],
-    references: [{}],
+    experience: [],
+    education: [],
+    certificates: [],
+    awards: [],
+    skills: [],
+    projects: [],
+    references: [],
   },
 
   addField: (section, index) =>
     set((state) => {
-      const currentFields = state.fields[section] || [{}] // fallback to empty object
+      const currentFields = state.fields[section] || [] // fallback to empty object
       const newField = {}
 
       const fields = [...currentFields]
@@ -38,6 +39,7 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
       return { fields: { ...state.fields, [section]: fields } }
     }),
 
+  setFields: (data) => set({ fields: data }),
   updateField: (section, index, key, value) =>
     set((state) => {
       const sectionFields = state.fields[section] || []
@@ -49,18 +51,28 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
 
   deleteField: (section, index) =>
     set((state) => {
-      const sectionFields = state.fields[section] || []
-      const updatedFields = sectionFields.filter((_, i) => i !== index)
+      console.log('state', state)
+      console.log('index', index)
 
-      const newFields = { ...state.fields }
-      if (updatedFields.length > 0) {
-        newFields[section] = updatedFields
-      } else {
-        delete newFields[section]
+      const sectionFields = state.fields[section]
+      console.log('sectionFields', sectionFields)
+
+      // Make sure the index exists before trying to delete
+      if (index < 0 || index >= sectionFields.length) {
+        return state // Index out of bounds, no changes
       }
 
-      return { fields: newFields }
+      const updatedFields = sectionFields.filter((_, i) => i !== index)
+      console.log('updatedFields', updatedFields)
+      return {
+        fields: {
+          ...state.fields,
+          [section]: updatedFields,
+        },
+      }
     }),
 }))
 
 export default useFieldStores
+
+// if (sectionFields.length <= 1) return state //  prevent deleting last item
