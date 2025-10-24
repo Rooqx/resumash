@@ -2,10 +2,25 @@ import { Link } from '@tanstack/react-router'
 
 export default function Header() {
   return (
-    <header className="p-2 flex gap-2 bg-white text-black justify-between">
-      <nav className="flex flex-row">
-        <div className="px-2 font-bold">
-          <Link to="/">Home</Link>
+    <header className="py-2 md:py-3 md:px-7  flex gap-2 bg-transparent border-2 border-zinc-400 mt-1 text-white justify-between rounded-full">
+      <nav className="flex flex-row justify-between w-full items-center">
+        <div className="px-6 font-bold">
+          <Link to="/">logo</Link>
+        </div>
+        <div className="px-2 font-bold flex gap-3">
+          <Link
+            to="/tailor-resume"
+            className="flex justify-center items-center gap-3 border-2 border-zinc-300 
+               bg-zinc-50 hover:bg-zinc-100 text-zinc-800  text-sm md:text-base
+               font-medium py-2 px-4 md:px-6 md:py-3 rounded-4xl transition relative
+               shadow-sm hover:shadow-md cursor-pointer  md:w-[200px] overflow-hidden
+               before:content-[''] before:absolute before:left-0 before:top-0 
+               before:h-0 before:w-full before:bg-black before:border-zinc-50 before:transition-all before:duration-300
+               hover:before:h-full hover:text-white
+               "
+          >
+            <p className="z-2">Tailor Resume</p>
+          </Link>
         </div>
       </nav>
     </header>
