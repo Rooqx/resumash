@@ -8,12 +8,12 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   return (
     <App>
-      <section className="bg-black w-full h-screen text-slate-100 flex justify-center items-center">
-        <div className=" flex flex-col gap-5 w-full items-center justify-center">
+      <section className="bg-black w-full h-screen text-slate-100 flex justify-center items-start">
+        <div className=" flex flex-col gap-5 w-full items-center justify-center mt-20">
           <Link
             to="/tailor-resume"
             className={`
-            font-bold text-xl w-[30%] text-center border-2 border-zinc-400 py-3 px-6 rounded-full relative
+            font-bold text-xl w-full md:w-[30%] text-center border-2 border-zinc-400 py-3 px-6 rounded-full relative
             tailor-resume
             `}
           >
@@ -22,7 +22,7 @@ function RouteComponent() {
           <Link
             to="/build-resume"
             className={`
-            font-bold text-xl w-[30%] text-center border-2 border-zinc-400 py-3 px-6 rounded-full relative
+            font-bold text-xl w-full md:w-[30%] text-center border-2 border-zinc-400 py-3 px-6 rounded-full relative
             tailor-resume
             `}
           >

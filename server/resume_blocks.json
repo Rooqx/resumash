@@ -1,47 +1,95 @@
 [
   {
     "block": "Header",
-    "content": "FAROOQ GOODLUCK ASHIRU5 Email:ashfaga2005f@gmail.com | Tel: 08064393200 Lindedin: Farooq | GitHub: Rooqx | PortfolioWebsite: farooqportfolioo.netlify.app",
+    "content": "FULLSTACK ENGINEER/ARCHITECT FAROOQ ASHIRU EMAIL: ashfaga2005f@gmail.com Tel: +2438064393200 Linkedin Github Portfolio",
     "subBlocks": []
-  },
-  {
-    "block": "Education",
-    "content": "Kwara State University Malete, Kwara B.S. & M.S. in Computer Science Expected Graduation, March, 2027 • Concentrations: Intelligence and Modeling/Simulations • GPA: 4.3/5.00, Dean’s List • Related Coursework: Data Structures & Algorithms, Objects & Design, Computer Organization &",
-    "subBlocks": [
-      {
-        "title": "Programming, Combinatorics, Machine Learning, Artificial Intelligence, Object-Oriented Programming,",
-        "details": [
-          "Statistics & Applications"
-        ]
-      }
-    ]
-  },
-  {
-    "block": "Experience",
-    "content": "Mafawas Kiddies Store Ilorin, Kwara State Role: FullStack Developer May 2025 – Till Date Built and Scale high conversion ecommerce platforms handling using NextJs, TaiwindCss, PostgreSql, and the Redux toolkit. ● Developed custom checkout flows with fraud detection (PayStack integrations), reducing payment failures by 35% ● Optimized product search and recommendations using ElasticSearch and algorithms, increasing average order value by 22%. ● Implemented microservices architecture (Docker, Kubernetes) which can support up to 10k+ users. ● Automated personalized email/SMS campaigns (Upstash integration). Boosting repeat purchases by 10%. Kobold AI Germany(Remote) Role: Frontend Developer May 2023 – May 2024 Developed high performance, responsive web applications using React.Js, TypeScript, GraphQl, Redux, Git, Jest, Cypress modern CSS, archiving a 30% improvement in load times. ● Collaborated with UI/UX designers to deliver pixel perfect, accessible interfaces with full cross browser compatibility.",
-    "subBlocks": [
-      {
-        "title": "Integrated RESTful APIs and GraphQL with frontend systems for seamless data flow and real-time",
-        "details": [
-          "updates.",
-          "● Enhanced application performance through code splitting, lazy loading and webpack optimizations,",
-          "improving Lighthouse scores by 10+ points.",
-          "● Conducted unit and end-to-end testing using Jest and Cypress, increasing code reliability and",
-          "reducing production bugs by 25%.",
-          "Neurloom Ashburn, Virginia (Remote)",
-          "Role: Backend Engineer Intern Jan 2022 – Aug 2022",
-          "● Built RESTful APIs in NodeJs to process real-time EEG/neuro-sensor data streams.",
-          "● Optimized AWS Lambda functions for data pipeline efficiency (reduced latency by 15%).",
-          "● Containerized microservices using Docker and orchestrated via Kubernetes.",
-          "● Collaborated with neuroscience team to structure NoSQL database schemas(MongoDB) for",
-          "experimental metadata"
-        ]
-      }
-    ]
   },
   {
     "block": "Skills",
-    "content": "Programming Languages: JavaScript, TypeScript, SQL, HTML5, CSS3 Framework & Libraries: ReactJs, NextJs, ExpressJs, NodeJs Tailwind CSS, Framer Motion Backend & Database: MongoDb, PostgreSQL, RESTful APIs, GraphQL, JWT Authentication, Flutter Integration, Paystack Integration",
+    "content": "Front-end: ReactJs, NextJs, HTML, CSS, Typescript, Javascript, TailwindCss, Shadcn, Redux, Zustard, Vite. Back-end: NodeJs, Redis, Mongodb, PostgreSql, Sql, Mongoose, prisma, RESTful API, GraphQl, Flutter Integration, Paystack integration, Websocket, JWT.",
     "subBlocks": []
+  },
+  {
+    "block": "Experience",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "Pasar — Full-Stack developer",
+        "details": []
+      },
+      {
+        "title": "June 2025 - PRESENT",
+        "details": [
+          "● Built and deployed a secure escrow system supporting both fiat",
+          "and crypto transactions.",
+          "● Developed responsive front-end interfaces with React/Next.js",
+          "and integrated Web3 wallet functionality.",
+          "● Implemented admin tools and monitoring dashboards to",
+          "ensure transaction transparency and platform reliability."
+        ]
+      },
+      {
+        "title": "Fixeroni — Front-end Engineer",
+        "details": []
+      },
+      {
+        "title": "June 2024 - Feb 2025",
+        "details": [
+          "● Developed user-friendly web interfaces connecting",
+          "customers with verified handymen (electricians, plumbers,",
+          "carpenters, etc.).",
+          "● Implemented search, booking, and profile features with",
+          "React, improving service discovery and customer",
+          "engagement.",
+          "● Optimized front-end performance and responsive design for",
+          "cross-device usability."
+        ]
+      }
+    ]
+  },
+  {
+    "block": "Projects",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "Zipzen — Details",
+        "details": [
+          "A modern cloud storage solution",
+          "designed to leverage the full power of any",
+          "device. With focus on speed, accessibility",
+          "and seamless synchronization, ZipZen",
+          "offers an intuitive platform for storing,",
+          "managing, and retrieving files across all",
+          "your devices."
+        ]
+      }
+    ]
+  },
+  {
+    "block": "Education",
+    "content": "",
+    "subBlocks": [
+      {
+        "title": "KWASU, Kwara State — B.sc in",
+        "details": [
+          "Computer Science",
+          "Expected Graduation, March, 2027",
+          "● Concentrations: Intelligence and",
+          "Modeling/Simulations.",
+          "● Related Coursework: Data",
+          "Structures & Algorithms, Objects",
+          "& Design, Computer Organization",
+          "Programming, Combinatorics,",
+          "Machine Learning, Artificial"
+        ]
+      },
+      {
+        "title": "Intelligence, Object-Oriented",
+        "details": [
+          "Programming, Statistics &",
+          "Applications"
+        ]
+      }
+    ]
   }
 ]

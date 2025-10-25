@@ -22,7 +22,7 @@ export const uploadResume = asyncHandler(
     if (!req.file) {
       throw new AppError("No file added", 400);
     }
-
+    console.log("resume uploaded");
     //Get file path
     const fileUrl = await `uploads/${req?.file?.filename}`;
 

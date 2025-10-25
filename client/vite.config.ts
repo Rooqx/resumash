@@ -17,6 +17,9 @@ export default defineConfig({
     nodePolyfills(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+  },
   test: {
     globals: true,
     environment: 'jsdom',

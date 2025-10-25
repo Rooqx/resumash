@@ -161,18 +161,18 @@ const styles = StyleSheet.create({
 })
 
 const ResumePDF: React.FC = () => {
-  const { inputValue, fields, tagFields } = resumeData
-  /* const { inputValue } = useInputStore()
+  // const { inputValue, fields, tagFields } = resumeData
+  const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
-  const tagFields = useTagStore((s) => s.fields) */
+  const tagFields = useTagStore((s) => s.fields)
 
-  /* useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       // put your logic here — this runs 1s after the last change
     }, 1000)
 
     return () => clearTimeout(timer) // clear old timer if dependencies change
-  }, [inputValue, tagFields, fields]) */
+  }, [inputValue, tagFields, fields])
   return (
     <Page size="A4" style={styles.page}>
       {/* Header */}

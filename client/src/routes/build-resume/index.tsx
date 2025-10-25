@@ -45,17 +45,17 @@ function RouteComponent() {
 
   return (
     <App>
-      <div className={`App  space-y-4 bg-black text-white relative`}>
+      <div className={`  space-y-4 bg-black text-white relative`}>
         {/*  <h2 className="text-2xl font-semibold mb-2  w-full text-center">
           My Resume
         </h2> */}
         {/* ================== Wrapper  ================== */}
-        <div className="w-full flex items-start justify-between h-[800px] ">
+        <div className="w-full flex items-start gap-0 justify-center h-[800px] ">
           {/* ================== Input Container  ================== */}
           <Sidebar />
 
           {/* ================== Resume Preview ================== */}
-          <div className="flex-shrink-0 ">
+          <div className="py-4 pr-4 w-full mt-10 lg:mt-5 flex justify-center">
             <ResumeComponent />
           </div>
           {/* ================== PDF Actions (optional) ==================*/}
@@ -81,7 +81,7 @@ function RouteComponent() {
           }
 
           {isDesktop && (
-            <div className="h-auto space-y-5 w-[300px] ml-10 mr-10">
+            <div className="h-auto space-y-5 p-5 w-full">
               <div>
                 <button
                   className="py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  

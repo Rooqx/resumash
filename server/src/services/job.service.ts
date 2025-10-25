@@ -231,6 +231,19 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
       let currentSubBlocks: any[] = [];
       let headerCollected = false;
 
+      // Check if resume contains at least one known section header
+      const hasSectionHeader = lines.some((line: any) => {
+        const normalized = line.toLowerCase();
+        return SECTION_HEADERS.some((header) => normalized.startsWith(header));
+      });
+
+      if (!hasSectionHeader) {
+        throw new AppError(
+          "this resume is invalid — no valid section headers found",
+          400
+        );
+      }
+
       //This is to check if the line starts with a section header
       for (const line of lines) {
         const normalized = line.toLowerCase();
@@ -240,6 +253,7 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
 
         // 🔹 Handle section headers
         if (matchedSection) {
+          console.log("match is true");
           // If this is the first section and we haven't saved a header yet:
           if (!headerCollected && currentContent.length > 0) {
             blocks.push({
@@ -310,6 +324,8 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
       return JSONBlock;
     } catch (error) {
       console.error("❌ Error reading PDF:", error);
+
+      throw error;
     }
   }
 

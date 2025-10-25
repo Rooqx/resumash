@@ -19,7 +19,7 @@ export const getTailoredResume = async ({
     console.log('formData', formData)
 
     const response = await axios.post(
-      'http://localhost:4000/api/v1/resumes/upload',
+      'http://localhost:5000/api/v1/resumes/upload',
       formData,
       {
         headers: {

@@ -10,6 +10,7 @@ interface InputProps {
   value?: string // optional controlled value
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void // controlled change handler
   inputBG?: string
+  inputHeight?: string
   labelFor: string
   imgSrc?: string
   alt?: string
@@ -27,6 +28,7 @@ export default function Textarea({
   value,
   onChange,
   inputBG = '#F7F8FA',
+  inputHeight,
   labelFor,
   imgSrc,
   placeholder,
@@ -90,6 +92,7 @@ export default function Textarea({
             autoComplete="off"
             style={{
               borderColor: focusBorder ? 'indigo-700' : 'transparent',
+              height: inputHeight,
             }}
           ></textarea>
           {passwordVisibility && (

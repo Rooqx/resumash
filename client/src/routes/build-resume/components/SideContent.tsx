@@ -24,7 +24,7 @@ export default function Sidebar() {
   const [displayPdf, setDisplayPdf] = useState(false)
 
   const sidebarContent = (
-    <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-full overflow-y-auto mr-10 scroll-bar">
+    <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] flex-shrink-0 md:w-[450px] lg:w-[370px] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-full overflow-y-auto mr-10 scroll-bar">
       {!isDesktop && (
         <div className="sticky top-0 bg-black z-10 py-3">
           <button
@@ -75,10 +75,10 @@ export default function Sidebar() {
   if (!isDesktop) {
     return (
       <Drawer open={open} onOpenChange={setOpen} direction="left">
-        <DrawerTrigger asChild>
+        <DrawerTrigger className="relative" asChild>
           <Button
             variant="outline"
-            className="absolute top-20 text-white bg-black left-4 z-50 md:hidden"
+            className="absolute top-2.5 text-black bg-white left-4 z-50 lg:hidden"
           >
             Add Inputs
           </Button>

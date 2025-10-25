@@ -23,8 +23,8 @@ app.get("/", (_req, res) => {
 
 const folder = fs.existsSync("uploads/176105325841-Resume.pdf");
 console.log("folder:", folder);
-/*
-const job = new Job(
+
+/*const job = new Job(
   `Job title : Front End Developer
 Job Location : Lagos Deadline : October 10, 2025 Quick Recommended Links
 
@@ -43,7 +43,7 @@ Good leadership skills and the ability to work well under pressure
 Strong adherence to deadlines and aself-motivated, can-do attitude
 Experience working withservice workers
 Bonus: Experience with Angular.`,
-  "Resume2.pdf"
+  "test2.pdf"
 );
 console.log("HF_TOKEN", HF_TOKEN);
 job.extractResumeBlocks();*/

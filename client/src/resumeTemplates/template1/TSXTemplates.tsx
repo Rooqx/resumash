@@ -4,26 +4,34 @@ import resumeData from '@/components/resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
+import { useDeviceType } from '@/lib/hooks/useDeviceHook'
 
 const ResumeComponent: React.FC = () => {
   //  const { inputValue, fields, tagFields } = resumeData
   const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
-
+  const { isDesktop, isTablet, isMobile } = useDeviceType()
   const tagFields = useTagStore((s) => s.fields)
 
   // Move this to a seperate file later
   const styles = {
     page: {
-      width: '50vw',
-      height: '800px',
+      width: isDesktop ? '50vw' : isTablet ? '75%' : isMobile ? '100%' : '100%',
+      height: isDesktop
+        ? '800px'
+        : isTablet
+          ? '700px'
+          : isMobile
+            ? '600px'
+            : '600px',
+
       border: '1px solid black',
       display: 'flex',
       flexDirection: 'column' as const,
       backgroundColor: '#FFFFFF',
       padding: '30px',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      fontSize: '16px',
+      fontSize: !isDesktop ? '16px' : '8px',
       lineHeight: '1.4',
       color: '#000',
     },
@@ -33,13 +41,13 @@ const ResumeComponent: React.FC = () => {
       paddingBottom: '2px',
     },
     name: {
-      fontSize: '24px',
+      fontSize: !isDesktop ? '16px' : '24px',
       fontWeight: 'bold' as const,
       color: 'black',
       marginBottom: '5px',
     },
     label: {
-      fontSize: '10px',
+      fontSize: !isDesktop ? '5px' : '10px',
       color: '#4a4a4a',
       marginBottom: '8px',
       marginTop: '10px',
@@ -53,7 +61,7 @@ const ResumeComponent: React.FC = () => {
       marginTop: '-2px',
     },
     contactItem: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       color: '#666666',
       display: 'flex',
       justifyContent: 'center',
@@ -63,7 +71,7 @@ const ResumeComponent: React.FC = () => {
       marginBottom: '10px',
     },
     sectionTitle: {
-      fontSize: '12px',
+      fontSize: !isDesktop ? '6px' : '12px',
       fontWeight: 'bold' as const,
       color: 'black',
       marginBottom: '2px',
@@ -76,24 +84,27 @@ const ResumeComponent: React.FC = () => {
       justifyContent: 'space-between',
       marginBottom: '3px',
     },
-    company: { fontSize: '10px', fontWeight: 'bold' as const },
+    company: {
+      fontSize: !isDesktop ? '5px' : '10px',
+      fontWeight: 'bold' as const,
+    },
     position: {
-      fontSize: '10px',
+      fontSize: !isDesktop ? '5px' : '10px',
       color: '#3a3a3a',
       fontWeight: 'semibold' as const,
     },
     date: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       color: '#666666',
       minWidth: '110px',
     },
     jobSummary: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       color: '#333333',
       textAlign: 'justify' as const,
     },
     jobHighlights: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       color: '#333333',
       textAlign: 'justify' as const,
       marginTop: '5px',
@@ -103,34 +114,34 @@ const ResumeComponent: React.FC = () => {
       marginBottom: '8px',
     },
     institution: {
-      fontSize: '10px',
+      fontSize: !isDesktop ? '5px' : '10px',
       fontWeight: 'bold' as const,
       marginBottom: '2px',
     },
-    studyType: { fontSize: '9px', color: '#4a4a4a' },
+    studyType: { fontSize: !isDesktop ? '5px' : '9px', color: '#4a4a4a' },
     skillItem: { marginBottom: '5px' },
     skillName: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       fontWeight: 'bold' as const,
       marginBottom: '1px',
     },
     skillLevel: {
-      fontSize: '8px',
+      fontSize: !isDesktop ? '4px' : '8px',
       color: '#666666',
       fontWeight: 'bold' as const,
     },
     projectItem: { marginBottom: '8px' },
     projectName: {
-      fontSize: '10px',
+      fontSize: !isDesktop ? '5px' : '10px',
       fontWeight: 'bold' as const,
       marginBottom: '2px',
     },
     projectDescription: {
-      fontSize: '9px',
+      fontSize: !isDesktop ? '5px' : '9px',
       color: '#333333',
       textAlign: 'justify' as const,
     },
-    languageItem: { fontSize: '9px', marginBottom: '2px' },
+    languageItem: { fontSize: !isDesktop ? '5px' : '9px', marginBottom: '2px' },
   }
 
   return (
@@ -143,11 +154,11 @@ const ResumeComponent: React.FC = () => {
         </div>
         <div style={styles.contactInfo}>
           <span style={styles.contactItem}>
-            <Mail size={10} />
+            <Mail size={!isDesktop ? '5px' : '10px'} />
             {inputValue.email || 'email@example.com'}
           </span>
           <span style={styles.contactItem}>
-            <Phone size={10} />
+            <Phone size={!isDesktop ? '5px' : '10px'} />
             {inputValue.phone || '(123) 456-7890'}
           </span>
           <a
@@ -156,7 +167,7 @@ const ResumeComponent: React.FC = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <Linkedin size={10} />
+            <Linkedin size={!isDesktop ? '5px' : '10px'} />
             {'LinkedIn'}
           </a>
           <a
@@ -165,12 +176,12 @@ const ResumeComponent: React.FC = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <Github size={10} />
+            <Github size={!isDesktop ? '5px' : '10px'} />
             {'GitHub'}
           </a>
           {(inputValue.city || inputValue.country) && (
             <span style={styles.contactItem}>
-              <MapPin size={10} />
+              <MapPin size={!isDesktop ? '5px' : '10px'} />
               {inputValue.city || 'City'}, {inputValue.country || 'Country'}
             </span>
           )}
