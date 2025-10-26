@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 const wakeServer = async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}`)
+    res.data.data.success
   } catch (error) {
     toast.error('Resume tailor might fail')
   }
