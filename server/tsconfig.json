@@ -1,30 +1,47 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "Preserve",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
-    //"types": ["node"],
+    // ==============================
+    // ✅ Modern Environment & Language Features
+    // ==============================
+    "target": "ESNext", // Compile to modern JS (keeps async/await, top-level await, etc.)
+    "lib": ["ESNext"], // Include latest JavaScript features and APIs
 
-    // Bundler mode
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
+    // ==============================
+    // 🧩 Module & Import System
+    // ==============================
+    "module": "ESNext", // Use native ES Modules (import/export)
+    "moduleResolution": "bundler", // Best for Bun, Vite, or modern bundlers
+    "jsx": "react-jsx", // Enables React JSX transform (if used)
+    "allowJs": true, // Allow importing and compiling .js files too
+    "verbatimModuleSyntax": false, // Let TS safely transform imports/exports for compatibility
 
-    // Best practices
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
+    // ==============================
+    // 🗂️ Directory Structure & Output
+    // ==============================
+    "outDir": "dist", // Compiled files output here
+    "rootDir": "src", // Your source files live here
+    "noEmit": false, // Ensure TypeScript emits .js output
 
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    // ==============================
+    // ⚙️ Strict Type-Checking
+    // ==============================
+    "strict": true, // Enable all strict type checking
+    "skipLibCheck": true, // Skip checking .d.ts files for faster builds
+    "noFallthroughCasesInSwitch": true, // Prevent accidental fallthroughs in switch statements
+    "noUncheckedIndexedAccess": true, // Treat array/object access as potentially undefined
+    "noImplicitOverride": true // Require 'override' keyword when overriding methods
+
+    // ==============================
+    // 💡 Optional Lint-like Checks
+    // ==============================
+    // "noUnusedLocals": true,         // Warn about unused local variables
+    // "noUnusedParameters": true,     // Warn about unused function parameters
+    // "noPropertyAccessFromIndexSignature": true // Enforce explicit property access
+  },
+
+  // ==============================
+  // 🧭 Project Scope
+  // ==============================
+  "include": ["src"], // Compile all TS files inside src/
+  "exclude": ["node_modules"] // Skip external dependencies
 }

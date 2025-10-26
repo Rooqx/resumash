@@ -32,7 +32,6 @@
     "typescript": "^5.9.2"
   },
   "name": "server",
-  "module": "index.ts",
   "version": "1.0.0",
   "type": "module",
   "private": true,
