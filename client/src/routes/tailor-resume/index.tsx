@@ -3,11 +3,13 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Send, Upload } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import ResumeSkeleton from '../build-resume/skeleton'
 import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 import Textarea from '@/components/Textarea'
 import App from '@/components/Layout'
 import Spinner from '@/components/Spinner'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
+import wakeServer from '@/lib/serverActions/wakeServer'
 
 export const Route = createFileRoute('/tailor-resume/')({
   component: RouteComponent,
@@ -24,7 +26,7 @@ function RouteComponent() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { page, setPage } = useCurrentPage()
-  // console.log(data?.file[0])
+
   // Mutation
   const mutation = useMutation({
     mutationFn: async (resumeData: {
@@ -55,60 +57,71 @@ function RouteComponent() {
   useEffect(() => {
     setPage('tailorPage')
   }, [page, setPage])
+
+  useEffect(() => {
+    if (page === 'tailorPage') wakeServer()
+  }, [page])
+
   return (
     <App>
-      <form
-        className="bg-black text-white h-screen relative flex items-center flex-col gap-0"
-        onSubmit={(e) => {
-          e.preventDefault()
-          mutation.mutate(data)
-        }}
-      >
-        <div className="w-4/5 overflow-hidden rounded-xl px-6 mt-5">
-          {' '}
-          <Textarea
-            labelFor="tailorJobDesc"
-            value={data.jobDescription}
-            onChange={(e) => {
-              setData((prev) => ({ ...prev, jobDescription: e.target.value }))
-            }}
-            inputTittle="Job Description"
-            placeholder="Enter your professional summary or career objective"
-            inputHeight="40vh"
-            inputBG="#27272a"
-            noBorder={false}
-            rounded={false}
-          />
-        </div>
+      {mutation.isPending ? (
+        <ResumeSkeleton />
+      ) : (
+        <form
+          className="bg-black text-white h-screen relative flex items-center flex-col gap-0"
+          onSubmit={(e) => {
+            e.preventDefault()
+            mutation.mutate(data)
+          }}
+        >
+          <div className="w-4/5 overflow-hidden rounded-xl px-6 mt-5">
+            {' '}
+            <Textarea
+              labelFor="tailorJobDesc"
+              value={data.jobDescription}
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev,
+                  jobDescription: e.target.value,
+                }))
+              }}
+              inputTittle="Job Description"
+              placeholder="Enter your professional summary or career objective"
+              inputHeight="40vh"
+              inputBG="#27272a"
+              noBorder={false}
+              rounded={false}
+            />
+          </div>
 
-        <span className="relative w-fit flex items-center justify-center">
-          <input
-            type="file"
-            id="resumeUpload"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const file: any | null = e.currentTarget.files?.[0] || null
-              setData((prev) => ({ ...prev, file }))
-              file
-                ? toast.success('Resume uploaded successfully')
-                : toast.error('Resume upload failed')
-            }}
-            accept=".pdf,.doc,.docx"
-            className="absolute  w-full h-full opacity-0 cursor-pointer "
-          />
+          <span className="relative w-fit flex items-center justify-center">
+            <input
+              type="file"
+              id="resumeUpload"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const file: any | null = e.currentTarget.files?.[0] || null
+                setData((prev) => ({ ...prev, file }))
+                file
+                  ? toast.success('Resume uploaded successfully')
+                  : toast.error('Resume upload failed')
+              }}
+              accept=".pdf,.doc,.docx"
+              className="absolute  w-full h-full opacity-0 cursor-pointer "
+            />
 
-          <label
-            htmlFor="resumeUpload"
-            className="flex flex-col justify-center items-center gap-3 border-2 border-zinc-300 w-[300px] p-6 rounded-xl mb-10 cursor-pointer"
-          >
-            <Upload className="w-5 h-5 z-2" />
-            <span className="text-sm text-center flex justify-center z-2">
-              {data.file ? data.file?.name : 'Upload Resume'}
-            </span>
-          </label>
-        </span>
-        <button
-          type="submit"
-          className={`flex justify-center items-center gap-3 border-2 border-zinc-300  font-medium px-5 py-3 rounded-xl transition relative
+            <label
+              htmlFor="resumeUpload"
+              className="flex flex-col justify-center items-center gap-3 border-2 border-zinc-300 w-[300px] p-6 rounded-xl mb-10 cursor-pointer"
+            >
+              <Upload className="w-5 h-5 z-2" />
+              <span className="text-sm text-center flex justify-center z-2">
+                {data.file ? data.file?.name : 'Upload Resume'}
+              </span>
+            </label>
+          </span>
+          <button
+            type="submit"
+            className={`flex justify-center items-center gap-3 border-2 border-zinc-300  font-medium px-5 py-3 rounded-xl transition relative
             shadow-sm hover:shadow-md  w-[200px] overflow-hidden text-zinc-800 
        ${
          mutation.isPending || !data.file || !data.jobDescription
@@ -121,14 +134,15 @@ function RouteComponent() {
             `
        }
           `}
-          disabled={mutation.isPending || !data.file || !data.jobDescription}
-        >
-          <span className="z-2 flex gap-2 items-center justify-center">
-            <Send /> {mutation.isPending ? 'Tailoring' : 'Tailor'}{' '}
-            {mutation.isPending ? <Spinner /> : ''}
-          </span>
-        </button>
-      </form>
+            disabled={mutation.isPending || !data.file || !data.jobDescription}
+          >
+            <span className="z-2 flex gap-2 items-center justify-center">
+              <Send /> {mutation.isPending ? 'Tailoring' : 'Tailor'}{' '}
+              {mutation.isPending ? <Spinner /> : ''}
+            </span>
+          </button>
+        </form>
+      )}
     </App>
   )
 }

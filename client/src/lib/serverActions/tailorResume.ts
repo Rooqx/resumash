@@ -17,10 +17,8 @@ export const getTailoredResume = async ({
     formData.append('jobDescription', jobDescription)
     formData.append('resume', file)
 
-    console.log('formData', formData)
-
     const response = await axios.post(
-      'http://localhost:5000/api/v1/resumes/upload',
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/resumes/upload`,
       formData,
       {
         headers: {
@@ -29,7 +27,5 @@ export const getTailoredResume = async ({
       },
     )
     return response.data
-  } catch (err) {
-    console.error('Error tailoring resume:', err)
-  }
+  } catch (_err) {}
 }

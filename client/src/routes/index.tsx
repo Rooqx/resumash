@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Helmet } from 'react-helmet-async'
 import App from '@/components/Layout'
+import SEO from '@/components/SEO'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -9,17 +9,11 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   return (
     <>
-      {' '}
-      <Helmet>
-        <title>Home | Resume Builder</title>
-        <meta
-          name="description"
-          content="Build your professional resume easily."
-        />
-        <meta property="og:title" content="Resume Builder" />
-        <meta property="og:type" content="website" />
-      </Helmet>
       <App>
+        <SEO
+          title="Home - Resume Builder"
+          description="Build your professional resume easily."
+        />
         <section className="bg-black w-full h-[calc(100vh-5rem)] text-slate-100 flex items-center justify-center ">
           <div className=" flex flex-col gap-5 w-full items-center justify-center  -mt-40 md:-mt-40 lg:-mt-10">
             <div className="space-y-3 w-full mb-2">
