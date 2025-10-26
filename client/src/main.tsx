@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
+import { HelmetProvider } from 'react-helmet-async'
 // Import the generated route tree
-
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import { routeTree } from './routeTree.gen.ts'
@@ -27,17 +26,19 @@ declare module '@tanstack/react-router' {
   }
 }
 const queryClient = new QueryClient()
-
+const helmetContext = {} // for SSR/SSG rendering
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <HelmetProvider context={helmetContext}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </HelmetProvider>
     </StrictMode>,
   )
 }

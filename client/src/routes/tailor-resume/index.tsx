@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Send, Upload } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 import Textarea from '@/components/Textarea'
 import App from '@/components/Layout'
 import Spinner from '@/components/Spinner'
+import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 
 export const Route = createFileRoute('/tailor-resume/')({
   component: RouteComponent,
@@ -21,6 +23,7 @@ function RouteComponent() {
   })
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { page, setPage } = useCurrentPage()
   // console.log(data?.file[0])
   // Mutation
   const mutation = useMutation({
@@ -39,24 +42,29 @@ function RouteComponent() {
     },
     onSuccess: (resumeData) => {
       console.log(`Success ${resumeData.data}:`, resumeData)
+      toast.success('Resume tailor successful')
       //  Store it globally in React Query cache
       queryClient.setQueryData(['tailoredResume'], resumeData.data.data)
       navigate({ to: '/build-resume' })
     },
     onError: (err: any) => {
       console.error('Upload failed:', err)
+      toast.error('Tailoring failed')
     },
   })
+  useEffect(() => {
+    setPage('tailorPage')
+  }, [page, setPage])
   return (
     <App>
       <form
-        className="bg-black text-white max-h-screen relative flex items-center flex-col gap-0"
+        className="bg-black text-white h-screen relative flex items-center flex-col gap-0"
         onSubmit={(e) => {
           e.preventDefault()
           mutation.mutate(data)
         }}
       >
-        <div className="w-full px-6 mt-10">
+        <div className="w-4/5 overflow-hidden rounded-xl px-6 mt-5">
           {' '}
           <Textarea
             labelFor="tailorJobDesc"
@@ -67,6 +75,9 @@ function RouteComponent() {
             inputTittle="Job Description"
             placeholder="Enter your professional summary or career objective"
             inputHeight="40vh"
+            inputBG="#27272a"
+            noBorder={false}
+            rounded={false}
           />
         </div>
 
@@ -77,6 +88,9 @@ function RouteComponent() {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const file: any | null = e.currentTarget.files?.[0] || null
               setData((prev) => ({ ...prev, file }))
+              file
+                ? toast.success('Resume uploaded successfully')
+                : toast.error('Resume upload failed')
             }}
             accept=".pdf,.doc,.docx"
             className="absolute  w-full h-full opacity-0 cursor-pointer "
@@ -97,7 +111,7 @@ function RouteComponent() {
           className={`flex justify-center items-center gap-3 border-2 border-zinc-300  font-medium px-5 py-3 rounded-xl transition relative
             shadow-sm hover:shadow-md  w-[200px] overflow-hidden text-zinc-800 
        ${
-         mutation.isPending
+         mutation.isPending || !data.file || !data.jobDescription
            ? 'bg-zinc-400 cursor-not-allowed'
            : `
             bg-zinc-50 hover:bg-zinc-100 cursor-pointer
@@ -107,7 +121,7 @@ function RouteComponent() {
             `
        }
           `}
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || !data.file || !data.jobDescription}
         >
           <span className="z-2 flex gap-2 items-center justify-center">
             <Send /> {mutation.isPending ? 'Tailoring' : 'Tailor'}{' '}

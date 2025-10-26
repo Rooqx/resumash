@@ -24,4 +24,5 @@ export const {
   MONGO_URI,
   REDIS_URI,
   HF_TOKEN,
+  MODEL,
 } = process.env;

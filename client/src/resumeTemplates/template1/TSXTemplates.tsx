@@ -1,6 +1,5 @@
 import React from 'react'
 import { Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
-import resumeData from '@/components/resume.json'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'

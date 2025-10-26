@@ -4,13 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import { ChevronLeft } from 'lucide-react'
 import Sidebar from './components/SideContent'
-import BasicInfoAndSummary from './components/BasicInfoAndSummary'
-import Skills from './components/Skills'
-import Experience from './components/Experience'
-import Education from './components/Education'
-import Project from './components/Project'
-import Certificate from './components/Certificate'
-import Award from './components/Awards'
 import App from '@/components/Layout'
 // import resumeData from '@/components/resume.json'
 
@@ -20,6 +13,7 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import { useDeviceType } from '@/lib/hooks/useDeviceHook'
+import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 
 export const Route = createFileRoute('/build-resume/')({
   component: RouteComponent,
@@ -32,6 +26,7 @@ function RouteComponent() {
   const { setTags } = useTagStore()
   const queryClient = useQueryClient()
   const { isDesktop } = useDeviceType()
+  const { page, setPage } = useCurrentPage()
 
   const resumeData: any = queryClient.getQueryData(['tailoredResume'])
 
@@ -42,6 +37,10 @@ function RouteComponent() {
       setTags(resumeData.tagFields)
     }
   }, [resumeData])
+
+  useEffect(() => {
+    setPage('buildPage')
+  }, [page, setPage])
 
   return (
     <App>

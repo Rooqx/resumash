@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import Image from './Image'
 import useInputStore from '@/lib/stores/useInputStores'
 
@@ -20,6 +19,8 @@ interface InputProps {
   userInputContent?: string
   className?: string
   focusBorder?: boolean
+  noBorder?: boolean
+  rounded?: boolean
 }
 
 export default function Textarea({
@@ -33,11 +34,12 @@ export default function Textarea({
   imgSrc,
   placeholder,
   alt,
-  forgotPassword,
   userInputContent,
   passwordVisibility = false,
   className,
   focusBorder = true,
+  noBorder = true,
+  rounded = true,
 }: InputProps) {
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)
@@ -84,7 +86,7 @@ export default function Textarea({
             }}
             className={`${
               !className
-                ? `bg-[${inputBG}] text-[#ededed] font-[500] w-full min-h-[150px] resize-none rounded-[4px] border border-[#E5E7EB] py-[10px] pr-[16px] ${
+                ? `outline-none text-[#ededed] font-[500] w-full min-h-[150px] resize-none ${rounded ? 'rounded-[4px]' : 'rounded-2xl'} ${noBorder ? 'border border-[#E5E7EB]' : ''} py-[10px] pr-[16px] ${
                     imgSrc ? 'pl-[44px]' : 'pl-[16px]'
                   } `
                 : className
@@ -93,6 +95,7 @@ export default function Textarea({
             style={{
               borderColor: focusBorder ? 'indigo-700' : 'transparent',
               height: inputHeight,
+              backgroundColor: inputBG,
             }}
           ></textarea>
           {passwordVisibility && (
@@ -109,14 +112,7 @@ export default function Textarea({
       <p className="w-full text-xs font-[400] mt-1 text-[#2F2F30] urbanist">
         {userInputContent}
       </p>
-      <div className="flex items-center justify-end w-full">
-        <Link
-          to={'/Resume'}
-          className="mt-[10px] w-full flex justify-end items-end text-[#EF4444] cursor-pointer text-[14px] Inter"
-        >
-          {forgotPassword}
-        </Link>
-      </div>
+      <div className="flex items-center justify-end w-full"></div>
     </div>
   )
 }

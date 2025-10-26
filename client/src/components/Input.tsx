@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import Image from './Image'
 import useInputStore from '@/lib/stores/useInputStores'
 
@@ -33,7 +32,6 @@ export default function Input({
   type,
   placeholder,
   alt,
-  forgotPassword,
   userInputContent,
   passwordVisibility = false,
   className,
@@ -109,14 +107,7 @@ export default function Input({
       <p className="w-full text-[14px] font-[400] mt-1 text-[#2F2F30] urbanist">
         {userInputContent}
       </p>
-      <div className="flex items-center justify-end w-full">
-        <Link
-          to={'/Resume'}
-          className="mt-[10px] w-full flex justify-end items-end text-[#EF4444] cursor-pointer text-[14px] Inter"
-        >
-          {forgotPassword}
-        </Link>
-      </div>
+      <div className="flex items-center justify-end w-full"></div>
     </div>
   )
 }

@@ -1,4 +1,3 @@
-import { Menu } from 'lucide-react'
 import { useState } from 'react'
 import { Document, PDFDownloadLink } from '@react-pdf/renderer'
 import BasicInfoAndSummary from './BasicInfoAndSummary'

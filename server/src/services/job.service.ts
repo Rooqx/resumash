@@ -1,25 +1,11 @@
 import fs from "fs";
 import { PDFParse } from "pdf-parse";
-import { HF_TOKEN } from "../configs/env.configs";
+import { HF_TOKEN, MODEL } from "../configs/env.configs";
 import { OpenAI } from "openai";
-import * as pdfjsLib from "pdfjs-dist";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import path from "path";
-import fontkit from "@pdf-lib/fontkit";
-import multer from "multer";
 import { AppError } from "../middlewares/error.middleware";
 import extractJSON from "../utils/extractJson";
-export interface ResumeBlock {
-  block: string;
-  content: string;
-  startLine: number;
-  endLine: number;
-}
+import { logger } from "../utils/logger";
 
-export interface ResumeLayout {
-  fileName: string;
-  blocks: ResumeBlock[];
-}
 class Job {
   jobDescription: string;
   resume: any;
@@ -28,22 +14,22 @@ class Job {
     this.resume = resume;
   }
   public async updatesBlocks() {
-    //Get job description
-    const jobDesc = this.jobDescription;
-    // console.log("jobDesc:", jobDesc);
-
     //Call resume block and save it
     const resumeBlocks = await this.extractResumeBlocks();
-    //   console.log("resumeBlocks:", resumeBlocks);
 
+    logger.info("Querying OpenAI for tailored resume");
     //create openai client
     const client = new OpenAI({
       baseURL: "https://api.fireworks.ai/inference/v1",
-      apiKey: "fw_3ZZScoGVZuD8RgwN8mgUrn3p", //Save to .env
+      apiKey: HF_TOKEN,
     });
-    // accounts/fireworks/models/qwen2p5-vl-32b-instruct
+
+    if (!client) {
+      throw new AppError("OpenAI client not initialized", 500);
+    }
+
     const chatCompletion = await client.chat.completions.create({
-      model: "accounts/fireworks/models/qwen2p5-vl-32b-instruct",
+      model: MODEL as string,
       messages: [
         {
           role: "system",
@@ -114,9 +100,6 @@ Return **only one valid JSON object** that follows this schema exactly:
    - Use 2–4 sentences written in a confident, senior-level tone.
    - Clearly highlight the candidate’s main strengths, relevant experience, and technical expertise.
    - Ensure the language matches the target role’s seniority and tech stack.
-   - Example:
-     “Results-driven Frontend Developer with 5+ years of experience building responsive and scalable web interfaces using React and TypeScript. Adept at collaborating in agile teams and optimizing UI performance for better user engagement.”
-
 
 3. **Skills**
    - Include **a maximum of 5 total skillName entries**.
@@ -129,6 +112,7 @@ Return **only one valid JSON object** that follows this schema exactly:
        - Cloud Engineering
        - UI/UX Design
        - Data Analysis
+       etc.
    - Place specific technologies and frameworks as **tags** under the corresponding skill key in \`tagFields\`.
 
 4. **Experience**
@@ -184,9 +168,12 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
       ],
     });
 
-    console.log("chatCompletion:", chatCompletion);
-    console.log("Tailored Resume:", chatCompletion?.choices[0]?.message);
+    if (!chatCompletion) {
+      throw new AppError("Failed to get chat completion", 500);
+    }
 
+    logger.info("Query successful resume Tailored");
+    logger.info(`Total Token Used: ${chatCompletion.usage?.total_tokens}`);
     return chatCompletion?.choices[0]?.message.content;
   }
 
@@ -214,6 +201,9 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
     try {
       const data = new PDFParse({ data: dataBuffer }); //Main extraction
       const textResult: any = await data.getText(); //Get the text
+      if (!textResult) {
+        throw new AppError("Failed to extract text from PDF", 500);
+      }
       await data.destroy(); //Clean up function to avoid memory leaks
 
       // Clean up text and remove extra spaces
@@ -253,7 +243,6 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
 
         // 🔹 Handle section headers
         if (matchedSection) {
-          console.log("match is true");
           // If this is the first section and we haven't saved a header yet:
           if (!headerCollected && currentContent.length > 0) {
             blocks.push({
@@ -317,14 +306,12 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
         });
       }
       // Save to file or return
-      fs.writeFileSync("resume_blocks.json", JSON.stringify(blocks, null, 2));
-      console.log("✅ Saved structured blocks to resume_blocks.json");
+      logger.info("✅ Saved structured blocks to resume_blocks.json");
       const JSONBlock = JSON.stringify(blocks); //turn blocks into json
       // console.log("JSONBlock", JSONBlock);
       return JSONBlock;
     } catch (error) {
-      console.error("❌ Error reading PDF:", error);
-
+      logger.error("❌ Error reading PDF:", error);
       throw error;
     }
   }
@@ -332,12 +319,12 @@ Analyze the job_description and inputBlocks. Then output a clean, well-structure
   public async returnTailorResume() {
     //Get message content from updatesBlocks
     const rawMessage = (await this.updatesBlocks()) || "";
-    console.log("rawMessage", rawMessage);
+    // console.log("rawMessage", rawMessage);
     //Sanitize message so it would return a perfect json
     const tailoredResume = extractJSON(rawMessage);
     //validate tailoredResume
     if (!tailoredResume) throw new AppError("Failed to extract JSON", 400);
-    console.log("tailoredResume", tailoredResume);
+    logger.info("✅ Tailored resume extracted");
     return tailoredResume;
   }
 }

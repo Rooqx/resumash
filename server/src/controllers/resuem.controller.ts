@@ -5,6 +5,7 @@ import type { Request, Response, NextFunction } from "express";
 import { AppError, asyncHandler } from "../middlewares/error.middleware";
 import { ResponseHelper } from "../utils/responseHelper";
 import Job from "../services/job.service";
+import { logger } from "../utils/logger";
 
 export const uploadResume = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -22,7 +23,7 @@ export const uploadResume = asyncHandler(
     if (!req.file) {
       throw new AppError("No file added", 400);
     }
-    console.log("resume uploaded");
+
     //Get file path
     const fileUrl = await `uploads/${req?.file?.filename}`;
 
@@ -32,8 +33,11 @@ export const uploadResume = asyncHandler(
     if (!data) {
       throw new AppError("Data not added", 404);
     }
-    console.log("file uploaded");
-
+    logger.info("Resume Tailor Successful");
+    fs.rm(fileUrl, { recursive: true, force: true }, (err) => {
+      if (err) throw err;
+      logger.info(`File ${fileUrl} deleted successfully`);
+    });
     return ResponseHelper.success(
       res,
       {

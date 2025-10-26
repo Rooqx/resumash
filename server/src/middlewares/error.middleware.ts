@@ -1,6 +1,7 @@
 // middleware/errorHandler.ts
 import type { Request, Response, NextFunction } from "express";
 import { ResponseHelper } from "../utils/responseHelper";
+import { logger } from "../utils/logger";
 
 /**
  * Custom Error class for application-specific errors
@@ -101,7 +102,7 @@ export const errorHandler = (
  * @param req - Express Request object for context
  */
 const logError = (error: Error, req: Request): void => {
-  console.error("Error occurred:", {
+  logger.error("Error occurred:", {
     timestamp: new Date().toISOString(),
     message: error.message,
     stack: error.stack,

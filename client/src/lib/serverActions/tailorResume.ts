@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'sonner'
 
 export const getTailoredResume = async ({
   jobDescription,
@@ -8,7 +9,7 @@ export const getTailoredResume = async ({
   file: any | null
 }) => {
   if (!file || jobDescription.trim() === '') {
-    alert('Please provide both a job description and a resume file.')
+    toast.error('Please provide both a job description and a resume file.')
     return
   }
   try {

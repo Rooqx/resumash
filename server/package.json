@@ -23,7 +23,8 @@
     "pdf-parse": "^2.2.3",
     "pdf-parser": "^1.0.5",
     "pdfjs-dist": "^5.4.296",
-    "redis": "^5.8.2"
+    "redis": "^5.8.2",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/bun": "latest",
