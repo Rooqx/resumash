@@ -29,6 +29,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.0",
+    "tsc-esm-fix": "^3.1.2",
     "typescript": "^5.9.2"
   },
   "name": "server",
@@ -37,7 +38,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --hot run src/app.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-esm-fix dist",
     "start": "node dist/app.js"
   }
 }
