@@ -26,23 +26,26 @@ function NavigationLoader() {
   )
 }
 
+const isDev = false
 export const Route = createRootRoute({
   component: () => (
     <>
       <Header />
       <Outlet />
       <NavigationLoader />
-      <TanstackDevtools
-        config={{
-          position: 'bottom-left',
-        }}
-        plugins={[
-          {
-            name: 'Tanstack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
+      {/*
+        <TanstackDevtools
+          config={{
+            position: 'bottom-left',
+          }}
+          plugins={[
+            {
+              name: 'Tanstack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+      */}
     </>
   ),
 })

@@ -70,7 +70,7 @@ function RouteComponent() {
             mutation.mutate(data)
           }}
         >
-          <div className="w-4/5 overflow-hidden rounded-xl px-6 mt-5">
+          <div className="w-full md:w-4/5 overflow-hidden rounded-xl px-6 mt-5">
             {' '}
             <Textarea
               labelFor="tailorJobDesc"
