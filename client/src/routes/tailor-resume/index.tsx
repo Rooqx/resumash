@@ -55,11 +55,8 @@ function RouteComponent() {
   })
   useEffect(() => {
     setPage('tailorPage')
+    wakeServer()
   }, [page, setPage])
-
-  useEffect(() => {
-    if (page === 'tailorPage') wakeServer()
-  }, [page])
 
   return (
     <App>
