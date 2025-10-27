@@ -21,7 +21,7 @@ export const Route = createFileRoute('/build-resume/')({
 
 function RouteComponent() {
   const [displayPdf, setDisplayPdf] = useState(false)
-  const { setInputData } = useInputStore()
+  const { inputValue, setInputData } = useInputStore()
   const { setFields } = useFieldStores()
   const { setTags } = useTagStore()
   const queryClient = useQueryClient()
@@ -44,12 +44,12 @@ function RouteComponent() {
 
   return (
     <App>
-      <div className={`  space-y-4 bg-black text-white relative`}>
+      <div className={`  space-y-4 bg-black text-white relative min-h-screen`}>
         {/*  <h2 className="text-2xl font-semibold mb-2  w-full text-center">
           My Resume
         </h2> */}
         {/* ================== Wrapper  ================== */}
-        <div className="w-full flex items-start gap-0 justify-center h-[800px] ">
+        <div className="w-full flex items-start gap-0 justify-center h-full ">
           {/* ================== Input Container  ================== */}
           <Sidebar />
 
@@ -63,6 +63,9 @@ function RouteComponent() {
               className="fixed top-0 w-full h-full bg-black z-10"
               style={{
                 display: displayPdf ? 'block' : 'none',
+                width: '100vw',
+                height: '100vh', // adapts to screen height
+                overflow: 'hidden',
               }}
             >
               <button
@@ -71,7 +74,7 @@ function RouteComponent() {
               >
                 <ChevronLeft size={24} /> Back
               </button>
-              <PDFViewer width="100%" height="600">
+              <PDFViewer style={{ width: '100%', height: '100%' }}>
                 <Document>
                   <ResumePDF />
                 </Document>
@@ -97,7 +100,11 @@ function RouteComponent() {
                       <ResumePDF />
                     </Document>
                   }
-                  fileName="Echo_Resume.pdf"
+                  fileName={
+                    inputValue?.fullName
+                      ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
+                      : 'resume.pdf'
+                  }
                 >
                   {({ loading }) =>
                     loading ? 'Generating...' : 'Download PDF'

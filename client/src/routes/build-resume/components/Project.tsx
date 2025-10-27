@@ -6,7 +6,7 @@ import { TagInput } from '@/components/TagInput'
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['projects']?.length === 0
-  console.log('isEmpty', isEmpty)
+
   return (
     <div className="space-y-4 mt-6">
       <span className="w-full flex justify-between items-start">
@@ -68,7 +68,7 @@ export default function Project() {
               key={field.i}
               name={`projectTechnologies-${i}`} // unique per field
               placeholder="List technologies used in your project"
-              onChange={(t) => console.log(`projectTechnologies-${i}:`, t)}
+              onChange={(t) => t}
             />
           </div>
           <div className="mt-4 space-y-3">

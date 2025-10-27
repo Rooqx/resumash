@@ -28,7 +28,7 @@ export default function Textarea({
   // inputWidth = "full",
   value,
   onChange,
-  inputBG = '#F7F8FA',
+  inputBG = 'transparent',
   inputHeight,
   labelFor,
   imgSrc,

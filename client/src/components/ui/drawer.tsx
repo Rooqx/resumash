@@ -52,6 +52,8 @@ function DrawerContent({
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
       <DrawerPrimitive.Content
+        aria-label="drawer-content"
+        aria-describedby="drawer-content"
         data-slot="drawer-content"
         className={cn(
           'group/drawer-content bg-background fixed z-50 flex h-auto flex-col',
@@ -100,6 +102,8 @@ function DrawerTitle({
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
+      aria-label="drawer-title"
+      aria-describedby="drawer-title"
       className={cn('text-foreground font-semibold', className)}
       {...props}
     />

@@ -43,7 +43,6 @@ function RouteComponent() {
       return Promise.race([getTailoredResume(resumeData), timeoutPromise])
     },
     onSuccess: (resumeData) => {
-      console.log(`Success ${resumeData.data}:`, resumeData)
       toast.success('Resume tailor successful')
       //  Store it globally in React Query cache
       queryClient.setQueryData(['tailoredResume'], resumeData.data.data)
@@ -86,7 +85,7 @@ function RouteComponent() {
                 }))
               }}
               inputTittle="Job Description"
-              placeholder="Enter your professional summary or career objective"
+              placeholder="Enter Job description"
               inputHeight="40vh"
               inputBG="#27272a"
               noBorder={false}

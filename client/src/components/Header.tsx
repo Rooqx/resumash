@@ -1,16 +1,20 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 
 export default function Header() {
   const { page, setPage } = useCurrentPage()
+  const isLoading = useRouterState()
 
   useEffect(() => {
     setPage('homePage')
   }, [page, setPage])
 
   return (
-    <header className="py-2 flex gap-2 bg-zinc-800 mb-5 w-[98%] md:w-[90%] mx-auto shadow-[0_0_10px_0_rgba(255,255,255,0.5)] border-zinc-400 mt-3 text-white justify-between rounded-full">
+    <header
+      className="py-2 flex gap-2 bg-zinc-800 mb-5 w-[98%] md:w-[90%] mx-auto shadow-[0_0_10px_0_rgba(255,255,255,0.5)] border-zinc-400 mt-3 text-white justify-between rounded-full"
+      style={{ zIndex: isLoading.isLoading ? 100 : 1 }}
+    >
       <nav className="flex flex-row justify-between w-full items-center text-xs md:text-sm">
         <div className="px-6 font-bold">
           <Link to="/" className="text-2xl md:text-4xl logo">

@@ -51,7 +51,7 @@ export default function Skills() {
           <TagInput
             key={field.i}
             name={`skills-${i}`} // unique per field
-            onChange={(t) => console.log(`skills-${i}:`, t)}
+            onChange={(t) => t}
           />{' '}
           <div className="mt-4 space-y-3">
             <button
