@@ -23,6 +23,21 @@ export default function Sidebar() {
   const { inputValue } = useInputStore()
   const { isDesktop } = useDeviceType()
   const [displayPdf, setDisplayPdf] = useState(false)
+  /*  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
+  /* const handleDownload = async () => {
+    try {
+      const blob = await pdf(<ResumePDF />).toBlob()
+
+      const fileName = inputValue?.fullName
+        ? `${String(inputValue.fullName).split(' ').join('_')}_resume.pdf`
+        : 'resume.pdf'
+
+      saveAs(blob, fileName)
+    } catch (err) {
+      console.error('PDF generation failed:', err)
+    }
+  }*/
 
   const sidebarContent = (
     <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] flex-shrink-0 md:w-[450px] lg:w-[370px] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-[800px] overflow-y-auto mr-10 scroll-bar">
@@ -34,8 +49,9 @@ export default function Sidebar() {
                     hover:before:w-full hover:text-black border border-white"
             onClick={() => setDisplayPdf(!displayPdf)}
           >
-            <p className="z-2 hover:text-black "> Preview PDF</p>
+            <p className="z-2 hover:text-black "> Preview resume</p>
           </button>
+
           <PDFDownloadLink
             className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
             document={
@@ -49,7 +65,7 @@ export default function Sidebar() {
                 : 'resume.pdf'
             }
           >
-            {({ loading }) => (loading ? 'Generating...' : 'Download PDF')}
+            {({ loading }) => (loading ? 'Generating...' : 'Download resume')}
           </PDFDownloadLink>
         </div>
       )}
@@ -100,7 +116,7 @@ export default function Sidebar() {
             <Button
               className="py-2 px-4 fixed overflow-hidden bg-[transparent] rounded-md justify-center w-[400px] cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
                     before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-                    hover:before:w-full hover:text-black top-6 left-4 z-50"
+                    hover:before:w-full hover:text-black top-6 left-4 z-50 "
               onClick={() => setDisplayPdf(!displayPdf)}
             ></Button>
           </DrawerClose>

@@ -24,7 +24,7 @@ function RouteComponent() {
                 Create and customize resumes that fit every job effortlessly
               </p>
             </div>
-            <div className="flex gap-5 flex-col md:flex-row justify-center items-center w-full py-6">
+            <div className="flex gap-5 flex-col md:flex-row justify-center items-center w-full py-6 px-4">
               <Link
                 to="/tailor-resume"
                 className={`
@@ -44,7 +44,7 @@ function RouteComponent() {
                 Build Resume
               </Link>
             </div>
-            <p className="font-bold text-zinc-50">Build Tailor Get hired</p>
+            <p className="font-thin text-zinc-50">Build Tailor Get hired</p>
           </div>
         </section>
       </App>

@@ -10,6 +10,7 @@ import App from '@/components/Layout'
 import Spinner from '@/components/Spinner'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 import wakeServer from '@/lib/serverActions/wakeServer'
+import SEO from '@/components/SEO'
 
 export const Route = createFileRoute('/tailor-resume/')({
   component: RouteComponent,
@@ -60,6 +61,10 @@ function RouteComponent() {
 
   return (
     <App>
+      <SEO
+        title="Tailor Resume"
+        description="Build your professional resume easily."
+      />
       {mutation.isPending ? (
         <ResumeSkeleton />
       ) : (
@@ -71,7 +76,6 @@ function RouteComponent() {
           }}
         >
           <div className="w-full md:w-4/5 overflow-hidden rounded-xl px-6 mt-5">
-            {' '}
             <Textarea
               labelFor="tailorJobDesc"
               value={data.jobDescription}

@@ -1,5 +1,4 @@
 import { Plus, Trash } from 'lucide-react'
-import { useEffect } from 'react'
 import Input from '@/components/Input'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
@@ -7,12 +6,8 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 
 export default function Skills() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
+  const { removeField } = useTagStore()
   const isEmpty = fields['skills']?.length === 0
-  const setSuggestions = useTagStore((s) => s.setSuggestions)
-
-  useEffect(() => {
-    setSuggestions('skills-0', ['React', 'Vue', 'Angular', 'Next.js'])
-  }, [setSuggestions])
 
   /** */
   return (
@@ -58,6 +53,7 @@ export default function Skills() {
               className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
               onClick={() => {
                 deleteField('skills', i)
+                removeField(`skills-${i}`)
               }}
             >
               <Trash className="hover:text-black z-1" size={16} />

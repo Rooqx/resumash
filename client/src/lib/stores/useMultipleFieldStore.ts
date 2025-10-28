@@ -51,11 +51,7 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
 
   deleteField: (section, index) =>
     set((state) => {
-      console.log('state', state)
-      console.log('index', index)
-
       const sectionFields = state.fields[section]
-      console.log('sectionFields', sectionFields)
 
       // Make sure the index exists before trying to delete
       if (index < 0 || index >= sectionFields.length) {
@@ -63,7 +59,7 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
       }
 
       const updatedFields = sectionFields.filter((_, i) => i !== index)
-      console.log('updatedFields', updatedFields)
+
       return {
         fields: {
           ...state.fields,

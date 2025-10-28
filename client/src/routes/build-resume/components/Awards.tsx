@@ -17,7 +17,7 @@ export default function Award() {
              before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
               before:duration-300 hover:before:w-full hover:text-black border border-white`}
             onClick={() => {
-              addField('award', 0)
+              addField('awards', 0)
             }}
           >
             <span className="flex gap-2 items-center z-10">

@@ -14,6 +14,7 @@ import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import { useDeviceType } from '@/lib/hooks/useDeviceHook'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
+import SEO from '@/components/SEO'
 
 export const Route = createFileRoute('/build-resume/')({
   component: RouteComponent,
@@ -44,6 +45,10 @@ function RouteComponent() {
 
   return (
     <App>
+      <SEO
+        title="Build Resume"
+        description="Build your professional resume easily."
+      />
       <div className={`  space-y-4 bg-black text-white relative min-h-screen`}>
         {/*  <h2 className="text-2xl font-semibold mb-2  w-full text-center">
           My Resume
@@ -91,7 +96,7 @@ function RouteComponent() {
               hover:before:w-full hover:text-black border border-white"
                   onClick={() => setDisplayPdf(!displayPdf)}
                 >
-                  <p className="z-2 hover:text-black "> Preview PDF</p>
+                  <p className="z-2 hover:text-black "> Preview resume</p>
                 </button>
                 <PDFDownloadLink
                   className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
@@ -107,7 +112,7 @@ function RouteComponent() {
                   }
                 >
                   {({ loading }) =>
-                    loading ? 'Generating...' : 'Download PDF'
+                    loading ? 'Generating...' : 'Download resume'
                   }
                 </PDFDownloadLink>
               </div>

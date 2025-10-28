@@ -26,14 +26,17 @@ function NavigationLoader() {
   )
 }
 
-const isDev = false
+const isProd = import.meta.env.VITE_ENV === 'production'
+
 export const Route = createRootRoute({
   component: () => (
     <>
       <Header />
       <Outlet />
       <NavigationLoader />
-      {/*
+      {isProd ? (
+        ''
+      ) : (
         <TanstackDevtools
           config={{
             position: 'bottom-left',
@@ -45,7 +48,7 @@ export const Route = createRootRoute({
             },
           ]}
         />
-      */}
+      )}
     </>
   ),
 })

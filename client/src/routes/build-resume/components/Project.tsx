@@ -2,11 +2,12 @@ import { Plus, Trash } from 'lucide-react'
 import Input from '@/components/Input'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
+import { useTagStore } from '@/lib/stores/useInputTags'
 
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['projects']?.length === 0
-
+  const { removeField } = useTagStore()
   return (
     <div className="space-y-4 mt-6">
       <span className="w-full flex justify-between items-start">
@@ -76,6 +77,7 @@ export default function Project() {
               className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
               onClick={() => {
                 deleteField('projects', i)
+                removeField(`projectTechnologies-${i}`)
               }}
             >
               <Trash className="hover:text-black z-1" size={16} />
