@@ -14,10 +14,12 @@ const queryClient = new QueryClient()
 export default function App({ children }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <Header />
-      <main className="poppins">{children}</main>
-      <ToasterProvider />
-      <Footer />
+      <div className="bg-black m-0">
+        <Header />
+        <main className="poppins">{children}</main>
+        <ToasterProvider />
+        <Footer />
+      </div>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

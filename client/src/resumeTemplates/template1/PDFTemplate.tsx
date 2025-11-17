@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-// import resumeData from '@/components/resume.json'
+import resumeData from '@/components/resume.json'
 import email from '/icons/mail.png'
 import github from '/icons/github.png'
 import mapPin from '/icons/map-pin.png'
@@ -10,29 +10,15 @@ import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 import './resume.css'
-import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 
 const ResumePDF = () => {
-  // const { inputValue, fields, tagFields } = resumeData
-  const { inputValue } = useInputStore()
+  const { inputValue, fields, tagFields } = resumeData
+  /* const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
-  const tagFields = useTagStore((s) => s.fields)
-  const { page, setPage } = useCurrentPage()
+  const tagFields = useTagStore((s) => s.fields)*/
 
-  useEffect(() => {
-    setPage('rxsmePage')
-  }, [page, setPage])
+  useEffect(() => {}, [inputValue, fields, tagFields])
 
-  useEffect(() => {
-    // Hide header
-    const header = document.querySelector('header')
-    if (header && page === 'rxsmePage') header.style.display = 'none'
-
-    // Cleanup when leaving PDF route
-    return () => {
-      if (header) header.style.display = 'flex'
-    }
-  }, [])
   return (
     <main className="page">
       {/* Header */}
