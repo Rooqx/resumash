@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RxsmeRouteImport } from './routes/rxsme'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TailorResumeIndexRouteImport } from './routes/tailor-resume/index'
 import { Route as BuildResumeIndexRouteImport } from './routes/build-resume/index'
 
+const RxsmeRoute = RxsmeRouteImport.update({
+  id: '/rxsme',
+  path: '/rxsme',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,36 +37,47 @@ const BuildResumeIndexRoute = BuildResumeIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/rxsme': typeof RxsmeRoute
   '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/rxsme': typeof RxsmeRoute
   '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/rxsme': typeof RxsmeRoute
   '/build-resume/': typeof BuildResumeIndexRoute
   '/tailor-resume/': typeof TailorResumeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/build-resume' | '/tailor-resume'
+  fullPaths: '/' | '/rxsme' | '/build-resume' | '/tailor-resume'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/build-resume' | '/tailor-resume'
-  id: '__root__' | '/' | '/build-resume/' | '/tailor-resume/'
+  to: '/' | '/rxsme' | '/build-resume' | '/tailor-resume'
+  id: '__root__' | '/' | '/rxsme' | '/build-resume/' | '/tailor-resume/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RxsmeRoute: typeof RxsmeRoute
   BuildResumeIndexRoute: typeof BuildResumeIndexRoute
   TailorResumeIndexRoute: typeof TailorResumeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rxsme': {
+      id: '/rxsme'
+      path: '/rxsme'
+      fullPath: '/rxsme'
+      preLoaderRoute: typeof RxsmeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RxsmeRoute: RxsmeRoute,
   BuildResumeIndexRoute: BuildResumeIndexRoute,
   TailorResumeIndexRoute: TailorResumeIndexRoute,
 }

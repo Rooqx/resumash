@@ -15,7 +15,7 @@ export default function Footer({
   tagline = 'Build, Tailor,  Get Hired.',
 }: FooterProps) {
   return (
-    <footer className="w-full bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
+    <footer className="w-full bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 mt-20">
       <div className="max-w-7xl mx-auto px-6 py-8 md:py-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>

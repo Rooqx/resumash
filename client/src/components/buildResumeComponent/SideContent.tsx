@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Document, PDFDownloadLink } from '@react-pdf/renderer'
 import BasicInfoAndSummary from './BasicInfoAndSummary'
 import Skills from './Skills'
 import Experience from './Experience'
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { useDeviceType } from '@/lib/hooks/useDeviceHook'
-import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
+import { downloadResume } from '@/lib/serverActions/downloadPDF'
 import useInputStore from '@/lib/stores/useInputStores'
 
 export default function Sidebar() {
@@ -23,24 +22,13 @@ export default function Sidebar() {
   const { inputValue } = useInputStore()
   const { isDesktop } = useDeviceType()
   const [displayPdf, setDisplayPdf] = useState(false)
-  /*  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
-  /* const handleDownload = async () => {
-    try {
-      const blob = await pdf(<ResumePDF />).toBlob()
-
-      const fileName = inputValue?.fullName
-        ? `${String(inputValue.fullName).split(' ').join('_')}_resume.pdf`
-        : 'resume.pdf'
-
-      saveAs(blob, fileName)
-    } catch (err) {
-      console.error('PDF generation failed:', err)
-    }
-  }*/
+  const fileName = inputValue?.fullName
+    ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
+    : 'resume.pdf'
 
   const sidebarContent = (
-    <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] flex-shrink-0 md:w-[450px] lg:w-[370px] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-[800px] overflow-y-auto mr-10 scroll-bar">
+    <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] flex-shrink-0 md:w-[450px] lg:w-[370px] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-[850px] overflow-y-auto mr-10 scroll-bar">
       {!isDesktop && (
         <div className="sticky top-0 bg-black z-10 py-3">
           <button
@@ -52,21 +40,12 @@ export default function Sidebar() {
             <p className="z-2 hover:text-black "> Preview resume</p>
           </button>
 
-          <PDFDownloadLink
+          <button
             className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-            document={
-              <Document>
-                <ResumePDF />
-              </Document>
-            }
-            fileName={
-              inputValue?.fullName
-                ? `${String(inputValue.fullName).split(' ').join('_')}_resume.pdf`
-                : 'resume.pdf'
-            }
+            onClick={() => downloadResume(fileName)}
           >
-            {({ loading }) => (loading ? 'Generating...' : 'Download resume')}
-          </PDFDownloadLink>
+            Download resume
+          </button>
         </div>
       )}
       {/* ================== Basic Info ================== */}

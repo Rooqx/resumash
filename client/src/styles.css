@@ -154,6 +154,7 @@ code {
   }
   .scroll-bar::-webkit-scrollbar {
     width: 8px;
+    display: none;
   }
   .scroll-bar::-webkit-scrollbar-track {
     background-color: transparent;

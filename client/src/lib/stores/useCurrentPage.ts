@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
 interface current {
-  page: 'tailorPage' | 'buildPage' | 'homePage'
-  setPage: (page: 'tailorPage' | 'buildPage' | 'homePage') => void
+  page: 'tailorPage' | 'buildPage' | 'homePage' | 'rxsmePage'
+  setPage: (page: 'tailorPage' | 'buildPage' | 'homePage' | 'rxsmePage') => void
 }
 
 export const useCurrentPage = create<current>((set) => ({

@@ -2,7 +2,6 @@ import { Outlet, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { useIsFetching } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
-import Header from '../components/Header'
 
 // Loading component
 function NavigationLoader() {
@@ -31,7 +30,6 @@ const isProd = import.meta.env.VITE_ENV === 'production'
 export const Route = createRootRoute({
   component: () => (
     <>
-      <Header />
       <Outlet />
       <NavigationLoader />
       {isProd ? (

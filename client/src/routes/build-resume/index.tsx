@@ -1,27 +1,25 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Document, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
-import { ChevronLeft } from 'lucide-react'
-import Sidebar from './components/SideContent'
+import Sidebar from '../../components/buildResumeComponent/SideContent'
 import App from '@/components/Layout'
 // import resumeData from '@/components/resume.json'
-
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
-import ResumeComponent from '@/resumeTemplates/template1/TSXTemplates'
 import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
 import { useDeviceType } from '@/lib/hooks/useDeviceHook'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 import SEO from '@/components/SEO'
+import { downloadResume } from '@/lib/serverActions/downloadPDF'
+import { PDFPreview } from '@/components/PdfUtils'
+// import { PdfPage, PdfPreviewArea } from '@/components/PdfUtils'
 
 export const Route = createFileRoute('/build-resume/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const [displayPdf, setDisplayPdf] = useState(false)
   const { inputValue, setInputData } = useInputStore()
   const { setFields } = useFieldStores()
   const { setTags } = useTagStore()
@@ -43,6 +41,9 @@ function RouteComponent() {
     setPage('buildPage')
   }, [page, setPage])
 
+  const fileName = inputValue?.fullName
+    ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
+    : 'resume.pdf'
   return (
     <App>
       <SEO
@@ -54,51 +55,34 @@ function RouteComponent() {
           My Resume
         </h2> */}
         {/* ================== Wrapper  ================== */}
-        <div className="w-full flex items-start gap-0 justify-center h-full ">
+        <div className="w-full flex items-start gap-0 justify-center h-full">
           {/* ================== Input Container  ================== */}
           <Sidebar />
 
           {/* ================== Resume Preview ================== */}
-          <div className="py-4 pr-4 w-full mt-10 lg:mt-5 flex justify-center">
-            <ResumeComponent />
+          {/* PDF Preview Section */}
+          <div className="w-[60%] h-[850px] overflow-auto p-2 scroll-bar">
+            <div className="scale-y-85 scale-x-85 -mt-20">
+              <PDFPreview showPageNumbers={true}>
+                <ResumePDF />
+              </PDFPreview>
+            </div>
           </div>
           {/* ================== PDF Actions (optional) ==================*/}
-          {
-            <div
-              className="fixed top-0 w-full h-full bg-black z-10"
-              style={{
-                display: displayPdf ? 'block' : 'none',
-                width: '100vw',
-                height: '100vh', // adapts to screen height
-                overflow: 'hidden',
-              }}
-            >
-              <button
-                className="text-sm flex gap-3 font-medium items-center px-6 py-3 bg-white rounded-xl text-black cursor-pointer"
-                onClick={() => setDisplayPdf(!displayPdf)}
-              >
-                <ChevronLeft size={24} /> Back
-              </button>
-              <PDFViewer style={{ width: '100%', height: '100%' }}>
-                <Document>
-                  <ResumePDF />
-                </Document>
-              </PDFViewer>
-            </div>
-          }
 
           {isDesktop && (
-            <div className="h-auto space-y-5 p-5 w-full">
+            <div className="h-auto space-y-5 p-5 w-[20%]">
               <div>
                 <button
                   className="py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
               before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
               hover:before:w-full hover:text-black border border-white"
-                  onClick={() => setDisplayPdf(!displayPdf)}
+                  onClick={() => downloadResume(fileName)}
                 >
-                  <p className="z-2 hover:text-black "> Preview resume</p>
+                  <p className="z-2 hover:text-black "> Download resume</p>
                 </button>
-                <PDFDownloadLink
+
+                {/* <div
                   className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
                   document={
                     <Document>
@@ -114,7 +98,7 @@ function RouteComponent() {
                   {({ loading }) =>
                     loading ? 'Generating...' : 'Download resume'
                   }
-                </PDFDownloadLink>
+                </div>*/}
               </div>
 
               {/* ==================More PDF Templates (optional) ==================*/}

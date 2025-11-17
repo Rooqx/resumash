@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Image, Link, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import { useEffect } from 'react'
+// import resumeData from '@/components/resume.json'
 import email from '/icons/mail.png'
 import github from '/icons/github.png'
 import mapPin from '/icons/map-pin.png'
@@ -9,452 +9,281 @@ import portfolio from '/icons/briefcase-business.png'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
+import './resume.css'
+import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 
-// ====================== Styles ======================
-const styles = StyleSheet.create({
-  page: {
-    backgroundColor: '#FFFFFF',
-    padding: 30,
-    fontFamily: 'Helvetica',
-    fontSize: 16,
-    lineHeight: 1,
-    color: '#000',
-    flexDirection: 'column',
-  },
-
-  header: {
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: 'black',
-    borderBottomStyle: 'solid',
-  },
-
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
-    marginBottom: 5,
-  },
-
-  label: {
-    fontSize: 10,
-    color: '#4a4a4a',
-    marginBottom: 8,
-    marginTop: 10,
-  },
-
-  contactInfo: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: -1,
-  },
-  link: {
-    textDecoration: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    marginRight: 5,
-    marginBottom: 3,
-  },
-  contactItem: {
-    fontSize: 9,
-    color: '#666666',
-    marginRight: 5,
-    marginBottom: -8,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-
-  section: {
-    marginBottom: 10,
-  },
-
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: 'black',
-    marginBottom: 2,
-    textTransform: 'uppercase',
-    paddingBottom: 3,
-  },
-
-  jobItem: {
-    marginBottom: 10,
-  },
-
-  jobHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 3,
-  },
-
-  company: { fontSize: 10, fontWeight: 'bold' },
-
-  position: {
-    fontSize: 9,
-    color: '#3a3a3a',
-    fontWeight: 'bold', // changed from semibold (unsupported)
-  },
-
-  date: {
-    fontSize: 9,
-    color: '#666666',
-    minWidth: 110,
-  },
-
-  jobSummary: {
-    fontSize: 9,
-    color: '#333333',
-    textAlign: 'justify',
-    lineHeight: 1.2,
-  },
-
-  jobHighlights: {
-    fontSize: 9,
-    color: '#333333',
-    textAlign: 'justify',
-    marginTop: 5,
-  },
-
-  educationItem: { marginBottom: 8 },
-
-  institution: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-
-  studyType: { fontSize: 9, color: '#4a4a4a' },
-
-  skillItem: { marginBottom: 2 },
-
-  skillName: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    marginBottom: 1,
-  },
-
-  skillLevel: {
-    fontSize: 8,
-    color: '#666666',
-    fontWeight: 'bold',
-  },
-
-  projectItem: { lineHeight: 0.65, marginBottom: 8 },
-
-  projectName: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-
-  projectDescription: {
-    fontSize: 9,
-    color: '#333333',
-    textAlign: 'justify',
-  },
-
-  languageItem: { fontSize: 9, marginBottom: 2 },
-})
-
-const ResumePDF: React.FC = () => {
+const ResumePDF = () => {
   // const { inputValue, fields, tagFields } = resumeData
   const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
   const tagFields = useTagStore((s) => s.fields)
+  const { page, setPage } = useCurrentPage()
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // put your logic here — this runs 1s after the last change
-    }, 1000)
+    setPage('rxsmePage')
+  }, [page, setPage])
 
-    return () => clearTimeout(timer) // clear old timer if dependencies change
-  }, [inputValue, tagFields, fields])
+  useEffect(() => {
+    // Hide header
+    const header = document.querySelector('header')
+    if (header && page === 'rxsmePage') header.style.display = 'none'
+
+    // Cleanup when leaving PDF route
+    return () => {
+      if (header) header.style.display = 'flex'
+    }
+  }, [])
   return (
-    <Page size="A4" style={styles.page}>
+    <main className="page">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.name}>{inputValue.fullName || 'Full Name'}</Text>
-        <Text style={styles.label}>
-          {inputValue.label || 'Job Title (e.g Frontend Engineer)'}
-        </Text>
-        <View style={styles.contactInfo}>
-          <View style={styles.contactItem}>
-            <Image
-              src={email}
-              style={{ width: 10, height: 10, marginRight: 3 }}
-            />
-            <Text>{inputValue.email || 'email@example.com'}</Text>
-          </View>
-          <View style={styles.contactItem}>
-            <Image
-              src={phone}
-              style={{ width: 10, height: 10, marginRight: 3 }}
-            />
-            <Text>{inputValue.phone || '(123) 456-7890'}</Text>
-          </View>
-          <Link
-            style={{
-              textDecoration: 'none',
-              ...styles.contactItem,
-            }}
-            src={inputValue.linkdlnUrl || '#'}
-          >
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-            >
-              <Image
-                src={linkdln}
-                style={{ width: 10, height: 10, marginRight: 3 }}
-              />{' '}
-              <Text>LinkedIn</Text>
-            </View>
-          </Link>
-          <Link
-            style={{
-              textDecoration: 'none',
-              ...styles.contactItem,
-            }}
-            src={inputValue.githubUrl || '#'}
-          >
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-            >
-              <Image
+      <div className="header">
+        <div className="name">{inputValue?.fullName || 'Full Name'}</div>
+        <div className="label">
+          {inputValue?.label || 'Job Title (e.g Frontend Engineer)'}
+        </div>
+        <div className="contactInfo">
+          <div className="contactItem flex justify-center items-center gap-1">
+            <img src={email} className="icon" />
+            <div>{inputValue?.email || 'email@example.com'}</div>
+          </div>
+          <div className="contactItem flex items-center justify-center gap-1">
+            <img src={phone} className="icon" />
+            <div>{inputValue?.phone || '(123) 456-7890'}</div>
+          </div>
+          <a className="link contactItem" href={inputValue?.linkdlnUrl || '#'}>
+            <div className="flex justify-center items-center gap-1">
+              <img src={linkdln} className="icon" />
+              <div>LinkedIn</div>
+            </div>
+          </a>
+          <a className="link contactItem" href={inputValue?.githubUrl || '#'}>
+            <div className="flex justify-center items-center">
+              <img
                 src={github}
-                style={{ width: 10, height: 10, marginRight: 5 }}
+                style={{ width: '10px', height: '10px', marginRight: '5px' }}
               />
-              <Text>GitHub</Text>
-            </View>
-          </Link>
-          {(inputValue.city || inputValue.country) && (
-            <View style={styles.contactItem}>
-              <Image
-                src={mapPin}
-                style={{ width: 10, height: 10, marginRight: 3 }}
-              />
-              <Text>
-                {' '}
-                {inputValue.city || 'City'}, {inputValue.country || 'Country'}
-              </Text>
-            </View>
+              <div>GitHub</div>
+            </div>
+          </a>
+          {(inputValue?.city || inputValue?.country) && (
+            <div className="flex justify-center items-center contactItem">
+              <img src={mapPin} className="icon" />
+              <div className="contactInfo">
+                {inputValue?.city || 'City'}, {inputValue?.country || 'Country'}
+              </div>
+            </div>
           )}
-          {inputValue.portfolioUrl && (
-            <Link
-              style={{
-                textDecoration: 'none',
-                ...styles.contactItem,
-              }}
-              src={inputValue?.portfolioUrl || '#'}
+          {inputValue?.portfolioUrl && (
+            <a
+              className="link contactItem"
+              href={inputValue?.portfolioUrl || '#'}
             >
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                }}
-              >
-                <Image
+              <div className="flex justify-center items-center">
+                <img
                   src={portfolio}
-                  style={{ width: 10, height: 10, marginRight: 5 }}
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    marginRight: '5px',
+                  }}
                 />
-                <Text>Portfolio</Text>
-              </View>
-            </Link>
+                <div>Portfolio</div>
+              </div>
+            </a>
           )}
-        </View>
-      </View>
+        </div>
+      </div>
 
       {/* Summary */}
-      {inputValue.summary && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Summary</Text>
-          <Text style={styles.jobSummary}>{inputValue.summary}</Text>
-        </View>
+      {inputValue?.summary && (
+        <div className="section">
+          <div className="sectionTitle">Summary</div>
+          <div className="jobSummary">{inputValue?.summary}</div>
+        </div>
       )}
 
       {/* Skills */}
-      {fields['skills']?.length > 0 && (
-        <View style={{ ...styles.section }}>
-          <Text style={styles.sectionTitle}>Skills</Text>
+      {fields['skills'] && fields['skills'].length > 0 && (
+        <div className="section">
+          <div className="sectionTitle">Skills</div>
+
           {fields['skills'].map((field, index) => (
-            <View key={index} style={{ lineHeight: 0.75, ...styles.skillItem }}>
-              <Text style={styles.skillName}>
-                {field.skillName || 'Skill Name'}
-              </Text>
-              <Text style={styles.skillLevel}>
+            <div key={index} className="skillItem">
+              <div className="skillName">
+                {field.skillName || 'Skill Category'}
+              </div>
+
+              <div className="skillLevel">
                 Technologies:{' '}
-                {((tagFields as any)[`skills-${index}`]?.tags?.length ?? 0) > 0
-                  ? (tagFields as any)[`skills-${index}`].tags.join(', ')
-                  : 'No technologies added'}
-              </Text>
-            </View>
+                {((tagFields as any)[`skills-${index}`]?.tags?.length ?? 0) >
+                0 ? (
+                  <span style={{ fontWeight: 'bold', color: '#3a3a3a' }}>
+                    {(tagFields as any)[`skills-${index}`]?.tags?.join(', ')}
+                  </span>
+                ) : (
+                  <span style={{ color: '#777' }}>No technologies added</span>
+                )}
+              </div>
+            </div>
           ))}
-        </View>
+        </div>
       )}
 
       {/* Work Experience */}
       {fields['experience']?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Work Experience</Text>
-          {fields['experience'].map((job, index) => (
-            <View key={index} style={styles.jobItem}>
-              <View style={styles.jobHeader}>
-                <View>
-                  <Text style={styles.company}>
+        <div className="section">
+          <div className="sectionTitle">Work Experience</div>
+          {fields['experience'].map((job: any, index: number) => (
+            <div key={index} className="jobItem">
+              <div className="jobHeader">
+                <div className="">
+                  <div className="company">
                     {job.companyName || 'Company Name'}
-                  </Text>
-                  <Text style={styles.position}>
+                  </div>
+                  <div className="position">
                     {job.jobPosition || 'Job Position'}
-                  </Text>
-                </View>
-                <Text style={styles.date}>
+                  </div>
+                </div>
+                <div className="date">
                   {job.jobStartDate || 'Start Date'} -{' '}
                   {job.jobEndDate || 'Present'}
-                </Text>
-              </View>
+                </div>
+              </div>
 
               {job.jobSummary && (
-                <Text style={styles.jobSummary}>{job.jobSummary}</Text>
+                <div className="jobSummary">{job.jobSummary}</div>
               )}
 
               {(tagFields as any)[`jobHighlights-${index}`]?.tags?.length >
                 0 && (
-                <View style={styles.jobHighlights}>
+                <ul className="jobHighlights list-disc">
                   {(tagFields as any)[`jobHighlights-${index}`].tags.map(
                     (item: string, i: number) => (
-                      <Text key={i}>• {item}</Text>
+                      <div key={i} className=" flex items-start">
+                        <b className="text-lg ">•</b>
+                        <div className="ml-2 mt-1 leading-5">{item}</div>
+                      </div>
                     ),
                   )}
-                </View>
+                </ul>
               )}
-            </View>
+            </div>
           ))}
-        </View>
+        </div>
       )}
+
       {/* Education */}
       {fields['education']?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
-          {fields['education'].map((edu, index) => (
-            <View
+        <div className="section">
+          <div className="sectionTitle">Education</div>
+          {fields['education'].map((edu: any, index: number) => (
+            <div
               key={index}
+              className="educationItem"
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 flexDirection: 'row',
-                ...styles.educationItem,
               }}
             >
-              <View>
-                <Text style={styles.institution}>
+              <div>
+                <div className="institution">
                   {edu.institution || 'Institution Name'}
-                </Text>
-                <Text style={styles.studyType}>
+                </div>
+                <div className="studyType">
                   {edu.studyType || 'Study Type'} in {edu.area || 'Area'}
-                </Text>
-              </View>
-              <View>
-                <Text style={styles.date}>
+                </div>
+              </div>
+              <div>
+                <div className="date">
                   {edu.startDate || 'Start'} - {edu.endDate || 'Present'}
-                </Text>
-              </View>
-            </View>
+                </div>
+              </div>
+            </div>
           ))}
-        </View>
+        </div>
       )}
+
       {/* Projects */}
       {fields['projects']?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Projects</Text>
-          {fields['projects'].map((project, index) => (
-            <View key={index} style={styles.projectItem}>
-              <Text style={styles.projectName}>
+        <div className="section">
+          <div className="sectionTitle">Projects</div>
+          {fields['projects'].map((project: any, index: number) => (
+            <div key={index} className="projectItem">
+              <div className="projectName">
                 {project.name || 'Project Name'}
-              </Text>
-              <Text style={styles.projectDescription}>
-                {project.description || 'Project description'}{' '}
+              </div>
+              <div className="projectDescription">
+                {project.description || 'Project description'}
                 {project[`projectTechnologies-${index}`]?.join(', ')}
-              </Text>
+              </div>
               {project.url && (
-                <Link
-                  style={{ marginTop: 5, ...styles.contactItem }}
-                  src={project.url}
+                <a
+                  className="contactItem"
+                  href={project.url}
+                  style={{ marginTop: '5px' }}
                 >
                   View Project
-                </Link>
+                </a>
               )}
-            </View>
+            </div>
           ))}
-        </View>
+        </div>
       )}
-      {/** #ToDO fix */}
+
       {/* Certificates */}
       {fields['certificates'] &&
         fields['certificates']?.length > 0 &&
         fields['certificates'].some(
-          (f) => f.certificateName && f.certificateName.trim() !== '',
+          (f: any) => f.certificateName && f.certificateName.trim() !== '',
         ) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certifications</Text>
-            {fields['certificates'].map((certificate, index) => (
-              <View key={index} style={styles.projectItem}>
-                <Text style={styles.projectName}>
-                  {certificate.certificateName}
-                </Text>
-                <Text style={styles.projectDescription}>
+          <div className="section">
+            <div className="sectionTitle">Certifications</div>
+            {fields['certificates'].map((certificate: any, index: number) => (
+              <div key={index} className="projectItem">
+                <div className="projectName">{certificate.certificateName}</div>
+                <div className="projectDescription">
                   {certificate.certificateIssuer
                     ? `Issued by ${certificate.certificateIssuer} – `
                     : ''}
                   {certificate.certificateDate
                     ? `(${certificate.certificateDate})`
                     : ''}
-                </Text>
+                </div>
                 {certificate.certificateUrl && (
-                  <Link
-                    style={styles.contactItem}
-                    src={certificate.certificateUrl}
-                  >
+                  <a className="contactItem" href={certificate.certificateUrl}>
                     View Certificate
-                  </Link>
+                  </a>
                 )}
-              </View>
+              </div>
             ))}
-          </View>
+          </div>
         )}
+
       {/* Awards */}
       {fields['awards']?.length > 0 &&
         fields['awards'].some(
           (f: any) => f.awardTitle && f.awardTitle.trim() !== '',
         ) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Awards</Text>
+          <div className="section">
+            <div className="sectionTitle">Awards</div>
             {fields['awards'].map((award: any, index: number) => (
-              <View key={index} style={styles.projectItem}>
-                <Text style={styles.projectName}>
+              <div key={index} className="projectItem">
+                <div className="projectName">
                   {award.awardTitle || award.title}
-                </Text>
-                <Text style={styles.projectDescription}>
+                </div>
+                <div className="projectDescription">
                   {award.awarder && `Awarded by ${award.awarder} – `}
                   {award.awardDate && `(${award.awardDate})`}
-                </Text>
+                </div>
                 {award.awardSummary && (
-                  <Text style={styles.projectDescription}>
-                    {award.awardSummary}
-                  </Text>
+                  <div className="projectDescription">{award.awardSummary}</div>
                 )}
-              </View>
+              </div>
             ))}
-          </View>
+          </div>
         )}
-    </Page>
+    </main>
   )
 }
 
