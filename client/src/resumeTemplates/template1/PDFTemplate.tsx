@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import resumeData from '@/components/resume.json'
+// import resumeData from '@/components/resume.json'
 import email from '/icons/mail.png'
 import github from '/icons/github.png'
 import mapPin from '/icons/map-pin.png'
@@ -12,10 +12,10 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 import './resume.css'
 
 const ResumePDF = () => {
-  const { inputValue, fields, tagFields } = resumeData
-  /* const { inputValue } = useInputStore()
+  // const { inputValue, fields, tagFields } = resumeData
+  const { inputValue } = useInputStore()
   const { fields } = useFieldStores()
-  const tagFields = useTagStore((s) => s.fields)*/
+  const tagFields = useTagStore((s) => s.fields)
 
   useEffect(() => {}, [inputValue, fields, tagFields])
 
