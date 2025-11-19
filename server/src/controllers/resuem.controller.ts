@@ -56,8 +56,7 @@ export async function generateResumePDF(zustandState: any) {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath:
-        "/opt/render/.cache/puppeteer/chrome/linux-142.0.7444.162/chrome-linux64/chrome",
+   executablePath: '/usr/bin/chromium',
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
