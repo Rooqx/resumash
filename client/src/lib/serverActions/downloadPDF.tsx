@@ -13,7 +13,7 @@ export async function downloadResume(fileName: string, setIsDownloading: any) {
   const payload = { inputValue, fields, tagFields }
   try {
     const res: any = await axios.post(
-      'http://localhost:5000/api/v1/resumes/download-resume',
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/resumes/download-resume`,
       payload,
       { responseType: 'blob' }, // IMPORTANT
     )
