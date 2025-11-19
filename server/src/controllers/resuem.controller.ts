@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { Request, Response, NextFunction } from "express";
+import { chromium } from "playwright";
 import { AppError, asyncHandler } from "../middlewares/error.middleware";
 import { ResponseHelper } from "../utils/responseHelper";
 import Job from "../services/job.service";
@@ -48,20 +49,13 @@ export const uploadResume = asyncHandler(
   }
 );
 
-import puppeteer from "puppeteer";
-
 export async function generateResumePDF(zustandState: any) {
   try {
     console.log("initializing pdf download");
 
-    const browser = await puppeteer.launch({
+    const browser = await chromium.launch({
       headless: true,
-   executablePath: '/usr/bin/chromium',
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
@@ -71,7 +65,7 @@ export async function generateResumePDF(zustandState: any) {
         JSON.stringify(zustandState)
       )}`,
       {
-        waitUntil: "networkidle0",
+        waitUntil: "networkidle",
       }
     );
 
