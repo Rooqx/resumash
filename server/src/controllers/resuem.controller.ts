@@ -1,5 +1,3 @@
-import multer from "multer";
-import path from "path";
 import fs from "fs";
 import type { Request, Response, NextFunction } from "express";
 import { AppError, asyncHandler } from "../middlewares/error.middleware";
@@ -52,25 +50,35 @@ export const uploadResume = asyncHandler(
 
 import puppeteer from "puppeteer";
 
-export async function generateResumePDF() {
+export async function generateResumePDF(zustandState: any) {
   try {
+    console.log("initializing pdf download");
+
     const browser = await puppeteer.launch({
       headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
     });
 
     const page = await browser.newPage();
-
     // Visit your Vite React page
-    await page.goto("http://localhost:3000/rxsme", {
-      waitUntil: "networkidle0",
-    });
+    await page.goto(
+      `http://localhost:3000/rxsme?data=${encodeURIComponent(
+        JSON.stringify(zustandState)
+      )}`,
+      {
+        waitUntil: "networkidle0",
+      }
+    );
 
     const pdfBuffer = await page.pdf({
       format: "A4",
-      width: "210mm",
-      height: "297mm",
-      margin: { top: "0cm", bottom: "0cm", left: "0cm", right: "0cm" },
       printBackground: true,
+      displayHeaderFooter: false,
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
     });
 
     await browser.close();

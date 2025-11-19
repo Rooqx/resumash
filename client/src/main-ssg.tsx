@@ -1,10 +1,11 @@
 import { StrictMode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
-import { ViteSSG } from 'vite-ssg'
+import { ViteReactSSG } from 'vite-react-ssg'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import type { RouteRecord } from 'vite-react-ssg'
 import './styles.css'
 
 // Create Query Client
@@ -43,7 +44,15 @@ export const App = () => (
 
 // This part is VERY important
 // vite-ssg needs this function to know how to render your app during the build
-export const createApp = ViteSSG(App, {
-  transformState: (state: any) => state,
-  includedRoutes: ['/', '/tailor-resume', '/build-resume'], // list of static routes
+const routes: Array<RouteRecord> = [
+  {
+    path: '/',
+    element: <App />,
+    entry: 'src/App.tsx',
+    // ... more routes or children
+  },
+]
+export const createApp = ViteReactSSG({
+  // no App, no paths
+  routes,
 })

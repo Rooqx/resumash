@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import Sidebar from '../../components/buildResumeComponent/SideContent'
 import App from '@/components/Layout'
 // import resumeData from '@/components/resume.json'
@@ -12,7 +13,7 @@ import { useDeviceType } from '@/lib/hooks/useDeviceHook'
 import { useCurrentPage } from '@/lib/stores/useCurrentPage'
 import SEO from '@/components/SEO'
 import { downloadResume } from '@/lib/serverActions/downloadPDF'
-import { PDFPreview } from '@/components/PdfUtils'
+
 // import { PdfPage, PdfPreviewArea } from '@/components/PdfUtils'
 
 export const Route = createFileRoute('/build-resume/')({
@@ -24,8 +25,9 @@ function RouteComponent() {
   const { setFields } = useFieldStores()
   const { setTags } = useTagStore()
   const queryClient = useQueryClient()
-  const { isDesktop } = useDeviceType()
+  const { isMobile, isDesktop } = useDeviceType()
   const { page, setPage } = useCurrentPage()
+  const [isDownloading, setIsDownloading] = useState<boolean>(false)
 
   const resumeData: any = queryClient.getQueryData(['tailoredResume'])
 
@@ -50,7 +52,7 @@ function RouteComponent() {
         title="Build Resume"
         description="Build your professional resume easily."
       />
-      <div className={`  space-y-4 bg-black text-white relative min-h-screen`}>
+      <div className={`  space-y-4 bg-black text-white relative h-auto`}>
         {/*  <h2 className="text-2xl font-semibold mb-2  w-full text-center">
           My Resume
         </h2> */}
@@ -61,11 +63,34 @@ function RouteComponent() {
 
           {/* ================== Resume Preview ================== */}
           {/* PDF Preview Section */}
-          <div className="w-[60%] h-[850px] overflow-auto p-2 scroll-bar">
-            <div className="scale-y-85 scale-x-85 -mt-20">
-              <PDFPreview showPageNumbers={true}>
+          <div className="w-full lg:w-[70%] flex justify-center items-center lg:items-start h-[600px] lg:h-[850px] overflow-auto scroll-bar mt-15 lg:mt-0 ">
+            <div className="">
+              {isMobile ? (
+                <div className="mt-20 cursor-grab scale-50">
+                  {/*    <PDFPreview showPageNumbers={true}>
                 <ResumePDF />
-              </PDFPreview>
+              </PDFPreview> */}
+                  <ResumePDF />
+                </div>
+              ) : (
+                <TransformWrapper
+                  initialScale={isDesktop ? 0.8 : 0.5}
+                  minScale={0.3}
+                  maxScale={0.9}
+                  centerOnInit={false}
+                  pinch={{ disabled: false }}
+                  wheel={{ step: 0.1 }}
+                >
+                  <TransformComponent>
+                    <div className="-mt-20 cursor-grab">
+                      {/*    <PDFPreview showPageNumbers={true}>
+                <ResumePDF />
+              </PDFPreview> */}
+                      <ResumePDF />
+                    </div>
+                  </TransformComponent>
+                </TransformWrapper>
+              )}
             </div>
           </div>
           {/* ================== PDF Actions (optional) ==================*/}
@@ -74,12 +99,27 @@ function RouteComponent() {
             <div className="h-auto space-y-5 p-5 w-[20%]">
               <div>
                 <button
-                  className="py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
+                  className={`py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
               before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white"
-                  onClick={() => downloadResume(fileName)}
+              hover:before:w-full hover:text-black border border-white ${isDownloading ? 'bg-[#ffffff96] cursor-not-allowed' : ''}`}
+                  onClick={() => downloadResume(fileName, setIsDownloading)}
+                  disabled={isDownloading}
                 >
-                  <p className="z-2 hover:text-black "> Download resume</p>
+                  {isDownloading ? (
+                    <div className="flex gap-2 items-center justify-center w-full z-2 hover:text-black text-[14px]">
+                      <span
+                        className={`inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin align-middle z-2 hover:border-black`}
+                        aria-label="Loading..."
+                        role="status"
+                      />{' '}
+                      <p className="z-2 hover:text-black ">Downloading...</p>
+                    </div>
+                  ) : (
+                    <p className="z-2 hover:text-black text-nowrap">
+                      {' '}
+                      Download resume
+                    </p>
+                  )}
                 </button>
 
                 {/* <div

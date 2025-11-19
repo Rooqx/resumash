@@ -13,11 +13,21 @@ import './resume.css'
 
 const ResumePDF = () => {
   // const { inputValue, fields, tagFields } = resumeData
-  const { inputValue } = useInputStore()
-  const { fields } = useFieldStores()
+  const { inputValue, setInputData } = useInputStore()
+  const { fields, setFields } = useFieldStores()
   const tagFields = useTagStore((s) => s.fields)
+  const { setTags } = useTagStore()
 
-  useEffect(() => {}, [inputValue, fields, tagFields])
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const data = urlParams.get('data')
+    if (data) {
+      const parsed = JSON.parse(data)
+      setInputData(parsed.inputValue)
+      setFields(parsed.fields)
+      setTags(parsed.tagFields)
+    }
+  }, [])
 
   return (
     <main className="page">

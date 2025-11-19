@@ -5,7 +5,9 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
 import type { UserConfig } from 'vite'
+import type { RouteRecord } from 'vite-react-ssg'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -17,6 +19,15 @@ export default defineConfig({
     nodePolyfills(),
     tailwindcss(),
   ],
+  ssgOptions: {
+    includedRoutes(
+      _paths: Array<string>,
+      _routes: Readonly<Array<RouteRecord>>,
+    ) {
+      // return array of route paths to pre-render
+      return ['/', '/tailor-resume', '/build-resume']
+    },
+  },
   server: {
     host: true,
   },
@@ -24,6 +35,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
+
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

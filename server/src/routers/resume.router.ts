@@ -6,14 +6,21 @@ import {
 } from "../controllers/resuem.controller";
 import uploadMiddleware from "../middlewares/uploads.middleware";
 import { logger } from "../utils/logger";
+import { AppError } from "../middlewares/error.middleware";
 const resumeRouter = Router();
 
 const upload = await uploadMiddleware();
 resumeRouter.post("/upload", upload.single("resume"), uploadResume);
 
-resumeRouter.get("/download-resume", async (req, res) => {
+resumeRouter.post("/download-resume", async (req, res) => {
   try {
-    const pdf = await generateResumePDF();
+    const { inputValue, fields, tagFields } = req.body;
+    if (!inputValue || !fields) {
+      throw new AppError("Missing resume data", 400);
+    }
+
+    const zustandState = { inputValue, fields, tagFields };
+    const pdf = await generateResumePDF(zustandState);
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "attachment; filename=resume.pdf");

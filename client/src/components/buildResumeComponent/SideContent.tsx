@@ -19,6 +19,7 @@ import useInputStore from '@/lib/stores/useInputStores'
 
 export default function Sidebar() {
   const [open, setOpen] = useState(true)
+  const [isDownloading, setIsDownloading] = useState<boolean>(false)
   const { inputValue } = useInputStore()
   const { isDesktop } = useDeviceType()
   const [displayPdf, setDisplayPdf] = useState(false)
@@ -27,6 +28,7 @@ export default function Sidebar() {
     ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
     : 'resume.pdf'
 
+  console.log(isDownloading)
   const sidebarContent = (
     <div className="shadow-[2px_5px_10px_rgba(197,197,197,0.3)] w-[100vw] flex-shrink-0 md:w-[450px] lg:w-[370px] bg-black text-white rounded-[1px] py-2 pb-6 px-4 max-h-[850px] overflow-y-auto mr-10 scroll-bar">
       {!isDesktop && (
@@ -42,9 +44,9 @@ export default function Sidebar() {
 
           <button
             className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-            onClick={() => downloadResume(fileName)}
+            onClick={() => downloadResume(fileName, setIsDownloading)}
           >
-            Download resume
+            {isDownloading ? 'Downloading...' : 'Download resume'}
           </button>
         </div>
       )}
@@ -76,12 +78,18 @@ export default function Sidebar() {
     return (
       <Drawer open={open} onOpenChange={setOpen} direction="left">
         <DrawerTrigger className="relative" asChild>
-          <Button
-            variant="outline"
-            className="absolute top-2.5 text-black bg-white left-4 z-50 lg:hidden"
-          >
-            Add Inputs
-          </Button>
+          <div>
+            <Button
+              variant="outline"
+              className="absolute top-2.5 text-black bg-zinc-100 left-4 z-50 lg:hidden"
+            >
+              Write on Resume
+            </Button>
+
+            <Button className="absolute top-2.5 text-white left-50 z-50 lg:hidden">
+              Change Template
+            </Button>
+          </div>
         </DrawerTrigger>
         <DrawerContent className="p-0">
           <DrawerClose asChild>

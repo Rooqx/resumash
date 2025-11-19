@@ -103,7 +103,6 @@ function DrawerTitle({
     <DrawerPrimitive.Title
       data-slot="drawer-title"
       aria-label="drawer-title"
-      aria-describedby="drawer-title"
       className={cn('text-foreground font-semibold', className)}
       {...props}
     />

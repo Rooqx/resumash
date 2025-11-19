@@ -1,12 +1,17 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import App from '@/components/Layout'
 import SEO from '@/components/SEO'
+import wakeServer from '@/lib/serverActions/wakeServer'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  useEffect(() => {
+    wakeServer(true)
+  }, [])
   return (
     <>
       <App>

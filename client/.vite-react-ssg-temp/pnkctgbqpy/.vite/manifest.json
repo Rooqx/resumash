@@ -1,0 +1,92 @@
+{
+  "_PDFTemplate-3h4ucpHh.js": {
+    "file": "assets/PDFTemplate-3h4ucpHh.js",
+    "name": "PDFTemplate",
+    "imports": [
+      "_useInputStores-B01ssLVm.js"
+    ]
+  },
+  "_SEO-ru4NyDif.js": {
+    "file": "assets/SEO-ru4NyDif.js",
+    "name": "SEO"
+  },
+  "_Textarea-BUz8-BoU.js": {
+    "file": "assets/Textarea-BUz8-BoU.js",
+    "name": "Textarea",
+    "imports": [
+      "_useInputStores-B01ssLVm.js"
+    ]
+  },
+  "_useInputStores-B01ssLVm.js": {
+    "file": "assets/useInputStores-B01ssLVm.js",
+    "name": "useInputStores"
+  },
+  "_wakeServer-_xVPpTf7.js": {
+    "file": "assets/wakeServer-_xVPpTf7.js",
+    "name": "wakeServer"
+  },
+  "src/main.tsx": {
+    "file": "main.mjs",
+    "name": "main",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/routes/rxsme.tsx?tsr-split=component",
+      "src/routes/index.tsx?tsr-split=component",
+      "src/routes/tailor-resume/index.tsx?tsr-split=component",
+      "src/routes/build-resume/index.tsx?tsr-split=component"
+    ]
+  },
+  "src/routes/build-resume/index.tsx?tsr-split=component": {
+    "file": "assets/index-BkJFlbHD.js",
+    "name": "index",
+    "src": "src/routes/build-resume/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_Textarea-BUz8-BoU.js",
+      "_useInputStores-B01ssLVm.js",
+      "_PDFTemplate-3h4ucpHh.js",
+      "_SEO-ru4NyDif.js",
+      "src/main.tsx"
+    ]
+  },
+  "src/routes/index.tsx?tsr-split=component": {
+    "file": "assets/index-D80tOvvW.js",
+    "name": "index",
+    "src": "src/routes/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_SEO-ru4NyDif.js",
+      "_wakeServer-_xVPpTf7.js",
+      "src/main.tsx"
+    ]
+  },
+  "src/routes/rxsme.tsx?tsr-split=component": {
+    "file": "assets/rxsme-DaLq98p0.js",
+    "name": "rxsme",
+    "src": "src/routes/rxsme.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_PDFTemplate-3h4ucpHh.js",
+      "src/main.tsx",
+      "_useInputStores-B01ssLVm.js"
+    ]
+  },
+  "src/routes/tailor-resume/index.tsx?tsr-split=component": {
+    "file": "assets/index-D4z2YT6i.js",
+    "name": "index",
+    "src": "src/routes/tailor-resume/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_Textarea-BUz8-BoU.js",
+      "_SEO-ru4NyDif.js",
+      "_wakeServer-_xVPpTf7.js",
+      "src/main.tsx",
+      "_useInputStores-B01ssLVm.js"
+    ]
+  },
+  "style.css": {
+    "file": "assets/style-COri1Mv2.css",
+    "src": "style.css"
+  }
+}

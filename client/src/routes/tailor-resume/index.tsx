@@ -56,7 +56,7 @@ function RouteComponent() {
   })
   useEffect(() => {
     setPage('tailorPage')
-    wakeServer()
+    wakeServer(false)
   }, [page, setPage])
 
   return (
