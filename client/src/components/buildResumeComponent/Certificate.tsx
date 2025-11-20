@@ -5,7 +5,6 @@ import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 export default function Certificate() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['certificates']?.length > 0
-
   return (
     <div className="space-y-4 mt-6">
       <span className="w-full flex justify-between items-start">
