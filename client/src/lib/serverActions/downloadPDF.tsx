@@ -15,7 +15,7 @@ export async function downloadResume(fileName: string, setIsDownloading: any) {
     import.meta.env.VITE_ENV === 'production'
       ? import.meta.env.VITE_BACKEND_URL
       : import.meta.env.VITE_DEVELOPMENT_BACKEND_URL
-  console.log('BACKEND_URL:', BACKEND_URL)
+
   try {
     const res: any = await axios.post(
       `${BACKEND_URL}/api/v1/resumes/download-resume`,
