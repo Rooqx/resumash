@@ -5,7 +5,7 @@ import { OpenAI } from "openai";
 import { AppError } from "../middlewares/error.middleware";
 import extractJSON from "../utils/extractJson";
 import { logger } from "../utils/logger";
-import resumeRewritePrompt from "../../prompts/resume-tailor";
+import resumeRewritePrompt from "../utils/prompts/resume-tailor";
 
 class Job {
   jobDescription: string;
