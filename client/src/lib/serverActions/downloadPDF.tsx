@@ -12,6 +12,7 @@ export async function downloadResume(fileName: string, setIsDownloading: any) {
   const tagFields = useTagStore.getState().fields
   const payload = { inputValue, fields, tagFields }
   const isProd = import.meta.env.VITE_ENV === 'production'
+  console.log("isProduction:", isProd)
   try {
     const res: any = await axios.post(
       `${isProd ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_DEVELOPMENT_BACKEND_URL}/api/v1/resumes/download-resume`,
