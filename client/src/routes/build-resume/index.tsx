@@ -40,6 +40,10 @@ function RouteComponent() {
   }, [resumeData])
 
   useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
     setPage('buildPage')
   }, [page, setPage])
 

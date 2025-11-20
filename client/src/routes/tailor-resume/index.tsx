@@ -54,6 +54,11 @@ function RouteComponent() {
       toast.error('Tailoring failed')
     },
   })
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   useEffect(() => {
     setPage('tailorPage')
     wakeServer(false)

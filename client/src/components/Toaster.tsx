@@ -6,7 +6,7 @@ export function ToasterProvider() {
       position="top-right"
       richColors
       closeButton
-      theme="light"
+      theme="dark"
       duration={3000}
     />
   )

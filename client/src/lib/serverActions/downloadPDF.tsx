@@ -11,13 +11,14 @@ export async function downloadResume(fileName: string, setIsDownloading: any) {
   const { fields } = useFieldStores.getState()
   const tagFields = useTagStore.getState().fields
   const payload = { inputValue, fields, tagFields }
+  const isProd = import.meta.env.VITE_ENV === 'production'
   try {
     const res: any = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/resumes/download-resume`,
+      `${isProd ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_DEVELOPMENT_BACKEND_URL}/api/v1/resumes/download-resume`,
       payload,
       { responseType: 'blob' }, // IMPORTANT
     )
-    console.log('fetch:', res)
+    // console.log('fetch:', res)
     const blob = new Blob([res.data], { type: 'application/pdf' })
 
     const url = URL.createObjectURL(blob)

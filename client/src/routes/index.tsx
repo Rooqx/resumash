@@ -12,6 +12,10 @@ function RouteComponent() {
   useEffect(() => {
     wakeServer(true)
   }, [])
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
   return (
     <>
       <App>

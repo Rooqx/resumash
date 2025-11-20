@@ -6,7 +6,7 @@ import React from 'react'
  */
 const Spinner: React.FC = () => (
   <span
-    className={`inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin align-middle`}
+    className={`inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin align-middle`}
     aria-label="Loading..."
     role="status"
   />
