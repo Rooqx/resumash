@@ -5,6 +5,11 @@ import { AppError, asyncHandler } from "../middlewares/error.middleware";
 import { ResponseHelper } from "../utils/responseHelper";
 import Job from "../services/job.service";
 import { logger } from "../utils/logger";
+import {
+  ENV,
+  FRONTEND_DEVELOPMENT_URL,
+  FRONTEND_PRODUCTION_URL,
+} from "../configs/env.configs";
 
 export const uploadResume = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -59,9 +64,13 @@ export async function generateResumePDF(zustandState: any) {
     });
 
     const page = await browser.newPage();
+    const FRONTEND_URL =
+      ENV === "development"
+        ? FRONTEND_DEVELOPMENT_URL
+        : FRONTEND_PRODUCTION_URL;
     // Visit your Vite React page
     await page.goto(
-      `http://localhost:3000/rxsme?data=${encodeURIComponent(
+      `${FRONTEND_URL}/rxsme?data=${encodeURIComponent(
         JSON.stringify(zustandState)
       )}`,
       {

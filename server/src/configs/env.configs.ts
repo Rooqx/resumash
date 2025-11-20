@@ -25,4 +25,6 @@ export const {
   REDIS_URI,
   HF_TOKEN,
   MODEL,
+  FRONTEND_PRODUCTION_URL,
+  FRONTEND_DEVELOPMENT_URL,
 } = process.env;
