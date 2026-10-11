@@ -35,3 +35,25 @@ test('mobile A4 view fits and zoom works', async ({ page }) => {
  const after=await page.locator('[aria-label="Resume preview"]').locator('..').getByText(/A4 ·/).textContent()
  expect(after).not.toBe(before)
 })
+
+test('tailoring restores original uploaded PDF and clears it on request',async ({page})=>{
+ await page.goto('/tailor-resume/')
+ const description=page.getByRole('textbox',{name:'Job description'})
+ await description.fill('Looking for a support professional with experience managing customer inquiries.')
+ await page.locator('input[type="file"]').setInputFiles({
+  name:'original-resume.pdf',
+  mimeType:'application/pdf',
+  buffer:Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF'),
+ })
+ await expect(page.getByText('original-resume.pdf',{exact:true})).toBeVisible()
+ // The debounce and the IndexedDB transaction both need to complete.
+ await expect.poll(async()=>page.evaluate(()=>Boolean(localStorage.getItem('resumash:tailor:v1')))).toBe(true)
+ await page.reload()
+ await expect(description).toHaveValue(/Looking for a support professional/)
+ await expect(page.getByText('original-resume.pdf',{exact:true})).toBeVisible()
+ await page.getByRole('button',{name:'Clear saved tailoring'}).click()
+ await expect(page.getByText('Choose your resume')).toBeVisible()
+ await page.reload()
+ await expect(page.getByText('Choose your resume')).toBeVisible()
+ await expect(description).toHaveValue('')
+})
