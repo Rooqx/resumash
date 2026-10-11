@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, FileCheck, FileText, Sparkles, UploadCloud } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,7 +13,14 @@ function TailorPage(){
  const [jobDescription,setJobDescription]=useState('')
  const [file,setFile]=useState<File|null>(null)
  const [result,setResult]=useState<TailoredResume|null>(null)
- const [view,setView]=useState<'tailored'|'original'>('tailored')
+ const [view,setView]=useState<'tailored'|'original'|'comparison'>('tailored')
+ const [originalUrl,setOriginalUrl]=useState<string|null>(null)
+ useEffect(()=>{
+  if(!file){setOriginalUrl(null);return}
+  const url=URL.createObjectURL(file)
+  setOriginalUrl(url)
+  return ()=>URL.revokeObjectURL(url)
+ },[file])
  const query=useQueryClient()
  const navigate=useNavigate()
  const mutation=useMutation({
@@ -51,9 +58,18 @@ function TailorPage(){
     </form>
     <section className="rs-card min-w-0 overflow-hidden p-4 md:p-6">
      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Resume preview</h2>{result&&<button className="rs-button rs-button-primary !min-h-[38px] !px-3" onClick={()=>navigate({to:'/build-resume'})}>Continue editing <ArrowRight size={15}/></button>}</div>
-     <div className="mb-4 flex gap-2"><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='tailored'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>setView('tailored')}>Tailored</button><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='original'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>setView('original')}>Original</button></div>
-     <div className="mx-auto min-h-[630px] w-full max-w-[550px] bg-white px-6 py-10 text-black shadow-lg md:px-10">
-      {view==='original'?<div className="flex h-96 flex-col items-center justify-center gap-3 text-center"><FileText size={32} className="text-neutral-500"/><p className="text-sm font-semibold">Original resume</p><p className="max-w-xs text-xs leading-6 text-neutral-500">Your uploaded resume remains unchanged. An in-browser PDF comparison viewer is not yet available.</p>{file&&<p className="text-xs text-neutral-500">{file.name}</p>}</div>:result?<><h3 className="font-serif text-3xl">{result.inputValue?.fullName||'Your Name'}</h3><p className="mt-1 text-sm text-neutral-600">{result.inputValue?.label}</p><p className="mt-3 text-xs text-neutral-500">{[result.inputValue?.email,result.inputValue?.phone,result.inputValue?.city].filter(Boolean).join(' · ')}</p>{result.inputValue?.summary&&<div className="mt-8"><h4 className="border-b pb-2 text-xs font-bold tracking-wider">SUMMARY</h4><p className="mt-3 text-xs leading-6">{result.inputValue.summary}</p></div>}{Object.entries(result.fields??{}).filter(([,entries])=>Array.isArray(entries)&&entries.length>0).map(([section,entries])=><div key={section} className="mt-8"><h4 className="border-b pb-2 text-xs font-bold tracking-wider">{section.toUpperCase()}</h4>{entries.map((entry,index)=><div key={index} className="mt-4 space-y-1 text-xs leading-6">{Object.entries(entry).filter(([,value])=>typeof value==='string'&&Boolean(value)).map(([key,value])=><p key={key}>{String(value)}</p>)}</div>)}</div>)}</>:<div className="flex h-96 flex-col items-center justify-center gap-4 text-center"><FileText size={35} className="text-neutral-400"/><p className="font-serif text-2xl">Your next chapter starts here.</p><p className="max-w-xs text-sm leading-6 text-neutral-500">Your tailored resume will appear here when the AI has finished processing your document.</p></div>}
+     <div className="mb-4 flex flex-wrap gap-2"><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='tailored'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>setView('tailored')}>Tailored</button><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='original'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>setView('original')}>Original</button><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='comparison'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>setView('comparison')}>Comparison</button></div>
+     <div className={view==='comparison'?'grid gap-4 xl:grid-cols-2':'grid grid-cols-1'}>
+      {(view==='original'||view==='comparison')&&<div className="min-w-0">
+       <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{color:'var(--rs-muted)'}}>Original resume</p>
+       {originalUrl?<iframe title="Original uploaded PDF" src={originalUrl} className="h-[650px] w-full rounded-lg border bg-white" style={{borderColor:'var(--rs-line)'}}/>:<div className="flex min-h-[450px] flex-col items-center justify-center gap-4 rounded-lg bg-white p-6 text-center text-black"><FileText size={32}/><p className="text-sm">Upload a PDF to preview your original resume.</p></div>}
+      </div>}
+      {(view==='tailored'||view==='comparison')&&<div className="min-w-0">
+       {view==='comparison'&&<p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{color:'var(--rs-muted)'}}>Tailored resume</p>}
+       <div className="mx-auto min-h-[630px] w-full bg-white px-5 py-10 text-black shadow-lg md:px-9">
+        result?<><h3 className="font-serif text-3xl">{result.inputValue?.fullName||'Your Name'}</h3><p className="mt-1 text-sm text-neutral-600">{result.inputValue?.label}</p><p className="mt-3 text-xs text-neutral-500">{[result.inputValue?.email,result.inputValue?.phone,result.inputValue?.city].filter(Boolean).join(' · ')}</p>{result.inputValue?.summary&&<div className="mt-8"><h4 className="border-b pb-2 text-xs font-bold tracking-wider">SUMMARY</h4><p className="mt-3 text-xs leading-6">{result.inputValue.summary}</p></div>}{Object.entries(result.fields??{}).filter(([,entries])=>Array.isArray(entries)&&entries.length>0).map(([section,entries])=><div key={section} className="mt-8"><h4 className="border-b pb-2 text-xs font-bold tracking-wider">{section.toUpperCase()}</h4>{entries.map((entry,index)=><div key={index} className="mt-4 space-y-1 text-xs leading-6">{Object.entries(entry).filter(([,value])=>typeof value==='string'&&Boolean(value)).map(([key,value])=><p key={key}>{String(value)}</p>)}</div>)}</div>)}</><div className="flex h-96 flex-col items-center justify-center gap-4 text-center"><FileText size={35} className="text-neutral-400"/><p className="font-serif text-2xl">Your next chapter starts here.</p><p className="max-w-xs text-sm leading-6 text-neutral-500">Your tailored resume will appear here when the AI has finished processing your document.</p></div>}
+       </div>
+      </div>}
      </div>
     </section>
     <aside className="rs-card p-5 md:p-6"><div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">AI insights</h2></div><p className="mt-3 text-sm leading-7" style={{color:'var(--rs-muted)'}}>The AI uses the job description to rewrite relevant information from your existing resume.</p><div className="mt-6 space-y-4">{['Review every generated statement for accuracy.','Emphasize relevant experience and skills.','Add measurable results only when they are genuine.'].map((tip,index)=><div key={tip} className="flex gap-3 border-t pt-4 text-sm leading-6" style={{borderColor:'var(--rs-line)'}}><span className="text-xs" style={{color:'var(--rs-muted)'}}>0{index+1}</span><span>{tip}</span></div>)}</div><p className="mt-7 text-xs leading-6" style={{color:'var(--rs-muted)'}}>Detailed change-by-change suggestions require additional backend response data. No match scores or recommendations are fabricated.</p></aside>
