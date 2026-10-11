@@ -94,9 +94,9 @@ function Section({
   return (
     <View style={[
       styles.section,
-      {marginBottom:templateConfigs[template].sectionSpacing},
       template === 'classic' ? styles.classicSection : {},
       template === 'executive' ? styles.executiveSection : {},
+      {marginBottom:templateConfigs[template].sectionSpacing},
     ]}>
       <Text style={[
         styles.sectionTitle,
@@ -257,9 +257,9 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
         ]}>
           <Text style={[
             styles.name,
-            {fontSize:templateConfigs[template].nameFontSize * 0.75},
             template === 'classic' ? styles.classicName : {},
             template === 'executive' ? styles.executiveName : {},
+            {fontSize:templateConfigs[template].nameFontSize * 0.75},
           ]}>{text(basics.fullName) || 'Your Name'}</Text>
           {!!text(basics.label) && <Text style={styles.role}>{text(basics.label)}</Text>}
           {!!contact && <Text style={styles.contact}>{contact}</Text>}
