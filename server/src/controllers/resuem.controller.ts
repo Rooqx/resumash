@@ -1,3 +1,4 @@
+import { tailorInputSchema, resumeOutputSchema } from "../modules/resume/resume.schema";
 import fs from "fs";
 import type { Request, Response, NextFunction } from "express";
 import { chromium } from "playwright";
