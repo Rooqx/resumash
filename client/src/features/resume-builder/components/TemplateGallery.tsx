@@ -4,6 +4,8 @@ import { resumeTemplates, type ResumeTemplateId } from '../templates/registry'
 import { sampleResume } from '../templates/sampleResume'
 import ResumeDocument from '../templates/ResumeDocument'
 import A4Preview from './A4Preview'
+import useInputStore from '@/lib/stores/useInputStores'
+import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 
 interface Props {
   selected: ResumeTemplateId
@@ -17,6 +19,10 @@ interface Props {
  */
 export default function TemplateGallery({ selected, onSelect }: Props) {
   const [open, setOpen] = useState<ResumeTemplateId|null>(null)
+  const role = useInputStore(s=>s.inputValue.label??'')
+  const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
+  const recommended: ResumeTemplateId = /(?:director|executive|head of|chief|vice president|manager)/i.test(role)
+    ? 'executive' : experienceCount===0 ? 'classic' : 'modern'
   return <>
     <section className="mb-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -35,7 +41,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
           <div className="mt-3 flex items-start justify-between gap-2">
             <div><h3 className="text-sm font-semibold">{item.name}</h3>
               <p className="mt-1 text-xs leading-5" style={{color:'var(--rs-muted)'}}>{item.description}</p></div>
-            {item.id==='modern'&&<span className="rounded border px-2 py-1 text-[10px]">Recommended</span>}
+            {item.id===recommended&&<span className="rounded border px-2 py-1 text-[10px]">Recommended</span>}
           </div>
           <p className="mt-2 text-xs" style={{color:'var(--rs-muted)'}}>Best for: {item.bestFor}</p>
           <div className="mt-4 flex gap-2">
