@@ -21,8 +21,9 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
   const [open, setOpen] = useState<ResumeTemplateId|null>(null)
   const role = useInputStore(s=>s.inputValue.label??'')
   const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
+  const earlyCareerEvidence = useFieldStores(s=>(s.fields.education?.length??0)+(s.fields.projects?.length??0))
   const recommended: ResumeTemplateId = /(?:director|executive|head of|chief|vice president|manager)/i.test(role)
-    ? 'executive' : experienceCount===0 ? 'classic' : 'modern'
+    ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'modern'
   return <>
     <section className="mb-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
