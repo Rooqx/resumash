@@ -1,14 +1,15 @@
 import { ArrowRight, FileText } from 'lucide-react'
-import type { TailoredResume } from '../schemas'
+import type { TailoringResponse } from '../schemas'
 
 export type ResumeView = 'original' | 'tailored' | 'comparison'
 
 interface ResumeReviewProps {
-  result: TailoredResume | null
+  result: TailoringResponse | null
   originalUrl: string | null
   view: ResumeView
   onViewChange: (view: ResumeView) => void
   onContinue: () => void
+  canContinue: boolean
 }
 
 export default function ResumeReview({
@@ -17,10 +18,11 @@ export default function ResumeReview({
   view,
   onViewChange,
   onContinue,
+  canContinue,
 }: ResumeReviewProps) {
   return (
     <section className="rs-card min-w-0 overflow-hidden p-4 md:p-6">
-     <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Resume preview</h2>{result&&<button className="rs-button rs-button-primary !min-h-[38px] !px-3" onClick={onContinue}>Continue editing <ArrowRight size={15}/></button>}</div>
+     <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Resume preview</h2>{result&&<button disabled={!canContinue} onClick={onContinue} title={!canContinue?'Review and approve the proposed draft first':undefined} className="rs-button rs-button-primary !min-h-[38px] !px-3 disabled:opacity-40">Continue editing <ArrowRight size={15}/></button>}</div>
      <div className="mb-4 flex flex-wrap gap-2"><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='tailored'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>onViewChange('tailored')}>Tailored</button><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='original'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>onViewChange('original')}>Original</button><button type="button" className={`rs-button !min-h-9 !px-3 !py-2 text-xs ${view==='comparison'?'rs-button-primary':'rs-button-outline'}`} onClick={()=>onViewChange('comparison')}>Comparison</button></div>
      <div className={view==='comparison'?'grid gap-4 xl:grid-cols-2':'grid grid-cols-1'}>
       {(view==='original'||view==='comparison')&&<div className="min-w-0">
