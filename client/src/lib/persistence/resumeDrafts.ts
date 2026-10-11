@@ -66,15 +66,22 @@ function openDatabase(): Promise<IDBDatabase> {
     request.onsuccess = () => resolve(request.result)
   })
 }
+/**
+ * IndexedDB requests can succeed before the containing transaction commits.
+ * Resolve only once tx.oncomplete confirms durable persistence.
+ */
 async function withFileStore<T>(mode: IDBTransactionMode, callback: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
   const db = await openDatabase()
   try {
     return await new Promise<T>((resolve, reject) => {
+      let value: T
       const tx = db.transaction('files', mode)
       const request = callback(tx.objectStore('files'))
-      request.onsuccess = () => resolve(request.result)
+      request.onsuccess = () => { value = request.result }
       request.onerror = () => reject(request.error)
-      tx.onerror = () => reject(tx.error)
+      tx.oncomplete = () => resolve(value)
+      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'))
+      tx.onerror = () => reject(tx.error ?? new Error('IndexedDB transaction failed'))
     })
   } finally { db.close() }
 }
