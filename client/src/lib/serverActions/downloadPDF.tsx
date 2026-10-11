@@ -4,20 +4,20 @@ import useInputStore from '../stores/useInputStores'
 import useFieldStores from '../stores/useMultipleFieldStore'
 import { useTagStore } from '../stores/useInputTags'
 
-export async function downloadResume(fileName: string, setIsDownloading: any) {
+export async function downloadResume(fileName: string, setIsDownloading: (value: boolean) => void, template: 'classic'|'modern'|'executive' = 'modern') {
   setIsDownloading(true)
   // used .getState() because it important if u want to use with scrapers
   const { inputValue } = useInputStore.getState()
   const { fields } = useFieldStores.getState()
   const tagFields = useTagStore.getState().fields
-  const payload = { inputValue, fields, tagFields }
+  const payload = { inputValue, fields, tagFields, templateId: template }
   const BACKEND_URL =
     import.meta.env.VITE_ENV === 'production'
       ? import.meta.env.VITE_BACKEND_URL
       : import.meta.env.VITE_DEVELOPMENT_BACKEND_URL
 
   try {
-    const res: any = await axios.post(
+    const res = await axios.post<Blob>(
       `${BACKEND_URL}/api/v1/resumes/download-resume`,
       payload,
       { responseType: 'blob' }, // IMPORTANT
