@@ -2,6 +2,10 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { AppError } from "../../middlewares/error.middleware";
 
+/** Maximum number of simultaneous model requests on each API instance. */
+const MAX_CONCURRENT_GENERATIONS = 6;
+let activeGenerations = 0;
+
 /**
  * Lightweight Fireworks-compatible generation gateway.
  * Keeping this single function avoids a provider class hierarchy until a
@@ -26,6 +30,12 @@ export async function generateJson<T extends z.ZodTypeAny>(
     timeout: 60_000,
     maxRetries: 1,
   });
+  // Cap in-flight paid calls per Express instance. This is independent
+  // of per-IP Redis quotas and protects against traffic from many IPs.
+  if (activeGenerations >= MAX_CONCURRENT_GENERATIONS) {
+    throw new AppError("AI service is busy. Please retry shortly.", 503);
+  }
+  activeGenerations++;
   let response: string | undefined | null;
   try {
     const completion = await client.chat.completions.create({
@@ -40,6 +50,8 @@ export async function generateJson<T extends z.ZodTypeAny>(
     response = completion.choices[0]?.message?.content;
   } catch {
     throw new AppError("AI service is temporarily unavailable", 502);
+  } finally {
+    activeGenerations--;
   }
   if (!response || response.length > 100_000) {
     throw new AppError("AI generated an empty or oversized response", 502);
