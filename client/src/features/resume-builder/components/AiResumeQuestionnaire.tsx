@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { z } from 'zod'
 import { builderResponseSchema, type BuilderResponse } from '@/features/resume-tailor/schemas'
@@ -58,6 +58,33 @@ const responseSchema = z.object({
   data: builderResponseSchema,
 })
 
+const AI_QUESTIONNAIRE_KEY = 'resumash:builder:questionnaire:v1'
+const storedQuestionnaireSchema = z.object({
+ step: z.number().int().min(0).max(3),
+ answers: z.object({
+  fullName: z.string(), email: z.string(), phone: z.string(),
+  location: z.string(), targetRole: z.string(),
+  careerLevel: z.enum(['student','entry','mid','senior']),
+  experience: z.array(z.object({
+   company:z.string(),position:z.string(),startDate:z.string(),
+   endDate:z.string(),responsibilities:z.string(),
+  })),
+  education: z.array(z.object({
+   institution:z.string(),degree:z.string(),dates:z.string(),
+   startDate:z.string(),endDate:z.string(),
+  })),
+  projects: z.array(z.object({name:z.string(),description:z.string()})),
+  skills:z.string(), additionalInfo:z.string(),
+ }),
+ draft: builderResponseSchema.nullable(),
+})
+function restoreQuestionnaire(): z.infer<typeof storedQuestionnaireSchema> | null {
+ try {
+  const saved=localStorage.getItem(AI_QUESTIONNAIRE_KEY)
+  return saved?storedQuestionnaireSchema.parse(JSON.parse(saved)):null
+ } catch { return null }
+}
+
 const fieldClass = 'mt-2 w-full rounded-lg border bg-transparent px-3 py-2.5 text-sm outline-offset-2'
 const fieldStyle = { borderColor: 'var(--rs-line)' }
 
@@ -66,11 +93,25 @@ const fieldStyle = { borderColor: 'var(--rs-line)' }
  * Work history is optional; students can describe projects or education instead.
  */
 export default function AiResumeQuestionnaire({ onDraft, onClose }: QuestionnaireProps) {
-  const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<Answers>(initialAnswers)
+  const [restored] = useState(()=>restoreQuestionnaire())
+  const [step, setStep] = useState(restored?.step??0)
+  const [answers, setAnswers] = useState<Answers>(restored?.answers??initialAnswers)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [draft,setDraft] = useState<BuilderResponse|null>(null)
+  const [draft,setDraft] = useState<BuilderResponse|null>(restored?.draft??null)
+  useEffect(()=>{
+   const timer=window.setTimeout(()=>{
+    try { localStorage.setItem(AI_QUESTIONNAIRE_KEY,JSON.stringify({step,answers,draft})) }
+    catch { /* Browser may disallow storage in private mode. */ }
+   },350)
+   return ()=>window.clearTimeout(timer)
+  },[step,answers,draft])
+
+  const acceptDraft=()=>{
+   if(!draft)return
+   try { localStorage.removeItem(AI_QUESTIONNAIRE_KEY) } catch {}
+   onDraft(draft)
+  }
 
   function update<K extends keyof Answers>(key: K, value: Answers[K]) {
     setAnswers(current => ({ ...current, [key]: value }))
@@ -180,7 +221,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
             style={{ backgroundColor: i <= step ? 'var(--rs-ink)' : 'var(--rs-line)' }} />
         ))}
       </div>
-      {draft&&<div className="mb-6 space-y-4 rounded-xl border p-4" style={{borderColor:'var(--rs-line)'}}><h3 className="text-lg font-semibold">Review your AI draft</h3><p className="text-sm">Generated summary: {draft.inputValue.summary}</p>{draft.writingNotes.map((note,i)=><p key={i} className="text-xs">{note}</p>)}{draft.clarificationQuestions.length>0&&<div><h4 className="text-sm font-semibold">Questions that could improve your resume</h4>{draft.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question} — {q.reason}</p>)}</div>}<p className="text-xs">AI wording is unverified. Check claims in the editor before using the resume.</p><div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-primary" onClick={()=>onDraft(draft)}>Accept draft and edit</button><button type="button" className="rs-button rs-button-outline" onClick={()=>setDraft(null)}>Return to answers</button></div></div>}
+      {draft&&<div className="mb-6 space-y-4 rounded-xl border p-4" style={{borderColor:'var(--rs-line)'}}><h3 className="text-lg font-semibold">Review your AI draft</h3><p className="text-sm">Generated summary: {draft.inputValue.summary}</p>{draft.writingNotes.map((note,i)=><p key={i} className="text-xs">{note}</p>)}{draft.clarificationQuestions.length>0&&<div><h4 className="text-sm font-semibold">Questions that could improve your resume</h4>{draft.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question} — {q.reason}</p>)}</div>}<p className="text-xs">AI wording is unverified. Check claims in the editor before using the resume.</p><div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-primary" onClick={acceptDraft}>Accept draft and edit</button><button type="button" className="rs-button rs-button-outline" onClick={()=>setDraft(null)}>Return to answers</button></div></div>}
       {!draft&&<form onSubmit={event => { event.preventDefault(); if (step < 3) next(); else void generateResume() }}>
         {step === 0 && (
           <div className="grid gap-4 md:grid-cols-2">
