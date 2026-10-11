@@ -1,4 +1,5 @@
-import { createElement } from 'react'
+import { createElement, type ReactElement } from 'react'
+import type { DocumentProps } from '@react-pdf/renderer'
 import { toast } from 'sonner'
 import useInputStore from '../stores/useInputStores'
 import useFieldStores from '../stores/useMultipleFieldStore'
@@ -42,7 +43,9 @@ export async function downloadResume(
       throw new Error('Please enter your name before exporting the resume.')
     }
 
-    const blob = await pdf(createElement(ResumePdfDocument, { snapshot, template })).toBlob()
+    // ResumePdfDocument always returns a React PDF <Document> root.
+    const documentElement = createElement(ResumePdfDocument, { snapshot, template }) as ReactElement<DocumentProps>
+    const blob = await pdf(documentElement).toBlob()
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
 
