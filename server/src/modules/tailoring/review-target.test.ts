@@ -36,12 +36,12 @@ test("accepts exact source-backed field references", () => {
 });
 
 test("rejects stale or fabricated field references", () => {
- const item = { ...fixture.suggestions[0], original: "Another unrelated sentence" };
+ const item = { ...fixture.suggestions[0]!, original: "Another unrelated sentence" };
  expect(validReviewTarget(fixture.resume, item)).toBe(false);
  expect(validatedReviewSuggestions({ ...fixture, suggestions: [item] }, "Maintained daily inventory records")).toHaveLength(0);
 });
 
 test("rejects fake provenance or duplicate target proposals", () => {
  expect(validatedReviewSuggestions(fixture, "No matching citation here")).toHaveLength(0);
- expect(validatedReviewSuggestions({ ...fixture, suggestions: [fixture.suggestions[0], fixture.suggestions[0]] }, "Maintained daily inventory records")).toHaveLength(1);
+ expect(validatedReviewSuggestions({ ...fixture, suggestions: [fixture.suggestions[0]!, fixture.suggestions[0]!] }, "Maintained daily inventory records")).toHaveLength(1);
 });
