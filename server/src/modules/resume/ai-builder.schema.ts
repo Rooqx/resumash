@@ -23,6 +23,8 @@ export const questionnaireSchema = z.object({
     institution: z.string().trim().min(1).max(160),
     degree: z.string().trim().max(150).default(""),
     dates: z.string().trim().max(70).default(""),
+    startDate: z.string().trim().max(40).default(""),
+    endDate: z.string().trim().max(40).default(""),
   })).max(10).default([]),
   projects: z.array(z.object({
     name: z.string().trim().min(1).max(160),
