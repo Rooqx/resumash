@@ -1,9 +1,10 @@
+import { tailorInputSchema } from "../modules/resume/resume.schema";
+import { tailorResume } from "../modules/tailoring/tailor.service";
 import fs from "fs";
 import type { Request, Response, NextFunction } from "express";
 import { chromium } from "playwright";
 import { AppError, asyncHandler } from "../middlewares/error.middleware";
 import { ResponseHelper } from "../utils/responseHelper";
-import Job from "../services/job.service";
 import { logger } from "../utils/logger";
 import {
   ENV,
@@ -12,49 +13,21 @@ import {
 } from "../configs/env.configs";
 
 export const uploadResume = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.body) {
-      throw new AppError("No body added", 400);
+  async (req: Request, res: Response) => {
+    const parsed = tailorInputSchema.safeParse(req.body);
+    if (!parsed.success) throw new AppError("Invalid job description (20–20,000 characters required)", 400);
+    const resume = req.file?.buffer;
+    // Check bytes: client-provided MIME and extension are not trustworthy.
+    if (!resume || resume.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      throw new AppError("Upload a valid PDF resume", 400);
     }
-    const { jobDescription } = req.body;
-
-    if (!jobDescription)
-      throw new AppError("Job description missing in the request body", 400);
-
-    //Stringy Job description best practice for ai prompting
-    const formattedJobDesc = JSON.stringify(jobDescription);
-
-    if (!req.file) {
-      throw new AppError("No file added", 400);
-    }
-
-    //Get file path
-    const fileUrl = await `uploads/${req?.file?.filename}`;
-
-    const newResume = new Job(formattedJobDesc, fileUrl);
-
-    const data = await newResume.returnTailorResume();
-    if (!data) {
-      throw new AppError("Data not added", 404);
-    }
-    logger.info("Resume Tailor Successful");
-    fs.rm(fileUrl, { recursive: true, force: true }, (err) => {
-      if (err) throw err;
-      logger.info(`File ${fileUrl} deleted successfully`);
-    });
-    return ResponseHelper.success(
-      res,
-      {
-        /* fileName: req?.file?.filename,
-        filePath: fileUrl,*/
-        data,
-      },
-      "File uploaded successfully!"
-    );
+    // AI input and parsing remain in memory: no public upload paths.
+    const result = await tailorResume(resume, parsed.data.jobDescription);
+    return ResponseHelper.success(res, { data: result }, "Resume tailored successfully");
   }
 );
 
-export async function generateResumePDF(zustandState: any) {
+export async function generateResumePDF(zustandState: any, template: "classic" | "modern" | "executive" = "modern") {
   try {
     console.log("initializing pdf download");
 
@@ -70,7 +43,7 @@ export async function generateResumePDF(zustandState: any) {
         : FRONTEND_PRODUCTION_URL;
     // Visit your Vite React page
     await page.goto(
-      `${FRONTEND_URL}/rxsme?data=${encodeURIComponent(
+      `${FRONTEND_URL}/rxsme?template=${encodeURIComponent(template)}&data=${encodeURIComponent(
         JSON.stringify(zustandState)
       )}`,
       {

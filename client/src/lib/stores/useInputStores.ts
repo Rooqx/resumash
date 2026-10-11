@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface InputState {
   inputValue: Record<string, string> // key value pairs for all input
@@ -6,7 +7,7 @@ interface InputState {
   setInputData: (data: Record<string, string>) => void
   reset: () => void
 }
-const useInputStore = create<InputState>((set) => ({
+const useInputStore = create<InputState>()(persist((set) => ({
   inputValue: {},
   setInputValue: (name: string, value: string) =>
     set((state) => ({
@@ -14,6 +15,6 @@ const useInputStore = create<InputState>((set) => ({
     })),
   setInputData: (data) => set({ inputValue: data }),
   reset: () => set({ inputValue: {} }),
-}))
+}), { name: 'resumash:builder:inputs:v1', storage: createJSONStorage(() => localStorage), partialize: state => ({ inputValue: state.inputValue }) }))
 
 export default useInputStore

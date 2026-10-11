@@ -1,0 +1,54 @@
+/* Text-first, linear DOM order and print-safe resume documents.
+   No tables, sidebar grids, rasterized text, icons or skill bars. */
+.rs-document { width:794px; min-height:1122px; box-sizing:border-box; padding:52px 58px; background:#fff!important; color:#171717!important; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:1.42; box-shadow:0 6px 22px #0001; }
+.rs-document-content { width:100%; overflow-wrap:break-word; }
+.rs-document h1,.rs-document h2,.rs-document h3,.rs-document p { margin:0; color:inherit; }
+.rs-document .resume-header { padding-bottom:12px; margin-bottom:15px; border-bottom:1px solid #333; }
+.rs-document .resume-header h1 { font-size:30px; line-height:1.1; letter-spacing:-.03em; font-weight:700; }
+.rs-document .resume-role { font-size:14px; margin-top:5px; }
+.rs-document .resume-contacts { font-size:11px; margin-top:9px; line-height:1.5; }
+.rs-document .resume-contacts a { color:inherit; text-decoration:none; }
+.rs-document .resume-section { margin-bottom:16px; break-inside:auto; }
+.rs-document .resume-section > h2 { font-size:12px; letter-spacing:.085em; text-transform:uppercase; font-weight:700; margin:0 0 9px; padding-bottom:4px; border-bottom:1px solid #aaa; }
+.rs-document .resume-entry { margin-bottom:11px; break-inside:avoid; }
+.rs-document .resume-entry-top { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:2px 12px; }
+.rs-document .resume-entry h3 { font-size:13px; font-weight:700; }
+.rs-document .resume-subheading { font-size:12px; margin-top:1px; }
+.rs-document .resume-date { font-size:11px; white-space:nowrap; }
+.rs-document .resume-paragraph { font-size:12px; line-height:1.5; margin-top:5px; white-space:pre-line; }
+.rs-document .resume-bullets { padding-left:18px; margin:5px 0 0; list-style:disc; }
+.rs-document .resume-bullets li { margin:2px 0; font-size:12px; line-height:1.5; }
+.rs-document .resume-skill { font-size:12px; margin:3px 0; }
+.rs-document .resume-skill strong { margin-right:7px; }
+/* Recruiter Standard — quick scan, familiar headings, compact evidence. */
+.rs-template-modern { font-family:Arial,Helvetica,sans-serif; padding:48px 55px; }
+.rs-template-modern .resume-header { border-bottom:2px solid #202a30; margin-bottom:13px; }
+.rs-template-modern .resume-header h1 { font-size:29px; color:#182329; }
+.rs-template-modern .resume-section > h2 { letter-spacing:.075em; border-bottom:1px solid #cfd7db; }
+.rs-template-modern .resume-section { margin-bottom:13px; }
+
+/* Emerging Talent — a clear, academic-inspired hierarchy: education and
+   projects precede job history when this layout is selected. */
+.rs-template-classic { font-family:Georgia,'Times New Roman',serif; padding:44px 57px; color:#203946!important; }
+.rs-template-classic .resume-header { text-align:left; border-bottom:1.5px solid #304752; }
+.rs-template-classic .resume-header h1 { font-size:29px; letter-spacing:-.015em; }
+.rs-template-classic .resume-role { color:#405764; }
+.rs-template-classic .resume-section > h2 { border-bottom:1px solid #8d9da4; letter-spacing:.035em; }
+.rs-template-classic .resume-section { margin-bottom:12px; }
+.rs-template-classic .resume-entry h3 { font-size:13px; }
+
+/* Leadership Profile — restrained executive editorial feel without sidebar,
+   photo or text rendered as imagery; remains a linear, selectable document. */
+.rs-template-executive { font-family:Cambria,Georgia,serif; padding:58px 66px; color:#242d25!important; }
+.rs-template-executive .resume-header { border-bottom:0; padding-bottom:20px; margin-bottom:16px; }
+.rs-template-executive .resume-header h1 { font-size:38px; font-weight:400; letter-spacing:-.04em; }
+.rs-template-executive .resume-role { font-size:13px; text-transform:uppercase; letter-spacing:.105em; }
+.rs-template-executive .resume-section > h2 { border-bottom:0; border-top:1px solid #7a8378; padding-top:8px; font-size:12px; letter-spacing:.12em; }
+.rs-template-executive .resume-section { margin-bottom:19px; }
+.rs-template-executive .resume-entry { margin-bottom:15px; }
+@media print {
+ @page { size:A4; margin:0; }
+ html,body,#app { margin:0!important; padding:0!important; background:#fff!important; }
+ .rs-document { width:210mm; min-height:297mm; padding:14mm 16mm; margin:0; box-shadow:none; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+ .rs-document .resume-entry { break-inside:avoid; }
+}

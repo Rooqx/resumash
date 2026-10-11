@@ -22,7 +22,8 @@
     "pdfjs-dist": "^5.4.296",
     "playwright": "^1.56.1",
     "redis": "^5.8.2",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -40,6 +41,9 @@
   "scripts": {
     "dev": "bun --hot run src/app.ts",
     "build": "tsc && tsc-esm-fix dist",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "typecheck": "tsc --noEmit",
+    "eval:ai": "bun run src/modules/resume/ai-builder.eval.ts",
+    "eval:tailor": "bun run src/modules/tailoring/tailor.eval.ts"
   }
 }

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface MultipleFieldStores {
   fields: Record<string, Array<any>>
@@ -13,7 +14,7 @@ interface MultipleFieldStores {
   deleteField: (section: string, index: number) => void
 }
 
-const useFieldStores = create<MultipleFieldStores>((set) => ({
+const useFieldStores = create<MultipleFieldStores>()(persist((set) => ({
   fields: {
     experience: [],
     education: [],
@@ -67,7 +68,7 @@ const useFieldStores = create<MultipleFieldStores>((set) => ({
         },
       }
     }),
-}))
+}), { name: 'resumash:builder:fields:v1', storage: createJSONStorage(() => localStorage), partialize: state => ({ fields: state.fields }) }))
 
 export default useFieldStores
 
