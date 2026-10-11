@@ -275,6 +275,7 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
             {additional}
           </>
         )}
+        {!!text(basics.additionalInfo) && <Section title="Additional Information" template={template}><Text style={styles.body}>{text(basics.additionalInfo)}</Text></Section>}
       </Page>
     </Document>
   )
