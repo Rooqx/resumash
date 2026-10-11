@@ -54,7 +54,7 @@ export const uploadResume = asyncHandler(
   }
 );
 
-export async function generateResumePDF(zustandState: any) {
+export async function generateResumePDF(zustandState: any, template: "classic" | "modern" | "executive" = "modern") {
   try {
     console.log("initializing pdf download");
 
@@ -70,7 +70,7 @@ export async function generateResumePDF(zustandState: any) {
         : FRONTEND_PRODUCTION_URL;
     // Visit your Vite React page
     await page.goto(
-      `${FRONTEND_URL}/rxsme?data=${encodeURIComponent(
+      `${FRONTEND_URL}/rxsme?template=${encodeURIComponent(template)}&data=${encodeURIComponent(
         JSON.stringify(zustandState)
       )}`,
       {
