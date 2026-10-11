@@ -52,9 +52,8 @@ export async function downloadResume(
     if (blob.size < 500 || header !== '%PDF-') throw new Error('The generated PDF is invalid. Please retry.')
     const safeName = (fileName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'resume.pdf').replace(/\.pdf$/i,'') + '.pdf'
     saveAs(blob, safeName)
-    /* Download is triggered immediately while the user gesture is active. */
-    /* Removed manual URL handling: file-saver manages browser-specific downloads. */
-    toast.success('Resume PDF generated')
+    // Browsers do not reliably report whether the user ultimately saved it.
+    toast.success('PDF prepared — download requested')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'PDF generation failed'
     console.error('Resume PDF export failed:', error)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { z } from 'zod'
 import { builderResponseSchema, type BuilderResponse } from '@/features/resume-tailor/schemas'
@@ -99,8 +99,10 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [draft,setDraft] = useState<BuilderResponse|null>(restored?.draft??null)
+  const acceptedRef=useRef(false)
   useEffect(()=>{
    const persistNow=()=>{
+    if(acceptedRef.current)return
     try { localStorage.setItem(AI_QUESTIONNAIRE_KEY,JSON.stringify({step,answers,draft})) }
     catch { /* Browser may disallow storage in private mode. */ }
    }
@@ -111,6 +113,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
 
   const acceptDraft=()=>{
    if(!draft)return
+   acceptedRef.current=true
    try { localStorage.removeItem(AI_QUESTIONNAIRE_KEY) } catch {}
    onDraft(draft)
   }

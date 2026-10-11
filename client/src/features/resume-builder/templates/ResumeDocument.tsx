@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import { templateSchema, type ResumeTemplateId } from './registry'
+import { orderedResumeSections, templateConfigs } from './templateConfig'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
@@ -9,6 +10,10 @@ import type { ResumeSnapshot } from '../export/ResumePdfDocument'
 
 type ResumeDocumentProps={template?:ResumeTemplateId; printPayload?:boolean; snapshot?:ResumeSnapshot}
 type Field=Record<string,unknown>
+// The sample gallery must not subscribe to changes in the user's private draft.
+const EMPTY_INPUT:Record<string,string>={}
+const EMPTY_FIELDS:Record<string,Array<Record<string,unknown>>>={}
+const EMPTY_TAGS:Record<string,{tags:string[];input:string;suggestions:string[]}>={}
 const asText=(value:unknown)=>typeof value==='string'?value.trim():''
 const join=(values:unknown[],separator=' · ')=>(values.map(asText).filter(Boolean)).join(separator)
 const asFields=(values:unknown):Field[]=>Array.isArray(values)?values.filter((item):item is Field=>typeof item==='object'&&item!==null&&!Array.isArray(item)):[]
@@ -24,9 +29,9 @@ function Entry({heading,subheading,date,detail,items}:{heading:string;subheading
  </div>
 }
 export default function ResumeDocument({template='modern',printPayload=false,snapshot}:ResumeDocumentProps){
- const savedInput=useInputStore(s=>s.inputValue)
- const savedFields=useFieldStores(s=>s.fields)
- const savedTags=useTagStore(s=>s.fields)
+ const savedInput=useInputStore(s=>snapshot?EMPTY_INPUT:s.inputValue)
+ const savedFields=useFieldStores(s=>snapshot?EMPTY_FIELDS:s.fields)
+ const savedTags=useTagStore(s=>snapshot?EMPTY_TAGS:s.fields)
  const input=snapshot?.inputValue??savedInput
  const fields=snapshot?.fields??savedFields
  const tags=snapshot?.tagFields??savedTags
@@ -65,15 +70,26 @@ export default function ResumeDocument({template='modern',printPayload=false,sna
  const skills=<>{showSkills&&<Section title="Skills">{sections.skills.map((item,i)=><div className="resume-skill" key={i}><strong>{asText(item.skillName)}</strong><span>{tags[`skills-${i}`]?.tags?.join(', ')||''}</span></div>)}</Section>}</>
  const projects=<>{showProjects&&<Section title="Projects">{sections.projects.map((item,i)=><Entry key={i} heading={asText(item.name)} detail={asText(item.description)} items={tags[`projectHighlights-${i}`]?.tags}/>)}</Section>}</>
  const additional=<>{showAdditional&&<Section title="Additional">{sections.certificates.map((item,i)=><Entry key={`c-${i}`} heading={asText(item.certificateName)} subheading={asText(item.certificateIssuer)} date={asText(item.certificateDate)}/>)}{sections.awards.map((item,i)=><Entry key={`a-${i}`} heading={asText(item.awardTitle)} subheading={asText(item.awarder)} date={asText(item.awardDate)} detail={asText(item.awardSummary)}/>)}</Section>}</>
- const summary=asText(input.summary)&&<Section title={style==='executive'?'Executive Profile':'Professional Summary'}><p className="resume-paragraph">{asText(input.summary)}</p></Section>
- return <article className={`rs-document rs-template-${style}`} aria-label={`${style} resume preview`}>
+ const summary=asText(input.summary)&&<Section title={templateConfigs[style].summaryTitle}><p className="resume-paragraph">{asText(input.summary)}</p></Section>
+ return <article className={`rs-document rs-template-${style}`} style={{
+  '--resume-ink':templateConfigs[style].ink,
+  '--resume-accent':templateConfigs[style].accent,
+  '--resume-name-size':`${templateConfigs[style].nameFontSize}px`,
+  '--resume-section-space':`${templateConfigs[style].sectionSpacing}px`,
+  '--resume-pad-top':`${templateConfigs[style].pagePadding.top*4/3}px`,
+  '--resume-pad-bottom':`${templateConfigs[style].pagePadding.bottom*4/3}px`,
+  '--resume-pad-horizontal':`${templateConfigs[style].pagePadding.horizontal*4/3}px`,
+ } as CSSProperties} aria-label={`${style} resume preview`}>
   <div className="rs-document-content">
    <header className="resume-header"><h1>{name}</h1>{asText(input.label)&&<p className="resume-role">{input.label}</p>}
     <p className="resume-contacts">{join(contact)}{links.map(([label,url])=>{const href=makeUrl(url);return href?<span key={label}> · <a href={href}>{label}</a></span>:null})}</p>
    </header>
-   {style==='classic'?(<>{summary}{education}{projects}{skills}{experience}{additional}</>)
-   :style==='executive'?(<>{summary}{experience}{skills}{projects}{education}{additional}</>)
-   :(<>{summary}{experience}{skills}{projects}{education}{additional}</>)}
+   {orderedResumeSections(style).map(section=>(
+    <div key={section} className="resume-section-slot">{({
+     summary, experience, education, projects, skills,
+     additional,
+    } as Record<string,React.ReactNode>)[section]}</div>
+   ))}
    {asText(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{asText(input.additionalInfo)}</p></Section>}
   </div>
  </article>

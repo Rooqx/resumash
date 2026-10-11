@@ -20,6 +20,7 @@ import { downloadResume } from '@/lib/serverActions/downloadPDF'
 import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
 import AiResumeQuestionnaire from '@/features/resume-builder/components/AiResumeQuestionnaire'
 import A4Preview from '@/features/resume-builder/components/A4Preview'
+import ActualPdfPreview from '@/features/resume-builder/components/ActualPdfPreview'
 import TemplateGallery from '@/features/resume-builder/components/TemplateGallery'
 import { restoreBuilderView, saveBuilderView, clearBuilderDraft } from '@/lib/persistence/resumeDrafts'
 
@@ -44,10 +45,12 @@ function BuilderPage(){
  const [active,setActive]=useState(savedView?.active??0)
  const [template,setTemplate]=useState<ResumeTemplateId>(()=>resumeTemplates.some(t=>t.id===savedView?.template)?savedView!.template as ResumeTemplateId:'modern')
  const [mobilePreview,setMobilePreview]=useState(false)
+ const [actualPdfOpen,setActualPdfOpen]=useState(false)
  const [downloading,setDownloading]=useState(false)
  const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
  const client=useQueryClient()
- const resume=client.getQueryData(['tailoredResume'])
+ const [incomingResume] = useState(()=>client.getQueryData(['tailoredResume']))
+ const [pendingImport,setPendingImport] = useState<TailoredResume|null>(null)
  const updateInput=useInputStore(s=>s.setInputData)
  const updateFields=useFieldStores(s=>s.setFields)
  const updateTags=useTagStore(s=>s.setTags)
@@ -67,9 +70,23 @@ function BuilderPage(){
   setTemplate('modern')
  }
  useEffect(()=>{
-  const parsed=tailoredResumeSchema.safeParse(resume)
-  if(parsed.success){updateInput(parsed.data.inputValue);updateFields(parsed.data.fields);updateTags(parsed.data.tagFields??{})}
- },[resume,updateInput,updateFields,updateTags])
+  if(!incomingResume)return
+  // Consume the one-time handoff before any editor changes can be persisted.
+  client.removeQueries({queryKey:['tailoredResume'],exact:true})
+  const parsed=tailoredResumeSchema.safeParse(incomingResume)
+  if(!parsed.success)return
+  const currentInput=useInputStore.getState().inputValue
+  const currentFields=useFieldStores.getState().fields
+  const hasPreviousWork=Object.values(currentInput).some(value=>typeof value==='string'&&value.trim().length>0) ||
+   Object.values(currentFields).some(entries=>Array.isArray(entries)&&entries.length>0)
+  // Never replace an existing local draft without the candidate choosing.
+  if(hasPreviousWork){setPendingImport(parsed.data);return}
+  updateInput(parsed.data.inputValue)
+  updateFields(parsed.data.fields)
+  updateTags(parsed.data.tagFields??{})
+ // One-time handoff only; do not replay it after local edits.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[])
  /**
   * Replace the editor's current state with a reviewed AI draft.
   * No separate AI draft store is maintained, so manual edits work normally.
@@ -96,6 +113,13 @@ function BuilderPage(){
     <span className="text-xs" style={{color:'var(--rs-muted)'}}>{saveWarning?'Browser autosave is unavailable':'Saved automatically on this device'}</span>
     <button type="button" className="rs-button rs-button-outline !min-h-9 text-xs" onClick={clearWork}>Start a new resume / clear saved work</button>
    </div>
+   {pendingImport&&<div className="rs-card mb-5 flex flex-wrap items-center justify-between gap-3 p-4" role="alert">
+     <p className="max-w-xl text-sm">You already have an autosaved resume. A reviewed tailored draft is ready. Replace the current editor only if you want to use that draft.</p>
+     <div className="flex flex-wrap gap-2">
+      <button type="button" className="rs-button rs-button-primary" onClick={()=>{updateInput(pendingImport.inputValue);updateFields(pendingImport.fields);updateTags(pendingImport.tagFields??{});setPendingImport(null);setActive(0)}}>Use tailored draft</button>
+      <button type="button" className="rs-button rs-button-outline" onClick={()=>setPendingImport(null)}>Keep my saved resume</button>
+     </div>
+    </div>}
    {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/>}
    <div className="mb-5 flex gap-2 lg:hidden">
     <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
@@ -109,8 +133,9 @@ function BuilderPage(){
      <div className="rs-legacy-builder mt-5 rounded-xl bg-[#171717] p-3 text-white md:p-5">{StepComponent&&<StepComponent/>}</div>
      <div className="mt-6 flex justify-between gap-3"><button onClick={()=>setActive(i=>Math.max(0,i-1))} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>setActive(i=>Math.min(steps.length-1,i+1))} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
     </section>
-    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Live resume preview</h2><button type="button" className="rs-button rs-button-outline !min-h-8 text-xs" onClick={()=>setActualPdfOpen(true)}>Inspect actual PDF pages</button></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
    </div>
   </div>
+  {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
  </ResumashShell>
 }

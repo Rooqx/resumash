@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, FileCheck, Sparkles, UploadCloud } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +22,8 @@ function TailorPage(){
  const [view,setView]=useState<'tailored'|'original'|'comparison'>(restored?.view??'tailored')
  const [originalUrl,setOriginalUrl]=useState<string|null>(null)
  const [storageWarning,setStorageWarning]=useState(false)
+ const fileRevision=useRef(0)
+ const generationRevision=useRef(0)
  useEffect(()=>{
   if(!file){setOriginalUrl(null);return}
   const url=URL.createObjectURL(file)
@@ -32,8 +34,9 @@ function TailorPage(){
  // Restore PDF bytes from IndexedDB, including its name and preview.
  useEffect(()=>{
   let cancelled=false
+  const revision=fileRevision.current
   void restoreUploadedResume().then(saved=>{
-    if(!cancelled&&saved)setFile(current=>current??saved)
+    if(!cancelled&&revision===fileRevision.current&&saved)setFile(current=>current??saved)
   }).catch(()=>setStorageWarning(true))
   return ()=>{cancelled=true}
  },[])
@@ -41,6 +44,10 @@ function TailorPage(){
  // Save after changes settle. All AI edit selections are restored separately.
  useEffect(()=>{
   const persistNow=()=>{
+   if(!jobDescription.trim() && !result && !approved && acceptedEdits.size===0){
+    clearTailorDraft()
+    return
+   }
    if(!saveTailorDraft({version:1,jobDescription,result,approved,acceptedEdits:[...acceptedEdits],view}))
     setStorageWarning(true)
   }
@@ -54,6 +61,8 @@ function TailorPage(){
  },[jobDescription,result,approved,acceptedEdits,view])
 
  const clearSavedWork=()=>{
+  generationRevision.current++
+  fileRevision.current++
   clearTailorDraft()
   void clearUploadedResume().catch(()=>{})
   setJobDescription('')
@@ -68,14 +77,16 @@ function TailorPage(){
  const navigate=useNavigate()
  const mutation=useMutation({
   mutationFn:async()=>{
+   const revision=generationRevision.current
    if(!file||!jobDescription.trim())throw new Error('Upload a resume and add the job description first.')
    const response=await getTailoredResume({file,jobDescription})
    const payload:unknown=response?.data?.data
    const parsed=tailoringResponseSchema.safeParse(payload)
    if(!parsed.success)throw new Error('The server returned an invalid resume format.')
-   return parsed.data
+   return {resume:parsed.data,revision}
   },
-  onSuccess:(resume)=>{
+  onSuccess:({resume,revision})=>{
+   if(revision!==generationRevision.current)return
    setResult(resume)
    setApproved(false)
    setAcceptedEdits(new Set())
@@ -98,7 +109,7 @@ function TailorPage(){
       {file?<FileCheck size={25}/>:<UploadCloud size={25}/>}
       <span className="max-w-full break-all text-sm font-semibold">{file?file.name:'Choose your resume'}</span>
       <span className="text-xs" style={{color:'var(--rs-muted)'}}>PDF resume • up to 10 MB</span>
-      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set());if(next){void saveUploadedResume(next).catch(()=>setStorageWarning(true))}else{void clearUploadedResume().catch(()=>{})}}}/>
+      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}generationRevision.current++;fileRevision.current++;setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set());if(next){void saveUploadedResume(next).catch(()=>setStorageWarning(true))}else{void clearUploadedResume().catch(()=>{})}}}/>
      </label>
      <button className="rs-button rs-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50" disabled={!file||!jobDescription.trim()||mutation.isPending} type="submit"><Sparkles size={17}/>{mutation.isPending?'Tailoring your resume…':'Tailor my resume'}<ArrowRight size={16}/></button>
     </form>

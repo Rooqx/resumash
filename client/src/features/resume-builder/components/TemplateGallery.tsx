@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { Check, Eye, X } from 'lucide-react'
 import { resumeTemplates, type ResumeTemplateId } from '../templates/registry'
 import { sampleForTemplate } from '../templates/sampleResume'
@@ -6,6 +6,14 @@ import ResumeDocument from '../templates/ResumeDocument'
 import A4Preview from './A4Preview'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
+
+const SampleThumbnail = memo(function SampleThumbnail({ template }: {template:ResumeTemplateId}) {
+ return <div aria-hidden="true" className="rs-template-thumbnail">
+   <div className="rs-template-thumbnail-paper">
+    <ResumeDocument template={template} snapshot={sampleForTemplate(template)}/>
+   </div>
+ </div>
+})
 
 interface Props {
   selected: ResumeTemplateId
@@ -22,7 +30,10 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
   const role = useInputStore(s=>s.inputValue.label??'')
   const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
   const earlyCareerEvidence = useFieldStores(s=>(s.fields.education?.length??0)+(s.fields.projects?.length??0))
-  const recommended: ResumeTemplateId = /(?:director|executive|head of|chief|vice president|manager)/i.test(role)
+  const knownExperience = useFieldStores(s=>s.fields.experience?.filter(item=>Boolean(item.jobPosition||item.companyName)).length??0)
+  // Do not infer leadership merely because a target vacancy contains 'manager'.
+  const seniorRole = /(?:director|executive|head of|chief|vice president)/i.test(role)
+  const recommended: ResumeTemplateId = seniorRole && knownExperience>=2
     ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'modern'
   return <>
     <section className="mb-6">
@@ -34,11 +45,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
-          <div className="relative h-48 overflow-hidden rounded-md border bg-[#e9eaeb]" style={{borderColor:'var(--rs-line)'}}>
-            <div className="absolute left-1/2 top-3 origin-top-left" style={{width:794,height:1122,transform:'scale(.24)',transformOrigin:'top left',left:'50%',marginLeft:-95}}>
-              <ResumeDocument template={item.id} snapshot={sampleForTemplate(item.id)}/>
-            </div>
-          </div>
+          <SampleThumbnail template={item.id}/>
           <div className="mt-3 flex items-start justify-between gap-2">
             <div><h3 className="text-sm font-semibold">{item.name}</h3>
               <p className="mt-1 text-xs leading-5" style={{color:'var(--rs-muted)'}}>{item.description}</p></div>
