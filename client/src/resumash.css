@@ -137,3 +137,9 @@
 .rs-legacy-builder .border { border-color: var(--rs-line); }
 .rs-legacy-builder button { color: var(--rs-ink); border-color: var(--rs-line); }
 .rs-legacy-builder button.bg-\\[white\\] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
+
+.rs-letter-print { display: none; }
+@media print {
+ .rs-letter-print { display: block !important; color: #111 !important; }
+ .rs-cover-preview textarea { display: none !important; }
+}
