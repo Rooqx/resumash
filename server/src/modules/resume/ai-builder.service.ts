@@ -2,6 +2,7 @@ import type { Questionnaire } from "./ai-builder.schema";
 import { resumeDraftSchema } from "./ai-builder.schema";
 import { generateJson } from "../../shared/ai/generate-json";
 import { BUILDER_INSTRUCTIONS } from "./ai-builder.prompt";
+import { auditResumeWriting } from "../../shared/ai/writing-quality";
 
 
 
@@ -71,7 +72,7 @@ export async function buildResumeFromQuestionnaire(input: Questionnaire) {
       ...(input.skills.length ? { "skills-0": { tags: input.skills, input: "", suggestions: [] } } : {}),
     },
     clarificationQuestions: proposed.clarificationQuestions,
-    writingNotes: proposed.writingNotes,
+    writingNotes: [...new Set([...proposed.writingNotes, ...auditResumeWriting([proposed.summary, ...proposed.experienceBullets.flatMap(item => item.bullets), ...proposed.projectBullets.flatMap(item => item.bullets)])])],
     requiresReview: true,
     reviewMessage: "AI-drafted wording must be checked for accuracy before export.",
   };
