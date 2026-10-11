@@ -54,10 +54,7 @@ function BuilderPage(){
  const fullName=useInputStore(s=>s.inputValue.fullName)
  const [saveWarning,setSaveWarning]=useState(false)
  useEffect(()=>{
-  const timer=window.setTimeout(()=>{
-   if(!saveBuilderView({active,template}))setSaveWarning(true)
-  },250)
-  return ()=>window.clearTimeout(timer)
+  if(!saveBuilderView({active,template}))setSaveWarning(true)
  },[active,template])
  const clearWork=()=>{
   // Reset live stores first, then clear their persisted snapshots and UI state.
