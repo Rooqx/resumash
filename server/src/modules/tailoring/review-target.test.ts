@@ -31,7 +31,7 @@ const fixture: Result = {
 };
 
 test("accepts exact source-backed field references", () => {
- expect(validReviewTarget(fixture.resume, fixture.suggestions[0])).toBe(true);
+ expect(validReviewTarget(fixture.resume, fixture.suggestions[0]!)).toBe(true);
  expect(validatedReviewSuggestions(fixture, "Maintained daily inventory records")).toHaveLength(1);
 });
 
