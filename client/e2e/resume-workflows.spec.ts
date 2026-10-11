@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test('builder persists fields, step, and template across refresh', async ({ page }) => {
  await page.goto('/build-resume/')
  await page.getByPlaceholder('Enter your full name').fill('Taylor Test Candidate')
- await page.getByPlaceholder('Enter your profession').fill('Customer Support Specialist')
+ await page.getByPlaceholder('Enter your profession',{exact:true}).fill('Customer Support Specialist')
  await page.getByRole('button',{name:'Next step'}).click()
  await page.getByRole('button',{name:'Use template'}).nth(0).click()
  await page.reload()
