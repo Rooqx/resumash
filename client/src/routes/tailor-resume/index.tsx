@@ -6,14 +6,15 @@ import { toast } from 'sonner'
 import ResumashShell from '@/components/ResumashShell'
 import SEO from '@/components/SEO'
 import { getTailoredResume } from '@/lib/serverActions/tailorResume'
-import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
+import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
 import ResumeReview from '@/features/resume-tailor/components/ResumeReview'
 
 export const Route=createFileRoute('/tailor-resume/')({component:TailorPage})
 function TailorPage(){
  const [jobDescription,setJobDescription]=useState('')
  const [file,setFile]=useState<File|null>(null)
- const [result,setResult]=useState<TailoredResume|null>(null)
+ const [result,setResult]=useState<TailoringResponse|null>(null)
+ const [approved,setApproved]=useState(false)
  const [view,setView]=useState<'tailored'|'original'|'comparison'>('tailored')
  const [originalUrl,setOriginalUrl]=useState<string|null>(null)
  useEffect(()=>{
@@ -29,13 +30,14 @@ function TailorPage(){
    if(!file||!jobDescription.trim())throw new Error('Upload a resume and add the job description first.')
    const response=await getTailoredResume({file,jobDescription})
    const payload:unknown=response?.data?.data
-   const parsed=tailoredResumeSchema.safeParse(payload)
+   const parsed=tailoringResponseSchema.safeParse(payload)
    if(!parsed.success)throw new Error('The server returned an invalid resume format.')
    return parsed.data
   },
   onSuccess:(resume)=>{
    setResult(resume)
-   query.setQueryData(['tailoredResume'],resume)
+   setApproved(false)
+   query.removeQueries({queryKey:['tailoredResume'],exact:true})
    toast.success('Your tailored resume is ready to review.')
   },
   onError:(error:Error)=>toast.error(error.message||'Resume tailoring failed. Please try again.'),
@@ -57,8 +59,22 @@ function TailorPage(){
      </label>
      <button className="rs-button rs-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50" disabled={!file||!jobDescription.trim()||mutation.isPending} type="submit"><Sparkles size={17}/>{mutation.isPending?'Tailoring your resume…':'Tailor my resume'}<ArrowRight size={16}/></button>
     </form>
-    <ResumeReview result={result} originalUrl={originalUrl} view={view} onViewChange={setView} onContinue={()=>navigate({to:'/build-resume'})} />
-    <aside className={`rs-card p-5 md:p-6 ${view==='comparison' ? 'lg:col-span-2' : ''}`}><div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">AI insights</h2></div><p className="mt-3 text-sm leading-7" style={{color:'var(--rs-muted)'}}>The AI uses the job description to rewrite relevant information from your existing resume.</p><div className="mt-6 space-y-4">{['Review every generated statement for accuracy.','Emphasize relevant experience and skills.','Add measurable results only when they are genuine.'].map((tip,index)=><div key={tip} className="flex gap-3 border-t pt-4 text-sm leading-6" style={{borderColor:'var(--rs-line)'}}><span className="text-xs" style={{color:'var(--rs-muted)'}}>0{index+1}</span><span>{tip}</span></div>)}</div><p className="mt-7 text-xs leading-6" style={{color:'var(--rs-muted)'}}>Detailed change-by-change suggestions require additional backend response data. No match scores or recommendations are fabricated.</p></aside>
+    <ResumeReview result={result} originalUrl={originalUrl} view={view} onViewChange={setView} onContinue={()=>{if(result&&approved){query.setQueryData(['tailoredResume'],result);navigate({to:'/build-resume'})}}} canContinue={approved} />
+    <aside className={`rs-card p-5 md:p-6 ${view==='comparison' ? 'lg:col-span-2' : ''}`}><div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">AI insights</h2></div><p className="mt-3 text-sm leading-7" style={{color:'var(--rs-muted)'}}>The AI uses the job description to rewrite relevant information from your existing resume.</p><div className="mt-6 space-y-4">{['Review every generated statement for accuracy.','Emphasize relevant experience and skills.','Add measurable results only when they are genuine.'].map((tip,index)=><div key={tip} className="flex gap-3 border-t pt-4 text-sm leading-6" style={{borderColor:'var(--rs-line)'}}><span className="text-xs" style={{color:'var(--rs-muted)'}}>0{index+1}</span><span>{tip}</span></div>)}</div>{result&&<div className="mt-6 space-y-4">
+  <h3 className="font-semibold">Evidence-backed review</h3>
+  {result.suggestions.length===0?<p className="text-xs">No individually verified edits were returned. Inspect the entire generated draft carefully.</p>:result.suggestions.map((suggestion,i)=><div key={i} className="rounded-lg border p-3 text-xs" style={{borderColor:'var(--rs-line)'}}>
+   <strong>{suggestion.priority.toUpperCase()} · {suggestion.section}</strong>
+   <p className="mt-2">Original: {suggestion.original}</p>
+   <p className="mt-2">Proposed: {suggestion.proposed}</p>
+   <p className="mt-2 opacity-75">Why: {suggestion.reason}</p>
+   <p className="mt-1 opacity-75">Evidence: {suggestion.sourceQuote}</p>
+   {suggestion.requiresConfirmation&&<p className="mt-2 font-semibold">Requires your confirmation</p>}
+  </div>)}
+  {result.missingRequirements.length>0&&<div><h4 className="font-semibold">Unverified job requirements</h4>{result.missingRequirements.map((r,i)=><p className="mt-2 text-xs" key={i}>{r}</p>)}</div>}
+  {result.clarificationQuestions.length>0&&<div><h4 className="font-semibold">Questions to clarify</h4>{result.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question}</p>)}</div>}
+  {result.writingNotes.map((note,i)=><p key={i} className="text-xs">{note}</p>)}
+  <label className="flex items-start gap-2 text-xs leading-5"><input type="checkbox" checked={approved} onChange={e=>setApproved(e.target.checked)}/><span>I have reviewed the full proposed resume and agree to use it as an editable draft. I will verify its claims before applying.</span></label>
+ </div>}</aside>
    </div>
   </div>
  </ResumashShell>
