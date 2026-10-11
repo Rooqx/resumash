@@ -4,6 +4,7 @@ import { parseResumePdf } from "../resume/parse-pdf";
 import { TAILOR_INSTRUCTIONS } from "./tailor.prompt";
 import { tailoringResultSchema } from "./tailor.schema";
 import { validatedReviewSuggestions } from "./review-target";
+import { assertBaselineProseSupported } from "./baseline-evidence";
 import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
 import { assertSourceEntitiesPreserved } from "../../shared/ai/source-entities";
 import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality";
@@ -34,6 +35,7 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
   // The proposed change is never applied server-side; validate its numeric claims too.
   assertNumericalClaimsSupported(sourceText, generated.suggestions.map(item => item.proposed));
   assertSourceEntitiesPreserved(sourceText, generated.resume.fields);
+  assertBaselineProseSupported(sourceText, generated.resume);
   // Each review suggestion must refer to a distinct, real job requirement.
   const requirementIds = new Set(generated.requirements.map(item => item.id));
   if (requirementIds.size !== generated.requirements.length) {
