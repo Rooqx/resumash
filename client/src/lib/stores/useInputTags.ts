@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 type TagFieldData = {
   tags: Array<string>
@@ -19,7 +20,7 @@ type TagStore = {
   removeField: (name: string) => void
 }
 
-export const useTagStore = create<TagStore>((set, get) => ({
+export const useTagStore = create<TagStore>()(persist((set, get) => ({
   fields: {},
 
   //  Initialize if missing before setting input
@@ -126,4 +127,4 @@ export const useTagStore = create<TagStore>((set, get) => ({
       const { [name]: _, ...rest } = state.fields
       return { fields: rest }
     }),
-}))
+}), { name: 'resumash:builder:tags:v1', storage: createJSONStorage(() => localStorage), partialize: state => ({ fields: state.fields }) }))
