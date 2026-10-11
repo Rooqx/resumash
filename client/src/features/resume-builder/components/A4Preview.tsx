@@ -14,6 +14,8 @@ export default function A4Preview({ children, label = 'Resume preview' }: {
   label?: string
 }) {
   const container = useRef<HTMLDivElement>(null)
+  const sheet = useRef<HTMLDivElement>(null)
+  const [contentHeight,setContentHeight]=useState(PAGE_HEIGHT)
   const [availableWidth, setAvailableWidth] = useState(PAGE_WIDTH)
   const [zoom, setZoom] = useState(1)
   useEffect(() => {
@@ -23,7 +25,11 @@ export default function A4Preview({ children, label = 'Resume preview' }: {
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(node)
-    return () => observer.disconnect()
+    const innerObserver=new ResizeObserver(()=>{
+      if(sheet.current)setContentHeight(Math.max(PAGE_HEIGHT,sheet.current.scrollHeight))
+    })
+    if(sheet.current)innerObserver.observe(sheet.current)
+    return () => {observer.disconnect();innerObserver.disconnect()}
   }, [])
 
   const fit = Math.min(1, availableWidth / PAGE_WIDTH)
@@ -42,8 +48,8 @@ export default function A4Preview({ children, label = 'Resume preview' }: {
         </div>
       </div>
       <div ref={container} aria-label={label} className="w-full max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2">
-        <div className="relative mx-auto" style={{width:PAGE_WIDTH*scale,height:PAGE_HEIGHT*scale,marginLeft:scale>fit?'auto':undefined}}>
-          <div style={{width:PAGE_WIDTH,height:PAGE_HEIGHT,transform:`scale(${scale})`,transformOrigin:'top left'}}>
+        <div className="relative mx-auto" style={{width:PAGE_WIDTH*scale,height:contentHeight*scale,marginLeft:scale>fit?'auto':undefined}}>
+          <div ref={sheet} style={{width:PAGE_WIDTH,minHeight:PAGE_HEIGHT,transform:`scale(${scale})`,transformOrigin:'top left'}}>
             {children}
           </div>
         </div>
