@@ -1,165 +1,68 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
-import Sidebar from '../../components/buildResumeComponent/SideContent'
-import App from '@/components/Layout'
-// import resumeData from '@/components/resume.json'
+import { Download, ChevronRight, FileText } from 'lucide-react'
+import ResumashShell from '@/components/ResumashShell'
+import SEO from '@/components/SEO'
+import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
+import BasicInfoAndSummary from '@/components/buildResumeComponent/BasicInfoAndSummary'
+import Experience from '@/components/buildResumeComponent/Experience'
+import Education from '@/components/buildResumeComponent/Education'
+import Skills from '@/components/buildResumeComponent/Skills'
+import Project from '@/components/buildResumeComponent/Project'
+import Certificate from '@/components/buildResumeComponent/Certificate'
+import Award from '@/components/buildResumeComponent/Awards'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
-import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
-import { useDeviceType } from '@/lib/hooks/useDeviceHook'
-import { useCurrentPage } from '@/lib/stores/useCurrentPage'
-import SEO from '@/components/SEO'
 import { downloadResume } from '@/lib/serverActions/downloadPDF'
+import { tailoredResumeSchema } from '@/features/resume-tailor/schemas'
 
-// import { PdfPage, PdfPreviewArea } from '@/components/PdfUtils'
+export const Route=createFileRoute('/build-resume/')({component:BuilderPage})
+const steps=[
+ {title:'Personal info',description:'Your details and summary',Component:BasicInfoAndSummary},
+ {title:'Experience',description:'Work history and achievements',Component:Experience},
+ {title:'Education',description:'Academic background',Component:Education},
+ {title:'Skills',description:'Your capabilities',Component:Skills},
+ {title:'Projects',description:'Selected work and projects',Component:Project},
+] as const
 
-export const Route = createFileRoute('/build-resume/')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  const { inputValue, setInputData } = useInputStore()
-  const { setFields } = useFieldStores()
-  const { setTags } = useTagStore()
-  const queryClient = useQueryClient()
-  const { isMobile, isDesktop } = useDeviceType()
-  const { page, setPage } = useCurrentPage()
-  const [isDownloading, setIsDownloading] = useState<boolean>(false)
-
-  const resumeData: any = queryClient.getQueryData(['tailoredResume'])
-
-  useEffect(() => {
-    if (resumeData) {
-      setInputData(resumeData.inputValue)
-      setFields(resumeData.fields)
-      setTags(resumeData.tagFields)
-    }
-  }, [resumeData])
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
-  useEffect(() => {
-    setPage('buildPage')
-  }, [page, setPage])
-
-  const fileName = inputValue?.fullName
-    ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
-    : 'resume.pdf'
-  return (
-    <App>
-      <SEO
-        title="Build Resume"
-        description="Build your professional resume easily."
-      />
-      <div className={`  space-y-4 bg-black text-white relative h-auto`}>
-        {/*  <h2 className="text-2xl font-semibold mb-2  w-full text-center">
-          My Resume
-        </h2> */}
-        {/* ================== Wrapper  ================== */}
-        <div className="w-full flex items-start gap-0 justify-center h-full">
-          {/* ================== Input Container  ================== */}
-          <Sidebar />
-
-          {/* ================== Resume Preview ================== */}
-          {/* PDF Preview Section */}
-          <div className="w-full lg:w-[70%] flex justify-center items-center lg:items-start h-[600px] lg:h-[850px] overflow-auto scroll-bar mt-15 lg:mt-0 ">
-            <div className="">
-              {isMobile ? (
-                <div className="mt-20 cursor-grab scale-50">
-                  {/*    <PDFPreview showPageNumbers={true}>
-                <ResumePDF />
-              </PDFPreview> */}
-                  <ResumePDF />
-                </div>
-              ) : (
-                <TransformWrapper
-                  initialScale={isDesktop ? 0.8 : 0.5}
-                  minScale={0.3}
-                  maxScale={0.9}
-                  centerOnInit={false}
-                  pinch={{ disabled: false }}
-                  wheel={{ step: 0.1 }}
-                >
-                  <TransformComponent>
-                    <div className="-mt-20 cursor-grab">
-                      {/*    <PDFPreview showPageNumbers={true}>
-                <ResumePDF />
-              </PDFPreview> */}
-                      <ResumePDF />
-                    </div>
-                  </TransformComponent>
-                </TransformWrapper>
-              )}
-            </div>
-          </div>
-          {/* ================== PDF Actions (optional) ==================*/}
-
-          {isDesktop && (
-            <div className="h-auto space-y-5 p-5 w-[20%]">
-              <div>
-                <button
-                  className={`py-2 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3  
-              before:content-['']  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300
-              hover:before:w-full hover:text-black border border-white ${isDownloading ? 'bg-[#ffffff96] cursor-not-allowed' : ''}`}
-                  onClick={() => downloadResume(fileName, setIsDownloading)}
-                  disabled={isDownloading}
-                >
-                  {isDownloading ? (
-                    <div className="flex gap-2 items-center justify-center w-full z-2 hover:text-black text-[14px]">
-                      <span
-                        className={`inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin align-middle z-2 hover:border-black`}
-                        aria-label="Loading..."
-                        role="status"
-                      />{' '}
-                      <p className="z-2 hover:text-black ">Downloading...</p>
-                    </div>
-                  ) : (
-                    <p className="z-2 hover:text-black text-nowrap">
-                      {' '}
-                      Download resume
-                    </p>
-                  )}
-                </button>
-
-                {/* <div
-                  className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-                  document={
-                    <Document>
-                      <ResumePDF />
-                    </Document>
-                  }
-                  fileName={
-                    inputValue?.fullName
-                      ? `${inputValue.fullName.split(' ').join('_')}_resume.pdf`
-                      : 'resume.pdf'
-                  }
-                >
-                  {({ loading }) =>
-                    loading ? 'Generating...' : 'Download resume'
-                  }
-                </div>*/}
-              </div>
-
-              {/* ==================More PDF Templates (optional) ==================*/}
-              <div className="bg-[#2c5530] p-4 rounded-md mt-15">
-                <h3 className="text-sm font-semibold text-white text-nowrap">
-                  Other Templates
-                </h3>
-                <div className="py-6">
-                  <button className="text-base text-white">
-                    More Templates coming soon
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </App>
-  )
+function BuilderPage(){
+ const [active,setActive]=useState(0)
+ const [mobilePreview,setMobilePreview]=useState(false)
+ const [downloading,setDownloading]=useState(false)
+ const client=useQueryClient()
+ const resume=client.getQueryData(['tailoredResume'])
+ const updateInput=useInputStore(s=>s.setInputData)
+ const updateFields=useFieldStores(s=>s.setFields)
+ const updateTags=useTagStore(s=>s.setTags)
+ const fullName=useInputStore(s=>s.inputValue.fullName)
+ useEffect(()=>{
+  const parsed=tailoredResumeSchema.safeParse(resume)
+  if(parsed.success){updateInput(parsed.data.inputValue);updateFields(parsed.data.fields);updateTags(parsed.data.tagFields??{})}
+ },[resume,updateInput,updateFields,updateTags])
+ const StepComponent=steps[active]?.Component
+ const filename=fullName?`${fullName.trim().replace(/\s+/g,'_')}_resume.pdf`:'resume.pdf'
+ return <ResumashShell>
+  <SEO title="Build your resume | Resumash" description="Create and edit a professional resume with live preview."/>
+  <div className="rs-container py-10 md:py-16">
+   <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
+    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button>
+   </div>
+   <div className="mb-5 flex gap-2 lg:hidden">
+    <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
+    <button onClick={()=>setMobilePreview(true)} className={`rs-button flex-1 ${mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Preview</button>
+   </div>
+   <div className="grid items-start gap-5 lg:grid-cols-[215px_minmax(300px,1fr)_minmax(340px,1.25fr)]">
+    <aside className={`rs-card p-3 ${mobilePreview?'hidden lg:block':''}`}><p className="rs-eyebrow px-3 py-4" style={{color:'var(--rs-muted)'}}>Your sections</p><nav aria-label="Resume sections" className="space-y-1">{steps.map((step,index)=><button key={step.title} onClick={()=>setActive(index)} aria-current={active===index?'step':undefined} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors" style={{background:active===index?'var(--rs-inverse)':'transparent',color:active===index?'var(--rs-inverse-text)':'var(--rs-ink)'}}><span className="text-xs opacity-60">{String(index+1).padStart(2,'0')}</span><span><span className="block text-sm font-semibold">{step.title}</span><span className="mt-1 block text-[11px] opacity-60">{step.description}</span></span></button>)}</nav><div className="mt-4 border-t p-3" style={{borderColor:'var(--rs-line)'}}><p className="text-xs" style={{color:'var(--rs-muted)'}}>Additional sections</p><details className="mt-3"><summary className="cursor-pointer text-sm">Certifications & awards</summary><div className="mt-3 rounded-lg bg-[#161616] p-3 text-white"><Certificate/><Award/></div></details></div></aside>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${mobilePreview?'hidden lg:block':''}`}>
+     <div className="flex items-center justify-between"><div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>Step {active+1} of {steps.length}</p><h2 className="mt-2 text-xl font-semibold">{steps[active]?.title}</h2></div><FileText size={22} strokeWidth={1.4}/></div>
+     <div className="rs-legacy-builder mt-5 rounded-xl bg-[#171717] p-3 text-white md:p-5">{StepComponent&&<StepComponent/>}</div>
+     <div className="mt-6 flex justify-between gap-3"><button onClick={()=>setActive(i=>Math.max(0,i-1))} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>setActive(i=>Math.min(steps.length-1,i+1))} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
+    </section>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><div className="max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2 md:p-5"><div className="mx-auto w-max origin-top-left scale-[.46] sm:scale-[.65] xl:scale-[.70]"><ResumePDF/></div></div></section>
+   </div>
+  </div>
+ </ResumashShell>
 }
