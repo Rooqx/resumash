@@ -76,6 +76,9 @@ export default function ResumeDocument({template='modern',printPayload=false,sna
   '--resume-accent':templateConfigs[style].accent,
   '--resume-name-size':`${templateConfigs[style].nameFontSize}px`,
   '--resume-section-space':`${templateConfigs[style].sectionSpacing}px`,
+  '--resume-pad-top':`${templateConfigs[style].pagePadding.top*4/3}px`,
+  '--resume-pad-bottom':`${templateConfigs[style].pagePadding.bottom*4/3}px`,
+  '--resume-pad-horizontal':`${templateConfigs[style].pagePadding.horizontal*4/3}px`,
  } as CSSProperties} aria-label={`${style} resume preview`}>
   <div className="rs-document-content">
    <header className="resume-header"><h1>{name}</h1>{asText(input.label)&&<p className="resume-role">{input.label}</p>}
