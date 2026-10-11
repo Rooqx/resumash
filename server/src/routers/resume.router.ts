@@ -14,13 +14,14 @@ resumeRouter.post("/upload", upload.single("resume"), uploadResume);
 
 resumeRouter.post("/download-resume", async (req, res) => {
   try {
-    const { inputValue, fields, tagFields } = req.body;
+    const { inputValue, fields, tagFields, templateId } = req.body;
+    const selectedTemplate = ["classic", "modern", "executive"].includes(templateId) ? templateId : "modern";
     if (!inputValue || !fields) {
       throw new AppError("Missing resume data", 400);
     }
 
     const zustandState = { inputValue, fields, tagFields };
-    const pdf = await generateResumePDF(zustandState);
+    const pdf = await generateResumePDF(zustandState, selectedTemplate);
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "attachment; filename=resume.pdf");
