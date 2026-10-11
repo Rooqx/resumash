@@ -50,6 +50,7 @@ function BuilderPage(){
  const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
  const client=useQueryClient()
  const [incomingResume] = useState(()=>client.getQueryData(['tailoredResume']))
+ const [pendingImport,setPendingImport] = useState<TailoredResume|null>(null)
  const updateInput=useInputStore(s=>s.setInputData)
  const updateFields=useFieldStores(s=>s.setFields)
  const updateTags=useTagStore(s=>s.setTags)
@@ -73,7 +74,16 @@ function BuilderPage(){
   // Consume the one-time handoff before any editor changes can be persisted.
   client.removeQueries({queryKey:['tailoredResume'],exact:true})
   const parsed=tailoredResumeSchema.safeParse(incomingResume)
-  if(parsed.success){updateInput(parsed.data.inputValue);updateFields(parsed.data.fields);updateTags(parsed.data.tagFields??{})}
+  if(!parsed.success)return
+  const currentInput=useInputStore.getState().inputValue
+  const currentFields=useFieldStores.getState().fields
+  const hasPreviousWork=Object.values(currentInput).some(value=>typeof value==='string'&&value.trim().length>0) ||
+   Object.values(currentFields).some(entries=>Array.isArray(entries)&&entries.length>0)
+  // Never replace an existing local draft without the candidate choosing.
+  if(hasPreviousWork){setPendingImport(parsed.data);return}
+  updateInput(parsed.data.inputValue)
+  updateFields(parsed.data.fields)
+  updateTags(parsed.data.tagFields??{})
  // One-time handoff only; do not replay it after local edits.
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[])
@@ -103,6 +113,13 @@ function BuilderPage(){
     <span className="text-xs" style={{color:'var(--rs-muted)'}}>{saveWarning?'Browser autosave is unavailable':'Saved automatically on this device'}</span>
     <button type="button" className="rs-button rs-button-outline !min-h-9 text-xs" onClick={clearWork}>Start a new resume / clear saved work</button>
    </div>
+   {pendingImport&&<div className="rs-card mb-5 flex flex-wrap items-center justify-between gap-3 p-4" role="alert">
+     <p className="max-w-xl text-sm">You already have an autosaved resume. A reviewed tailored draft is ready. Replace the current editor only if you want to use that draft.</p>
+     <div className="flex flex-wrap gap-2">
+      <button type="button" className="rs-button rs-button-primary" onClick={()=>{updateInput(pendingImport.inputValue);updateFields(pendingImport.fields);updateTags(pendingImport.tagFields??{});setPendingImport(null);setActive(0)}}>Use tailored draft</button>
+      <button type="button" className="rs-button rs-button-outline" onClick={()=>setPendingImport(null)}>Keep my saved resume</button>
+     </div>
+    </div>}
    {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/>}
    <div className="mb-5 flex gap-2 lg:hidden">
     <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
