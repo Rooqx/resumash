@@ -56,8 +56,8 @@ const cases = [
 ] as const;
 
 async function main(): Promise<void> {
-  if (!process.env.HF_TOKEN || !process.env.MODEL) {
-    throw new Error("Set HF_TOKEN and MODEL to run live model evaluation.");
+  if (!process.env.LLM_API_KEY || !process.env.MODEL) {
+    throw new Error("Set LLM_API_KEY and MODEL to run live model evaluation.");
   }
 
   let passed = 0;
