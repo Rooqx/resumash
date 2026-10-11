@@ -17,5 +17,7 @@ jobs:
       - run: bun install
       - name: TypeScript
         run: bun run typecheck
+      - name: Focused regression tests
+        run: bun test
       - name: Production build
         run: bun run build
