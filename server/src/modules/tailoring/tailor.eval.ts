@@ -49,7 +49,7 @@ for (const item of cases) {
   try {
     const result = await tailorResume(await createPdf(item.resume), item.job);
     if (!result.requiresReview) throw new Error("Review requirement missing");
-    if (item.role.includes("Kubernetes") && result.resume.fields.skills?.some(skill =>
+    if (item.role.includes("Kubernetes") && result.fields.skills?.some((skill: Record<string, unknown>) =>
       String(skill.skillName ?? "").toLowerCase().includes("kubernetes")
     )) {
       throw new Error("Unsupported Kubernetes skill was inserted");
