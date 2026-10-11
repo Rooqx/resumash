@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Download, ChevronRight, FileText } from 'lucide-react'
 import ResumashShell from '@/components/ResumashShell'
 import SEO from '@/components/SEO'
-import ResumePDF from '@/resumeTemplates/template1/PDFTemplate'
+import ResumeDocument from '@/features/resume-builder/templates/ResumeDocument'
+import { resumeTemplates, type ResumeTemplateId } from '@/features/resume-builder/templates/registry'
 import BasicInfoAndSummary from '@/components/buildResumeComponent/BasicInfoAndSummary'
 import Experience from '@/components/buildResumeComponent/Experience'
 import Education from '@/components/buildResumeComponent/Education'
@@ -34,6 +35,7 @@ function AdditionalSections(){
 
 function BuilderPage(){
  const [active,setActive]=useState(0)
+ const [template,setTemplate]=useState<ResumeTemplateId>('modern')
  const [mobilePreview,setMobilePreview]=useState(false)
  const [downloading,setDownloading]=useState(false)
  const client=useQueryClient()
@@ -53,7 +55,7 @@ function BuilderPage(){
   <div className="rs-container py-10 md:py-16">
    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
-    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button>
+    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button>
    </div>
    <div className="mb-5 flex gap-2 lg:hidden">
     <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
@@ -66,7 +68,7 @@ function BuilderPage(){
      <div className="rs-legacy-builder mt-5 rounded-xl bg-[#171717] p-3 text-white md:p-5">{StepComponent&&<StepComponent/>}</div>
      <div className="mt-6 flex justify-between gap-3"><button onClick={()=>setActive(i=>Math.max(0,i-1))} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>setActive(i=>Math.min(steps.length-1,i+1))} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
     </section>
-    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><div className="max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2 md:p-5"><div className="rs-resume-zoom mx-auto w-max origin-top-left"><ResumePDF/></div></div></section>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><fieldset className="mb-5"><legend className="mb-2 text-xs font-semibold">Choose a resume template</legend><div className="grid gap-2 sm:grid-cols-3">{resumeTemplates.map(item=><button type="button" key={item.id} onClick={()=>setTemplate(item.id)} aria-pressed={template===item.id} className={`rounded-lg border px-3 py-3 text-left text-xs ${template===item.id?'rs-button-primary':'rs-button-outline'}`}><strong className="block">{item.name}</strong><span className="mt-1 block opacity-70">{item.description}</span></button>)}</div></fieldset><div className="max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2 md:p-5"><div className="rs-resume-zoom mx-auto w-max origin-top-left"><ResumeDocument template={template}/></div></div></section>
    </div>
   </div>
  </ResumashShell>
