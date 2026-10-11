@@ -65,7 +65,7 @@ export async function buildResumeFromQuestionnaire(input: Questionnaire) {
         ]),
       ),
       ...Object.fromEntries(input.projects.map((_, index) => [
-        `projectTechnologies-${index}`,
+        `projectHighlights-${index}`,
         { tags: projectBullets.get(index) ?? [], input: "", suggestions: [] },
       ])),
       ...(input.skills.length ? { "skills-0": { tags: input.skills, input: "", suggestions: [] } } : {}),
