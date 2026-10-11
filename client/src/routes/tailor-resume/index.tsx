@@ -6,16 +6,13 @@ import { toast } from 'sonner'
 import ResumashShell from '@/components/ResumashShell'
 import SEO from '@/components/SEO'
 import { getTailoredResume } from '@/lib/serverActions/tailorResume'
+import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
 
 export const Route=createFileRoute('/tailor-resume/')({component:TailorPage})
-type ResumeResult={inputValue?:Record<string,string>;fields?:Record<string,Array<Record<string,unknown>>>;tagFields?:Record<string,unknown>}
-function isResume(value:unknown):value is ResumeResult {
- return typeof value==='object'&&value!==null&&'inputValue' in value&&'fields' in value
-}
 function TailorPage(){
  const [jobDescription,setJobDescription]=useState('')
  const [file,setFile]=useState<File|null>(null)
- const [result,setResult]=useState<ResumeResult|null>(null)
+ const [result,setResult]=useState<TailoredResume|null>(null)
  const [view,setView]=useState<'tailored'|'original'>('tailored')
  const query=useQueryClient()
  const navigate=useNavigate()
@@ -24,8 +21,9 @@ function TailorPage(){
    if(!file||!jobDescription.trim())throw new Error('Upload a resume and add the job description first.')
    const response=await getTailoredResume({file,jobDescription})
    const payload:unknown=response?.data?.data
-   if(!isResume(payload))throw new Error('The server did not return a valid resume.')
-   return payload
+   const parsed=tailoredResumeSchema.safeParse(payload)
+   if(!parsed.success)throw new Error('The server returned an invalid resume format.')
+   return parsed.data
   },
   onSuccess:(resume)=>{
    setResult(resume)
