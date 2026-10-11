@@ -29,6 +29,7 @@
         "puppeteer-core": "^24.30.0",
         "redis": "^5.8.2",
         "winston": "^3.18.3",
+        "zod": "^3.25.76",
       },
       "devDependencies": {
         "@types/bun": "latest",
