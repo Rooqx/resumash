@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import type { RequestHandler } from "express";
 
 const WINDOW_SECONDS = 5 * 60 * 60;
-const REQUEST_LIMIT = 10;
+
 
 /**
  * Shared Redis client for quota accounting. A missing Redis URL is a
@@ -37,7 +37,8 @@ return {used, ttl}
  * per window. Middleware must execute BEFORE multipart upload processing.
  * Quota storage failure returns 503 rather than allowing costly requests.
  */
-export const tailorRateLimit: RequestHandler = async (req, res, next) => {
+export function aiRateLimit(bucket: "tailor" | "builder" | "letter", requestLimit: number): RequestHandler {
+ return async (req, res, next) => {
   try {
     const ip = req.ip;
     if (!ip) {
@@ -46,7 +47,7 @@ export const tailorRateLimit: RequestHandler = async (req, res, next) => {
     }
     const client = getRedis();
     if (!client.isOpen) await client.connect();
-    const key = "resumash:tailor:" + createHash("sha256").update(ip).digest("hex");
+    const key = "resumash:ai:" + bucket + ":" + createHash("sha256").update(ip).digest("hex");
     const result = await client.eval(QUOTA_SCRIPT, {
       keys: [key],
       arguments: [String(WINDOW_SECONDS)],
@@ -55,10 +56,10 @@ export const tailorRateLimit: RequestHandler = async (req, res, next) => {
     const used = Number(result[0]);
     const ttl = Math.max(0, Number(result[1]));
     if (!Number.isFinite(used) || !Number.isFinite(ttl)) throw new Error("Invalid quota result");
-    res.setHeader("RateLimit-Limit", String(REQUEST_LIMIT));
-    res.setHeader("RateLimit-Remaining", String(Math.max(0, REQUEST_LIMIT - used)));
+    res.setHeader("RateLimit-Limit", String(requestLimit));
+    res.setHeader("RateLimit-Remaining", String(Math.max(0, requestLimit - used)));
     res.setHeader("RateLimit-Reset", String(ttl));
-    if (used > REQUEST_LIMIT) {
+    if (used > requestLimit) {
       res.setHeader("Retry-After", String(ttl));
       res.status(429).json({ message: "Resume tailoring limit reached. Try again later.", retryAfterSeconds: ttl });
       return;
@@ -67,4 +68,8 @@ export const tailorRateLimit: RequestHandler = async (req, res, next) => {
   } catch {
     res.status(503).json({ message: "Resume tailoring is temporarily unavailable." });
   }
-};
+ };
+}
+
+/** Strict limit requested for resume tailoring: 10/IP per five-hour window. */
+export const tailorRateLimit = aiRateLimit("tailor", 10);
