@@ -47,7 +47,7 @@ function BuilderPage(){
  const [downloading,setDownloading]=useState(false)
  const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
  const client=useQueryClient()
- const resume=client.getQueryData(['tailoredResume'])
+ const [incomingResume] = useState(()=>client.getQueryData(['tailoredResume']))
  const updateInput=useInputStore(s=>s.setInputData)
  const updateFields=useFieldStores(s=>s.setFields)
  const updateTags=useTagStore(s=>s.setTags)
@@ -67,9 +67,14 @@ function BuilderPage(){
   setTemplate('modern')
  }
  useEffect(()=>{
-  const parsed=tailoredResumeSchema.safeParse(resume)
+  if(!incomingResume)return
+  // Consume the one-time handoff before any editor changes can be persisted.
+  client.removeQueries({queryKey:['tailoredResume'],exact:true})
+  const parsed=tailoredResumeSchema.safeParse(incomingResume)
   if(parsed.success){updateInput(parsed.data.inputValue);updateFields(parsed.data.fields);updateTags(parsed.data.tagFields??{})}
- },[resume,updateInput,updateFields,updateTags])
+ // One-time handoff only; do not replay it after local edits.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[])
  /**
   * Replace the editor's current state with a reviewed AI draft.
   * No separate AI draft store is maintained, so manual edits work normally.
