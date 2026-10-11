@@ -6,7 +6,8 @@ import { z } from "zod";
  */
 export const questionnaireSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
-  email: z.string().trim().email().max(254).optional().default(""),
+  // An empty email is valid: the questionnaire intentionally makes it optional.
+  email: z.union([z.literal(""), z.string().trim().email().max(254)]).optional().default(""),
   phone: z.string().trim().max(40).optional().default(""),
   location: z.string().trim().max(160).optional().default(""),
   targetRole: z.string().trim().min(2).max(120),
