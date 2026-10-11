@@ -25,7 +25,7 @@ function NavigationLoader() {
   )
 }
 
-const isProd = import.meta.env.VITE_ENV === 'production'
+const isProd = import.meta.env.PROD
 
 export const Route = createRootRoute({
   component: () => (
