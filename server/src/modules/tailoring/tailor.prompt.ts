@@ -7,7 +7,7 @@ import { RESUME_WRITING_STANDARDS } from "../../shared/ai/resume-writing-standar
 export const TAILOR_INSTRUCTIONS = `
 ${RESUME_WRITING_STANDARDS}
 
-TASK: Tailor the supplied candidate resume to the supplied job posting,
+TASK: Produce a conservative, faithful structured TRANSCRIPTION of the\nsupplied candidate resume as resume. Do NOT pre-apply suggestions.\nThen recommend selective changes to the supplied candidate resume for the supplied job posting,
 while preserving the candidate's actual background and voice.
 Analyze the job requirements as essential, preferred or contextual.
 For each important qualification, assess evidence as:
@@ -44,11 +44,11 @@ Do not erase truthful but less-relevant work, rename actual job titles, or
 replace the person's professional identity with the target title.
 Preserve source contacts, employers, titles, dates and credentials.
 Never invent metrics or amplify responsibility.
-Preserve already-strong phrases rather than rewriting everything.
+Preserve already-strong phrases rather than rewriting everything.\nDo not optimize baseline resume based on the job; only suggestions may tailor it.
 
 REVIEW OUTPUT
-"suggestions": up to 15 meaningful, supported changes:
- { "section":string, "sourceQuote":string, "original":string,
+"suggestions": up to 15 individually reviewable, supported changes:\nEach suggestion must target ONE existing plain-text field in the baseline resume.\nUse a target object { "section": "inputValue"|"fields", "key": string,\n"index": number (fields only), "field": string (fields only) }.\nFor inputValue, key is "summary"; omit index/field.\nFor fields, key must be "experience" or "projects"; field is\n"jobSummary" for experience or "description" for projects.\n"original" MUST exactly match the ENTIRE baseline field value in resume.\n"proposed" MUST be the full replacement text; do not append unknown facts.\nIf a source bullet cannot be safely targeted, write a clarification question\ninstead. Never present an unapplied change as already included in resume.
+ { "section":string, "target":{ "section":"fields", "key":"experience", "index":0, "field":"jobSummary" },\n "sourceQuote":string, "original":string,
  "proposed":string, "reason":string, "priority":"high"|"medium"|"low",
  "changeType":"rewrite"|"emphasize"|"reorder"|"clarify",
  "requirementId":string, "evidenceLevel":"direct"|"related"|"ambiguous",
