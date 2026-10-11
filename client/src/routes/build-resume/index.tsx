@@ -25,7 +25,12 @@ const steps=[
  {title:'Education',description:'Academic background',Component:Education},
  {title:'Skills',description:'Your capabilities',Component:Skills},
  {title:'Projects',description:'Selected work and projects',Component:Project},
+ {title:'Additional',description:'Certificates and awards',Component:AdditionalSections},
 ] as const
+
+function AdditionalSections(){
+ return <div className="space-y-8"><Certificate/><Award/></div>
+}
 
 function BuilderPage(){
  const [active,setActive]=useState(0)
@@ -55,13 +60,13 @@ function BuilderPage(){
     <button onClick={()=>setMobilePreview(true)} className={`rs-button flex-1 ${mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Preview</button>
    </div>
    <div className="grid items-start gap-5 lg:grid-cols-[215px_minmax(300px,1fr)_minmax(340px,1.25fr)]">
-    <aside className={`rs-card p-3 ${mobilePreview?'hidden lg:block':''}`}><p className="rs-eyebrow px-3 py-4" style={{color:'var(--rs-muted)'}}>Your sections</p><nav aria-label="Resume sections" className="space-y-1">{steps.map((step,index)=><button key={step.title} onClick={()=>setActive(index)} aria-current={active===index?'step':undefined} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors" style={{background:active===index?'var(--rs-inverse)':'transparent',color:active===index?'var(--rs-inverse-text)':'var(--rs-ink)'}}><span className="text-xs opacity-60">{String(index+1).padStart(2,'0')}</span><span><span className="block text-sm font-semibold">{step.title}</span><span className="mt-1 block text-[11px] opacity-60">{step.description}</span></span></button>)}</nav><div className="mt-4 border-t p-3" style={{borderColor:'var(--rs-line)'}}><p className="text-xs" style={{color:'var(--rs-muted)'}}>Additional sections</p><details className="mt-3"><summary className="cursor-pointer text-sm">Certifications & awards</summary><div className="mt-3 rounded-lg bg-[#161616] p-3 text-white"><Certificate/><Award/></div></details></div></aside>
+    <aside className={`rs-card p-3 ${mobilePreview?'hidden lg:block':''}`}><p className="rs-eyebrow px-3 py-4" style={{color:'var(--rs-muted)'}}>Your sections</p><nav aria-label="Resume sections" className="space-y-1">{steps.map((step,index)=><button key={step.title} onClick={()=>setActive(index)} aria-current={active===index?'step':undefined} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors" style={{background:active===index?'var(--rs-inverse)':'transparent',color:active===index?'var(--rs-inverse-text)':'var(--rs-ink)'}}><span className="text-xs opacity-60">{String(index+1).padStart(2,'0')}</span><span><span className="block text-sm font-semibold">{step.title}</span><span className="mt-1 block text-[11px] opacity-60">{step.description}</span></span></button>)}</nav></aside>
     <section className={`rs-card min-w-0 p-4 md:p-6 ${mobilePreview?'hidden lg:block':''}`}>
      <div className="flex items-center justify-between"><div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>Step {active+1} of {steps.length}</p><h2 className="mt-2 text-xl font-semibold">{steps[active]?.title}</h2></div><FileText size={22} strokeWidth={1.4}/></div>
      <div className="rs-legacy-builder mt-5 rounded-xl bg-[#171717] p-3 text-white md:p-5">{StepComponent&&<StepComponent/>}</div>
      <div className="mt-6 flex justify-between gap-3"><button onClick={()=>setActive(i=>Math.max(0,i-1))} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>setActive(i=>Math.min(steps.length-1,i+1))} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
     </section>
-    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><div className="max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2 md:p-5"><div className="mx-auto w-max origin-top-left scale-[.46] sm:scale-[.65] xl:scale-[.70]"><ResumePDF/></div></div></section>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><div className="max-h-[830px] overflow-auto rounded-lg bg-[#dddddd] p-2 md:p-5"><div className="rs-resume-zoom mx-auto w-max origin-top-left"><ResumePDF/></div></div></section>
    </div>
   </div>
  </ResumashShell>
