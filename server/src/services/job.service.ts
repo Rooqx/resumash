@@ -1,5 +1,5 @@
 import { PDFParse } from "pdf-parse";
-import { HF_TOKEN, MODEL } from "../configs/env.configs";
+import { LLM_API_KEY, LLM_URL, MODEL } from "../configs/env.configs";
 import { OpenAI } from "openai";
 import { AppError } from "../middlewares/error.middleware";
 import extractJSON from "../utils/extractJson";
@@ -20,8 +20,9 @@ class Job {
     logger.info("Querying OpenAI for tailored resume");
     //create openai client
     const client = new OpenAI({
-      baseURL: "https://api.fireworks.ai/inference/v1",
-      apiKey: HF_TOKEN,
+      // Legacy service is retained for compatibility; use the same provider.
+      baseURL: LLM_URL?.replace(/\/chat\/completions\/?$/, ""),
+      apiKey: LLM_API_KEY,
     });
 
     if (!client) {
