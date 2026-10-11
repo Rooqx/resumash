@@ -37,11 +37,11 @@ const styles = StyleSheet.create({
   modernPage: { fontFamily: 'Helvetica', paddingTop: 45 },
   executivePage: { fontFamily: 'Times-Roman', paddingTop: 50 },
   header: { borderBottomWidth: 1, borderBottomColor: '#282828', paddingBottom: 10, marginBottom: 13 },
-  classicHeader: { alignItems: 'center', borderBottomWidth: 1.2 },
+  classicHeader: { alignItems: 'flex-start', borderBottomWidth: 1.2, borderBottomColor: '#304752' },
   executiveHeader: { borderBottomWidth: 0, marginBottom: 19 },
   name: { fontSize: 21, fontFamily: 'Helvetica-Bold', marginBottom: 5 },
-  classicName: { fontSize: 22, fontFamily: 'Times-Bold' },
-  executiveName: { fontSize: 28, fontFamily: 'Times-Roman' },
+  classicName: { fontSize: 22, fontFamily: 'Times-Bold', color: '#203946' },
+  executiveName: { fontSize: 28, fontFamily: 'Times-Roman', color: '#273024' },
   role: { fontSize: 10.5, marginBottom: 4 },
   contact: { fontSize: 8.5, color: '#434343' },
   section: { marginBottom: 12 },
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     letterSpacing: .7,
   },
   classicSectionTitle: { fontFamily: 'Times-Bold', borderBottomColor: '#333' },
-  executiveSectionTitle: { fontFamily: 'Times-Bold' },
+  executiveSectionTitle: { fontFamily: 'Times-Bold', borderBottomWidth: 0, letterSpacing: 1.3 },
   entry: { marginBottom: 8 },
   entryTitle: { fontFamily: 'Helvetica-Bold', fontSize: 9.4, marginBottom: 2 },
   serifEntryTitle: { fontFamily: 'Times-Bold' },
@@ -257,12 +257,11 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
         </View>
         {template === 'classic' ? (
           <>
-            {experienceEntries.length === 0 && education}
             {summary}
-            {experience}
-            {experienceEntries.length > 0 && education}
-            {skills}
+            {education}
             {projects}
+            {skills}
+            {experience}
             {additional}
           </>
         ) : (
