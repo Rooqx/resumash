@@ -86,16 +86,27 @@ async function withFileStore<T>(mode: IDBTransactionMode, callback: (store: IDBO
   } finally { db.close() }
 }
 
+/**
+ * Serialize mutations so an older async save cannot commit after a later clear.
+ * Reads also enter the queue, preventing restoration from observing half-written data.
+ */
+let fileOperations: Promise<unknown> = Promise.resolve()
+function enqueueFileOperation<T>(operation: () => Promise<T>): Promise<T> {
+  const result=fileOperations.then(operation,operation)
+  fileOperations=result.then(()=>undefined,()=>undefined)
+  return result
+}
+
 /** IndexedDB stores the original PDF Blob separately from localStorage metadata. */
 export async function saveUploadedResume(file: File): Promise<void> {
   if (file.size > MAX_UPLOAD || file.type !== 'application/pdf') throw new Error('Only PDF files up to 10 MB are supported')
-  await withFileStore('readwrite', store => store.put({ blob: file, name: file.name, savedAt: Date.now() }, FILE_KEY))
+  await enqueueFileOperation(()=>withFileStore('readwrite', store => store.put({ blob: file, name: file.name, savedAt: Date.now() }, FILE_KEY)))
 }
 export async function restoreUploadedResume(): Promise<File | null> {
-  const stored = await withFileStore<{ blob: Blob; name: string } | undefined>('readonly', store => store.get(FILE_KEY))
+  const stored = await enqueueFileOperation(()=>withFileStore<{ blob: Blob; name: string } | undefined>('readonly', store => store.get(FILE_KEY)))
   if (!stored?.blob || stored.blob.size > MAX_UPLOAD) return null
   return new File([stored.blob], stored.name || 'resume.pdf', { type: 'application/pdf' })
 }
 export async function clearUploadedResume(): Promise<void> {
-  await withFileStore('readwrite', store => store.delete(FILE_KEY))
+  await enqueueFileOperation(()=>withFileStore('readwrite', store => store.delete(FILE_KEY)))
 }
