@@ -9,6 +9,7 @@ import logRouter from "./routers/logs.route";
 import { connectToRedis } from "./db/redis";
 import { connectToMongo } from "./db/mongo";
 import resumeRouter from "./routers/resume.router";
+import coverLetterRouter from "./routers/cover-letter.router";
 const app = express();
 
 // Trust proxy configuration must match deployment infrastructure. Default: do not trust forwarded IP headers.
@@ -27,6 +28,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/v1/resumes", resumeRouter);
+app.use("/api/v1/cover-letters", coverLetterRouter);
 app.use("/api/v1/logs", logRouter);
 
 app.use(errorHandler);
