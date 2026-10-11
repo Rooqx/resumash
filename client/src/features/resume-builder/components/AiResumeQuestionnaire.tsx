@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { z } from 'zod'
-import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
+import { builderResponseSchema, type BuilderResponse } from '@/features/resume-tailor/schemas'
 
 type Experience = {
   company: string
@@ -34,7 +34,7 @@ interface Answers {
 
 interface QuestionnaireProps {
   /** Applies the resulting draft to the existing editor, without creating a second resume store. */
-  onDraft: (draft: TailoredResume) => void
+  onDraft: (draft: BuilderResponse) => void
   onClose: () => void
 }
 
@@ -53,7 +53,7 @@ const initialAnswers: Answers = {
 }
 
 const responseSchema = z.object({
-  data: tailoredResumeSchema,
+  data: builderResponseSchema,
 })
 
 const fieldClass = 'mt-2 w-full rounded-lg border bg-transparent px-3 py-2.5 text-sm outline-offset-2'
@@ -68,6 +68,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
   const [answers, setAnswers] = useState<Answers>(initialAnswers)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [draft,setDraft] = useState<BuilderResponse|null>(null)
 
   function update<K extends keyof Answers>(key: K, value: Answers[K]) {
     setAnswers(current => ({ ...current, [key]: value }))
@@ -141,7 +142,8 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
       if (!parsed.success) throw new Error('The server returned an invalid resume draft.')
 
       // The parent applies draft data to the existing editor. No independent AI store.
-      onDraft(parsed.data.data)
+      // Present review metadata before committing any AI proposal to the editor.
+      setDraft(parsed.data.data)
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'An unexpected error occurred.')
     } finally {
@@ -176,7 +178,8 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
             style={{ backgroundColor: i <= step ? 'var(--rs-ink)' : 'var(--rs-line)' }} />
         ))}
       </div>
-      <form onSubmit={event => { event.preventDefault(); if (step < 3) next(); else void generateResume() }}>
+      {draft&&<div className="mb-6 space-y-4 rounded-xl border p-4" style={{borderColor:'var(--rs-line)'}}><h3 className="text-lg font-semibold">Review your AI draft</h3><p className="text-sm">Generated summary: {draft.inputValue.summary}</p>{draft.writingNotes.map((note,i)=><p key={i} className="text-xs">{note}</p>)}{draft.clarificationQuestions.length>0&&<div><h4 className="text-sm font-semibold">Questions that could improve your resume</h4>{draft.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question} — {q.reason}</p>)}</div>}<p className="text-xs">AI wording is unverified. Check claims in the editor before using the resume.</p><div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-primary" onClick={()=>onDraft(draft)}>Accept draft and edit</button><button type="button" className="rs-button rs-button-outline" onClick={()=>setDraft(null)}>Return to answers</button></div></div>}
+      {!draft&&<form onSubmit={event => { event.preventDefault(); if (step < 3) next(); else void generateResume() }}>
         {step === 0 && (
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm">Full name *<input className={fieldClass} style={fieldStyle}
@@ -321,7 +324,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
             {loading ? 'Writing your draft…' : step === 3 ? 'Build my resume with AI' : 'Continue'}
           </button>
         </div>
-      </form>
+      </form>}
     </section>
   )
 }
