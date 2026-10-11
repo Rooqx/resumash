@@ -40,11 +40,17 @@ function TailorPage(){
 
  // Save after changes settle. All AI edit selections are restored separately.
  useEffect(()=>{
-  const timer=window.setTimeout(()=>{
-    if(!saveTailorDraft({version:1,jobDescription,result,approved,acceptedEdits:[...acceptedEdits],view}))
-      setStorageWarning(true)
-  },350)
-  return ()=>window.clearTimeout(timer)
+  const persistNow=()=>{
+   if(!saveTailorDraft({version:1,jobDescription,result,approved,acceptedEdits:[...acceptedEdits],view}))
+    setStorageWarning(true)
+  }
+  const timer=window.setTimeout(persistNow,350)
+  // Flush on refresh/close; otherwise a final keystroke could be lost.
+  window.addEventListener('pagehide',persistNow)
+  return ()=>{
+   window.clearTimeout(timer)
+   window.removeEventListener('pagehide',persistNow)
+  }
  },[jobDescription,result,approved,acceptedEdits,view])
 
  const clearSavedWork=()=>{
