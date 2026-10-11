@@ -5,12 +5,13 @@ import {
   uploadResume,
 } from "../controllers/resuem.controller";
 import uploadMiddleware from "../middlewares/uploads.middleware";
+import { tailorRateLimit } from "../middlewares/tailor-rate-limit";
 import { logger } from "../utils/logger";
 import { AppError } from "../middlewares/error.middleware";
 const resumeRouter = Router();
 
-const upload = await uploadMiddleware();
-resumeRouter.post("/upload", upload.single("resume"), uploadResume);
+const upload = uploadMiddleware();
+resumeRouter.post("/upload", tailorRateLimit, upload, uploadResume);
 
 resumeRouter.post("/download-resume", async (req, res) => {
   try {
