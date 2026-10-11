@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import type { ReactNode } from 'react'
 import type { ResumeTemplateId } from '../templates/registry'
+import { orderedResumeSections, templateConfigs } from '../templates/templateConfig'
 
 /**
  * Immutable snapshot of the current resume editor.
@@ -219,7 +220,7 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
   )
 
   const summary = !!text(basics.summary) && (
-    <Section title={template === 'executive' ? 'Executive Profile' : 'Professional Summary'} template={template}>
+    <Section title={templateConfigs[template].summaryTitle} template={template}>
       <Text style={styles.body}>{text(basics.summary)}</Text>
     </Section>
   )
@@ -238,6 +239,12 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
     <Document title={text(basics.fullName) ? `${basics.fullName} — Resume` : 'Resume'} creator="Resumash">
       <Page size="A4" wrap style={[
         styles.page,
+        {
+          paddingTop:templateConfigs[template].pagePadding.top,
+          paddingBottom:templateConfigs[template].pagePadding.bottom,
+          paddingHorizontal:templateConfigs[template].pagePadding.horizontal,
+          color:templateConfigs[template].ink,
+        },
         template === 'classic' ? styles.classicPage : {},
         template === 'modern' ? styles.modernPage : {},
         template === 'executive' ? styles.executivePage : {},
@@ -255,25 +262,11 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
           {!!text(basics.label) && <Text style={styles.role}>{text(basics.label)}</Text>}
           {!!contact && <Text style={styles.contact}>{contact}</Text>}
         </View>
-        {template === 'classic' ? (
-          <>
-            {summary}
-            {education}
-            {projects}
-            {skills}
-            {experience}
-            {additional}
-          </>
-        ) : (
-          <>
-            {summary}
-            {experience}
-            {skills}
-            {projects}
-            {education}
-            {additional}
-          </>
-        )}
+        {orderedResumeSections(template).map(key=>(
+          <View key={key}>
+            {({ summary, experience, education, projects, skills, additional } as Record<string,ReactNode>)[key]}
+          </View>
+        ))}
         {!!text(basics.additionalInfo) && <Section title="Additional Information" template={template}><Text style={styles.body}>{text(basics.additionalInfo)}</Text></Section>}
       </Page>
     </Document>
