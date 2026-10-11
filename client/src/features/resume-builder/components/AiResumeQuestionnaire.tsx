@@ -100,11 +100,13 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
   const [error, setError] = useState('')
   const [draft,setDraft] = useState<BuilderResponse|null>(restored?.draft??null)
   useEffect(()=>{
-   const timer=window.setTimeout(()=>{
+   const persistNow=()=>{
     try { localStorage.setItem(AI_QUESTIONNAIRE_KEY,JSON.stringify({step,answers,draft})) }
     catch { /* Browser may disallow storage in private mode. */ }
-   },350)
-   return ()=>window.clearTimeout(timer)
+   }
+   const timer=window.setTimeout(persistNow,350)
+   window.addEventListener('pagehide',persistNow)
+   return ()=>{window.clearTimeout(timer);window.removeEventListener('pagehide',persistNow)}
   },[step,answers,draft])
 
   const acceptDraft=()=>{
