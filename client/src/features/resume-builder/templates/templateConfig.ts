@@ -16,6 +16,8 @@ interface TemplateConfig {
   fontFamily: 'Helvetica' | 'Times-Roman'
   ink: string
   accent: string
+  nameFontSize: number
+  sectionSpacing: number
 }
 
 export const templateConfigs: Record<ResumeTemplateId, TemplateConfig> = {
@@ -27,6 +29,8 @@ export const templateConfigs: Record<ResumeTemplateId, TemplateConfig> = {
     fontFamily:'Helvetica',
     ink:'#182329',
     accent:'#283841',
+    nameFontSize:29,
+    sectionSpacing:13,
   },
   classic: {
     displayName: 'Graduate & Emerging Talent',
@@ -36,6 +40,8 @@ export const templateConfigs: Record<ResumeTemplateId, TemplateConfig> = {
     fontFamily:'Times-Roman',
     ink:'#203946',
     accent:'#304752',
+    nameFontSize:29,
+    sectionSpacing:12,
   },
   executive: {
     displayName: 'Leadership Profile',
@@ -45,6 +51,8 @@ export const templateConfigs: Record<ResumeTemplateId, TemplateConfig> = {
     fontFamily:'Times-Roman',
     ink:'#242d25',
     accent:'#576653',
+    nameFontSize:38,
+    sectionSpacing:19,
   },
 }
 
