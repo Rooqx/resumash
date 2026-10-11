@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Check, Eye, X } from 'lucide-react'
 import { resumeTemplates, type ResumeTemplateId } from '../templates/registry'
-import { sampleResume } from '../templates/sampleResume'
+import { sampleForTemplate } from '../templates/sampleResume'
 import ResumeDocument from '../templates/ResumeDocument'
 import A4Preview from './A4Preview'
 import useInputStore from '@/lib/stores/useInputStores'
@@ -36,7 +36,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
         {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
           <div className="relative h-48 overflow-hidden rounded-md border bg-[#e9eaeb]" style={{borderColor:'var(--rs-line)'}}>
             <div className="absolute left-1/2 top-3 origin-top-left" style={{width:794,height:1122,transform:'scale(.24)',transformOrigin:'top left',left:'50%',marginLeft:-95}}>
-              <ResumeDocument template={item.id} snapshot={sampleResume}/>
+              <ResumeDocument template={item.id} snapshot={sampleForTemplate(item.id)}/>
             </div>
           </div>
           <div className="mt-3 flex items-start justify-between gap-2">
@@ -61,7 +61,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
           <p className="text-xs" style={{color:'var(--rs-muted)'}}>Fictional sample resume · A4</p></div>
           <button type="button" className="rs-button rs-button-outline !p-2" aria-label="Close preview" onClick={()=>setOpen(null)}><X size={18}/></button>
         </div>
-        <A4Preview label="Sample resume preview"><ResumeDocument snapshot={sampleResume} template={open}/></A4Preview>
+        <A4Preview label="Sample resume preview"><ResumeDocument snapshot={sampleForTemplate(open)} template={open}/></A4Preview>
         <button type="button" className="rs-button rs-button-primary mt-4" onClick={()=>{onSelect(open);setOpen(null)}}>Choose this template</button>
       </div>
     </div>}
