@@ -9,22 +9,55 @@ import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
 import ResumeReview from '@/features/resume-tailor/components/ResumeReview'
 import { applyApprovedChanges } from '@/features/resume-tailor/reviewChanges'
+import { restoreTailorDraft, saveTailorDraft, clearTailorDraft, saveUploadedResume, restoreUploadedResume, clearUploadedResume } from '@/lib/persistence/resumeDrafts'
 
 export const Route=createFileRoute('/tailor-resume/')({component:TailorPage})
 function TailorPage(){
- const [jobDescription,setJobDescription]=useState('')
+ const [restored] = useState(() => restoreTailorDraft())
+ const [jobDescription,setJobDescription]=useState(restored?.jobDescription??'')
  const [file,setFile]=useState<File|null>(null)
- const [result,setResult]=useState<TailoringResponse|null>(null)
- const [approved,setApproved]=useState(false)
- const [acceptedEdits,setAcceptedEdits]=useState<Set<number>>(()=>new Set())
- const [view,setView]=useState<'tailored'|'original'|'comparison'>('tailored')
+ const [result,setResult]=useState<TailoringResponse|null>(restored?.result??null)
+ const [approved,setApproved]=useState(restored?.approved??false)
+ const [acceptedEdits,setAcceptedEdits]=useState<Set<number>>(()=>new Set(restored?.acceptedEdits??[]))
+ const [view,setView]=useState<'tailored'|'original'|'comparison'>(restored?.view??'tailored')
  const [originalUrl,setOriginalUrl]=useState<string|null>(null)
+ const [storageWarning,setStorageWarning]=useState(false)
  useEffect(()=>{
   if(!file){setOriginalUrl(null);return}
   const url=URL.createObjectURL(file)
   setOriginalUrl(url)
   return ()=>URL.revokeObjectURL(url)
  },[file])
+
+ // Restore PDF bytes from IndexedDB, including its name and preview.
+ useEffect(()=>{
+  let cancelled=false
+  void restoreUploadedResume().then(saved=>{
+    if(!cancelled&&saved)setFile(current=>current??saved)
+  }).catch(()=>{})
+  return ()=>{cancelled=true}
+ },[])
+
+ // Save after changes settle. All AI edit selections are restored separately.
+ useEffect(()=>{
+  const timer=window.setTimeout(()=>{
+    if(!saveTailorDraft({version:1,jobDescription,result,approved,acceptedEdits:[...acceptedEdits],view}))
+      setStorageWarning(true)
+  },350)
+  return ()=>window.clearTimeout(timer)
+ },[jobDescription,result,approved,acceptedEdits,view])
+
+ const clearSavedWork=()=>{
+  clearTailorDraft()
+  void clearUploadedResume().catch(()=>{})
+  setJobDescription('')
+  setFile(null)
+  setResult(null)
+  setApproved(false)
+  setAcceptedEdits(new Set())
+  setView('tailored')
+  toast.success('Locally saved tailoring draft cleared')
+ }
  const query=useQueryClient()
  const navigate=useNavigate()
  const mutation=useMutation({
@@ -48,6 +81,7 @@ function TailorPage(){
  return <ResumashShell>
   <SEO title="Tailor your resume | Resumash" description="Tailor your resume to a job description and refine the result." />
   <div className="rs-container py-10 md:py-16">
+   <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><span className="text-xs opacity-70">{storageWarning?'Local saving unavailable in this browser':'Draft automatically saved on this device'}</span><button type="button" className="rs-button rs-button-outline !min-h-9 text-xs" onClick={clearSavedWork}>Clear saved tailoring</button></div>
    <div className="mb-9"><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>01 / Resume tailoring</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">The right story for the right role.</h1><p className="mt-4 max-w-2xl text-sm leading-7" style={{color:'var(--rs-muted)'}}>Upload your resume, add the job description, and review a tailored version built around your actual experience.</p></div>
    <div className={`grid items-start gap-5 ${view==='comparison' ? 'lg:grid-cols-[minmax(270px,.65fr)_minmax(0,2fr)]' : 'lg:grid-cols-[minmax(280px,1fr)_minmax(360px,1.3fr)_minmax(250px,.8fr)]'}`}>
     <form className="rs-card space-y-6 p-5 md:p-6" onSubmit={e=>{e.preventDefault();mutation.mutate()}}>
@@ -58,7 +92,7 @@ function TailorPage(){
       {file?<FileCheck size={25}/>:<UploadCloud size={25}/>}
       <span className="max-w-full break-all text-sm font-semibold">{file?file.name:'Choose your resume'}</span>
       <span className="text-xs" style={{color:'var(--rs-muted)'}}>PDF resume • up to 10 MB</span>
-      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set())}}/>
+      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set());if(next){void saveUploadedResume(next).catch(()=>setStorageWarning(true))}else{void clearUploadedResume().catch(()=>{})}}}/>
      </label>
      <button className="rs-button rs-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50" disabled={!file||!jobDescription.trim()||mutation.isPending} type="submit"><Sparkles size={17}/>{mutation.isPending?'Tailoring your resume…':'Tailor my resume'}<ArrowRight size={16}/></button>
     </form>
