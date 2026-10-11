@@ -5,6 +5,12 @@ export const tailoringResultSchema = z.object({
   resume: resumeOutputSchema,
   suggestions: z.array(z.object({
     section: z.string().max(80),
+    target: z.object({
+      section: z.enum(["inputValue", "fields"]),
+      key: z.string().max(60),
+      index: z.number().int().min(0).optional(),
+      field: z.string().max(60).optional(),
+    }).strict(),
     sourceQuote: z.string().min(8).max(500),
     original: z.string().max(750),
     proposed: z.string().max(750),
