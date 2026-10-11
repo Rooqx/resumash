@@ -11,10 +11,16 @@ import { connectToMongo } from "./db/mongo";
 import resumeRouter from "./routers/resume.router";
 const app = express();
 
-app.use(express.json());
+// Trust proxy configuration must match deployment infrastructure. Default: do not trust forwarded IP headers.
+if (process.env.TRUST_PROXY_HOPS) {
+  const hops = Number(process.env.TRUST_PROXY_HOPS);
+  if (!Number.isInteger(hops) || hops < 0 || hops > 5) throw new Error("Invalid TRUST_PROXY_HOPS");
+  app.set("trust proxy", hops);
+}
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(cors());
-app.use("/uploads", express.static("uploads"));
+// Resume documents are private and must never be served as static files.
 
 app.get("/", (_req, res) => {
   res.send("Hello from Server (Express + TS) 👋");
