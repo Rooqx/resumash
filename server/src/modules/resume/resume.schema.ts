@@ -1,0 +1,12 @@
+import { z } from "zod";
+
+/** Constraints apply to the text extracted from untrusted uploads. */
+export const tailorInputSchema = z.object({
+  jobDescription: z.string().trim().min(20).max(20_000),
+});
+
+export const resumeOutputSchema = z.object({
+  inputValue: z.record(z.string()),
+  fields: z.record(z.array(z.record(z.unknown()))),
+  tagFields: z.record(z.unknown()).optional(),
+});
