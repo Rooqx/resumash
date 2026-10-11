@@ -29,6 +29,12 @@ resumeRouter.post("/ai-build", aiRateLimit("builder", 10), async (req, res, next
 });
 
 resumeRouter.post("/download-resume", async (req, res) => {
+  // React PDF now runs entirely in the browser. Old Playwright rendering is
+  // disabled by default to prevent unnecessary server resource consumption.
+  if (process.env.ENABLE_LEGACY_PDF_EXPORT !== "true") {
+    res.status(410).json({ message: "Use browser-side PDF export instead." });
+    return;
+  }
   try {
     const { inputValue, fields, tagFields, templateId } = req.body;
     const selectedTemplate = ["classic", "modern", "executive"].includes(templateId) ? templateId : "modern";
