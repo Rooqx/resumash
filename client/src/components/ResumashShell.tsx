@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Menu, Moon, Sun, X } from 'lucide-react'
 import '../resumash.css'
@@ -11,6 +11,7 @@ const navigation = [
 export default function ResumashShell({children}:{children:React.ReactNode}) {
  const [dark,setDark]=useState(()=> typeof window!=='undefined' && (localStorage.getItem('resumash-theme')==='dark' || (!localStorage.getItem('resumash-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)))
  const [menu,setMenu]=useState(false)
+ useEffect(()=>{document.documentElement.classList.toggle('dark',dark)},[dark])
  const toggleTheme=()=>setDark(value=>{const next=!value;document.documentElement.classList.toggle('dark',next);localStorage.setItem('resumash-theme',next?'dark':'light');return next})
  return <div className="rs-app">
   <header className="rs-site-header">
