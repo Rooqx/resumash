@@ -13,6 +13,7 @@ import { Route as RxsmeRouteImport } from './routes/rxsme'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TailorResumeIndexRouteImport } from './routes/tailor-resume/index'
 import { Route as BuildResumeIndexRouteImport } from './routes/build-resume/index'
+import { Route as CoverLetterIndexRouteImport } from './routes/cover-letter/index'
 
 const RxsmeRoute = RxsmeRouteImport.update({
   id: '/rxsme',
@@ -35,19 +36,28 @@ const BuildResumeIndexRoute = BuildResumeIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const CoverLetterIndexRoute = CoverLetterIndexRouteImport.update({
+  id: '/cover-letter/',
+  path: '/cover-letter/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 export interface FileRoutesByFullPath {
+  '/cover-letter': typeof CoverLetterIndexRoute
   '/': typeof IndexRoute
   '/rxsme': typeof RxsmeRoute
   '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesByTo {
+  '/cover-letter': typeof CoverLetterIndexRoute
   '/': typeof IndexRoute
   '/rxsme': typeof RxsmeRoute
   '/build-resume': typeof BuildResumeIndexRoute
   '/tailor-resume': typeof TailorResumeIndexRoute
 }
 export interface FileRoutesById {
+  '/cover-letter/': typeof CoverLetterIndexRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/rxsme': typeof RxsmeRoute
@@ -56,13 +66,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/rxsme' | '/build-resume' | '/tailor-resume'
+  fullPaths: '/' | '/rxsme' | '/build-resume' | '/tailor-resume' | '/cover-letter'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/rxsme' | '/build-resume' | '/tailor-resume'
-  id: '__root__' | '/' | '/rxsme' | '/build-resume/' | '/tailor-resume/'
+  to: '/' | '/rxsme' | '/build-resume' | '/tailor-resume' | '/cover-letter'
+  id: '__root__' | '/' | '/rxsme' | '/build-resume/' | '/tailor-resume/' | '/cover-letter/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  CoverLetterIndexRoute: typeof CoverLetterIndexRoute
   IndexRoute: typeof IndexRoute
   RxsmeRoute: typeof RxsmeRoute
   BuildResumeIndexRoute: typeof BuildResumeIndexRoute
@@ -71,6 +82,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/cover-letter/': {
+      id: '/cover-letter/'
+      path: '/cover-letter'
+      fullPath: '/cover-letter'
+      preLoaderRoute: typeof CoverLetterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rxsme': {
       id: '/rxsme'
       path: '/rxsme'
@@ -103,6 +121,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  CoverLetterIndexRoute: CoverLetterIndexRoute,
   IndexRoute: IndexRoute,
   RxsmeRoute: RxsmeRoute,
   BuildResumeIndexRoute: BuildResumeIndexRoute,
