@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
+import { tailoringResponseSchema } from '@/features/resume-tailor/schemas'
 
 const TAILOR_KEY = 'resumash:tailor:v1'
 const BUILDER_VIEW_KEY = 'resumash:builder:view:v1'
