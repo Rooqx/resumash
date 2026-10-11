@@ -28,7 +28,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
       <div className="grid gap-4 sm:grid-cols-3">
         {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
           <div className="relative h-48 overflow-hidden rounded-md border bg-[#e9eaeb]" style={{borderColor:'var(--rs-line)'}}>
-            <div className="absolute left-1/2 top-3 origin-top-left" style={{width:794,height:1122,transform:'translateX(-50%) scale(.24)',transformOrigin:'0 0',left:'50%',marginLeft:-95}}>
+            <div className="absolute left-1/2 top-3 origin-top-left" style={{width:794,height:1122,transform:'scale(.24)',transformOrigin:'top left',left:'50%',marginLeft:-95}}>
               <ResumeDocument template={item.id} snapshot={sampleResume}/>
             </div>
           </div>
