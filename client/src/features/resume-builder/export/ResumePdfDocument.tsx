@@ -192,7 +192,7 @@ export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocum
         <Entry key={index} template={template}
           title={text(entry.name)}
           description={text(entry.description)}
-          bullets={snapshot.tagFields[`projectTechnologies-${index}`]?.tags || []}
+          bullets={snapshot.tagFields[`projectHighlights-${index}`]?.tags || []}
         />
       ))}
     </Section>
