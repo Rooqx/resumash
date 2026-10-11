@@ -1,0 +1,36 @@
+name: Frontend browser acceptance
+
+on:
+  push:
+    branches: [feat/frontend-redesign]
+    paths:
+      - 'client/**'
+      - '.github/workflows/frontend-browser.yml'
+  workflow_dispatch:
+
+jobs:
+  chromium-e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build frontend
+        run: bun run build
+      - name: Install test-only browser tooling
+        run: npm install --no-save --package-lock=false @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser acceptance tests
+        run: npx playwright test e2e/resume-workflows.spec.ts --reporter=line
+      - name: Save failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: client/test-results
+          retention-days: 7
