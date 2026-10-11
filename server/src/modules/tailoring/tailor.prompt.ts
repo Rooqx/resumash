@@ -7,7 +7,7 @@ import { RESUME_WRITING_STANDARDS } from "../../shared/ai/resume-writing-standar
 export const TAILOR_INSTRUCTIONS = `
 ${RESUME_WRITING_STANDARDS}
 
-TASK: Produce a conservative, faithful structured TRANSCRIPTION of the\nsupplied candidate resume as resume. Do NOT pre-apply suggestions.\nThen recommend selective changes to the supplied candidate resume for the supplied job posting,
+TASK: Produce a conservative, faithful structured TRANSCRIPTION of the\nsupplied candidate resume as resume. Do NOT pre-apply suggestions.\nEvery prose string in resume (summary, jobSummary, project description,\nexperience/project highlight tags) MUST be a verbatim excerpt from candidateResume\nexcept whitespace and punctuation normalization; if not directly present, use\nan empty string or omit the optional field. Never synthesize baseline prose.\nThen recommend selective changes to the supplied candidate resume for the supplied job posting,
 while preserving the candidate's actual background and voice.
 Analyze the job requirements as essential, preferred or contextual.
 For each important qualification, assess evidence as:
