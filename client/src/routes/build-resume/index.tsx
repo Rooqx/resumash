@@ -20,6 +20,7 @@ import { downloadResume } from '@/lib/serverActions/downloadPDF'
 import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
 import AiResumeQuestionnaire from '@/features/resume-builder/components/AiResumeQuestionnaire'
 import A4Preview from '@/features/resume-builder/components/A4Preview'
+import ActualPdfPreview from '@/features/resume-builder/components/ActualPdfPreview'
 import TemplateGallery from '@/features/resume-builder/components/TemplateGallery'
 import { restoreBuilderView, saveBuilderView, clearBuilderDraft } from '@/lib/persistence/resumeDrafts'
 
@@ -44,6 +45,7 @@ function BuilderPage(){
  const [active,setActive]=useState(savedView?.active??0)
  const [template,setTemplate]=useState<ResumeTemplateId>(()=>resumeTemplates.some(t=>t.id===savedView?.template)?savedView!.template as ResumeTemplateId:'modern')
  const [mobilePreview,setMobilePreview]=useState(false)
+ const [actualPdfOpen,setActualPdfOpen]=useState(false)
  const [downloading,setDownloading]=useState(false)
  const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
  const client=useQueryClient()
@@ -114,8 +116,9 @@ function BuilderPage(){
      <div className="rs-legacy-builder mt-5 rounded-xl bg-[#171717] p-3 text-white md:p-5">{StepComponent&&<StepComponent/>}</div>
      <div className="mt-6 flex justify-between gap-3"><button onClick={()=>setActive(i=>Math.max(0,i-1))} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>setActive(i=>Math.min(steps.length-1,i+1))} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
     </section>
-    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Live resume preview</h2><span className="text-xs" style={{color:'var(--rs-muted)'}}>A4</span></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
+    <section className={`rs-card min-w-0 p-4 md:p-6 ${!mobilePreview?'hidden lg:block':''}`}><div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Live resume preview</h2><button type="button" className="rs-button rs-button-outline !min-h-8 text-xs" onClick={()=>setActualPdfOpen(true)}>Inspect actual PDF pages</button></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
    </div>
   </div>
+  {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
  </ResumashShell>
 }
