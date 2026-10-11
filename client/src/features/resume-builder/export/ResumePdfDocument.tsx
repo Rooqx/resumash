@@ -96,7 +96,7 @@ function Section({
       styles.section,
       template === 'classic' ? styles.classicSection : {},
       template === 'executive' ? styles.executiveSection : {},
-      {marginBottom:templateConfigs[template].sectionSpacing},
+      {marginBottom:templateConfigs[template].sectionSpacing * 0.75},
     ]}>
       <Text style={[
         styles.sectionTitle,
