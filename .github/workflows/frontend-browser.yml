@@ -22,7 +22,7 @@ jobs:
       - name: Build frontend
         run: bun run build
       - name: Install test-only browser tooling
-        run: npm install --no-save --package-lock=false @playwright/test
+        run: npm install --no-save --package-lock=false --legacy-peer-deps @playwright/test
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run browser acceptance tests
