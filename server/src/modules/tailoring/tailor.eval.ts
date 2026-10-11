@@ -1,6 +1,6 @@
 /**
  * Opt-in live Tailor evaluation with synthetic text-based PDFs.
- * Invoked with HF_TOKEN and MODEL configured. Does not run in CI.
+ * Invoked with LLM_API_KEY and MODEL configured. Does not run in CI.
  *
  * Tests cannot replace a human recruiter review. They confirm that
  * model responses pass structural, numerical and baseline provenance gates.
@@ -40,8 +40,8 @@ async function createPdf(lines: string[]): Promise<Buffer> {
   return Buffer.from(await doc.save());
 }
 
-if (!process.env.HF_TOKEN || !process.env.MODEL) {
-  throw new Error("Set HF_TOKEN and MODEL before running live Tailor evaluation");
+if (!process.env.LLM_API_KEY || !process.env.MODEL) {
+  throw new Error("Set LLM_API_KEY and MODEL before running live Tailor evaluation");
 }
 
 let failures = 0;
