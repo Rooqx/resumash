@@ -49,6 +49,7 @@ export default function ActualPdfPreview({ template, onClose }: {
         <div><h2 className="text-lg font-semibold">Actual PDF preview</h2><p className="text-xs opacity-70">Pages and breaks are rendered by the same engine as Download.</p></div>
         <button type="button" className="rs-button rs-button-outline" onClick={onClose}>Close</button>
       </div>
+      {url&&<a className="mb-3 text-xs underline" target="_blank" rel="noopener noreferrer" href={url}>Open the PDF in a new tab if your browser cannot display it here</a>}
       {error?<p role="alert" className="text-sm text-red-500">{error}</p>:
        url?<iframe src={url} title="Selectable A4 resume PDF" className="min-h-0 w-full flex-1 rounded-md bg-white"/>:
        <p role="status" className="text-sm">Preparing page-accurate preview…</p>}
