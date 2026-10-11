@@ -3,6 +3,7 @@ import { generateJson } from "../../shared/ai/generate-json";
 import { parseResumePdf } from "../resume/parse-pdf";
 import { TAILOR_INSTRUCTIONS } from "./tailor.prompt";
 import { tailoringResultSchema } from "./tailor.schema";
+import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality";
 
 /**
  * Verify a cited quote exists in the original candidate document.
@@ -71,7 +72,7 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
     requirements: verifiedRequirements,
     missingRequirements: generated.missingRequirements,
     clarificationQuestions: generated.clarificationQuestions,
-    writingNotes: generated.writingNotes,
+    writingNotes: [...new Set([...generated.writingNotes, ...auditResumeWriting(resumeProse(generated.resume))])],
     requiresReview: true,
   };
 }
