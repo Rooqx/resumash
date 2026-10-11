@@ -1,6 +1,7 @@
 import { createElement, type ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
 import { toast } from 'sonner'
+import { saveAs } from 'file-saver'
 import useInputStore from '../stores/useInputStores'
 import useFieldStores from '../stores/useMultipleFieldStore'
 import { useTagStore } from '../stores/useInputTags'
@@ -46,20 +47,17 @@ export async function downloadResume(
     // ResumePdfDocument always returns a React PDF <Document> root.
     const documentElement = createElement(ResumePdfDocument, { snapshot, template }) as ReactElement<DocumentProps>
     const blob = await pdf(documentElement).toBlob()
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-
-    link.href = url
-    link.download = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-
-    // Delayed cleanup allows the browser to finish resolving the download.
-    window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
+    // Fail clearly if the renderer returned HTML/empty bytes instead of a PDF.
+    const header = new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())
+    if (blob.size < 500 || header !== '%PDF-') throw new Error('The generated PDF is invalid. Please retry.')
+    const safeName = (fileName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'resume.pdf').replace(/\.pdf$/i,'') + '.pdf'
+    saveAs(blob, safeName)
+    /* Download is triggered immediately while the user gesture is active. */
+    /* Removed manual URL handling: file-saver manages browser-specific downloads. */
     toast.success('Resume PDF generated')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'PDF generation failed'
+    console.error('Resume PDF export failed:', error)
     toast.error(message)
   } finally {
     setIsDownloading(false)
