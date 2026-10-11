@@ -1,7 +1,7 @@
 # Resumash API — Backend Guide
 
 The API is a small Express + TypeScript modular monolith. All AI features use
-one Fireworks-compatible OpenAI SDK client and Zod validation. Resume PDFs are
+one OpenAI-compatible Atria OpenAI SDK client and Zod validation. Resume PDFs are
 rendered in the browser with the existing React PDF dependency.
 
 ## Environment configuration
@@ -10,15 +10,16 @@ rendered in the browser with the existing React PDF dependency.
 | --- | --- |
 | `PORT` | HTTP listen port |
 | `NODE_ENV` | `development` / `production` |
-| `HF_TOKEN` | Fireworks API credential (the legacy variable name is retained) |
-| `MODEL` | Fireworks model identifier; must support JSON response format |
+| `LLM_API_KEY` | Fireworks API credential (the legacy variable name is retained) |
+| `LLM_URL` | Atria API URL, either `https://api.atria-asi.ai/v1` or the full `/v1/chat/completions` endpoint |
+| `MODEL` | Fireworks model identifier; for example `Atria-Dawn-Preview`; return valid JSON per prompt |
 | `REDIS_URI` | Required shared Redis/Valkey URL for atomic AI quotas |
 | `FRONTEND_DEVELOPMENT_URL` | Allowed development web origin |
 | `FRONTEND_PRODUCTION_URL` | Allowed production web origin |
 | `TRUST_PROXY_HOPS` | Number of **trusted** reverse proxy hops; set only after inspecting deployment topology |
 | `ENABLE_LEGACY_PDF_EXPORT` | Optional rollback flag; defaults to disabled |
 
-Never expose `HF_TOKEN` to Vite/React environment variables.
+Never expose `LLM_API_KEY` to Vite/React environment variables.
 
 **IP quota correctness:** If a reverse proxy is present, Express must resolve
 the actual client IP. Configure `TRUST_PROXY_HOPS` based on your hosting
@@ -121,8 +122,8 @@ branch and pull requests. No new automated test suite was added per scope.
 
 **Known limitations and release gates:**
 
-- A production Redis URL, Fireworks credential and suitable model are required.
-- Live model quality and provider JSON-format support must be checked with real
+- A production Redis URL, Atria credential and suitable model are required.
+- Live model quality and provider JSON response reliability must be checked with real
   credentials; compilation alone cannot verify an inference response.
 - The legacy Playwright PDF endpoint is disabled unless explicitly re-enabled
   for controlled rollback. Do not use it for new exports because it transmits
