@@ -2,6 +2,7 @@ import type { Questionnaire } from "./ai-builder.schema";
 import { resumeDraftSchema } from "./ai-builder.schema";
 import { generateJson } from "../../shared/ai/generate-json";
 import { BUILDER_INSTRUCTIONS } from "./ai-builder.prompt";
+import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
 import { auditResumeWriting } from "../../shared/ai/writing-quality";
 
 
@@ -13,6 +14,9 @@ import { auditResumeWriting } from "../../shared/ai/writing-quality";
  */
 export async function buildResumeFromQuestionnaire(input: Questionnaire) {
   const proposed = await generateJson(BUILDER_INSTRUCTIONS, input, resumeDraftSchema);
+
+  // Check user-originated source numbers before any AI text reaches the editor.
+  assertNumericalClaimsSupported(JSON.stringify(input), [proposed.summary, ...proposed.experienceBullets.flatMap(item=>item.bullets), ...proposed.projectBullets.flatMap(item=>item.bullets)]);
 
   const experienceBullets = new Map<number, string[]>();
   for (const item of proposed.experienceBullets) {
