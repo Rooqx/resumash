@@ -4,6 +4,7 @@ import { parseResumePdf } from "../resume/parse-pdf";
 import { TAILOR_INSTRUCTIONS } from "./tailor.prompt";
 import { tailoringResultSchema } from "./tailor.schema";
 import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
+import { assertSourceEntitiesPreserved } from "../../shared/ai/source-entities";
 import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality";
 
 /**
@@ -29,6 +30,7 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
   );
 
   assertNumericalClaimsSupported(sourceText, resumeProse(generated.resume));
+  assertSourceEntitiesPreserved(sourceText, generated.resume.fields);
   // Each review suggestion must refer to a distinct, real job requirement.
   const requirementIds = new Set(generated.requirements.map(item => item.id));
   if (requirementIds.size !== generated.requirements.length) {
