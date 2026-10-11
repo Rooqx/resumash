@@ -83,3 +83,6 @@
 .rs-document { color:var(--resume-ink,#171717)!important; }
 .rs-document .resume-header h1 { font-size:var(--resume-name-size,30px); }
 .rs-document .resume-section { margin-bottom:var(--resume-section-space,16px); }
+
+/* Convert PDF point-based page metrics into CSS pixels (96/72). */
+.rs-document {padding:var(--resume-pad-top,56px) var(--resume-pad-horizontal,63px) var(--resume-pad-bottom,57px)!important;}
