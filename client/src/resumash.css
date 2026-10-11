@@ -116,3 +116,24 @@
   .rs-cover-preview .rs-letter-page { break-inside: avoid; }
   .rs-workspace .rs-container { width: 100% !important; padding: 0 !important; }
 }
+
+/* Normalize legacy builder fields without replacing their existing data binding. */
+.rs-legacy-builder {
+  background: var(--rs-surface);
+  color: var(--rs-ink);
+  border: 1px solid var(--rs-line);
+}
+.rs-legacy-builder input,
+.rs-legacy-builder textarea {
+  background: var(--rs-page) !important;
+  color: var(--rs-ink) !important;
+  border: 1px solid var(--rs-line) !important;
+  border-radius: 8px !important;
+  min-height: 40px;
+  max-width: 100%;
+}
+.rs-legacy-builder input::placeholder,
+.rs-legacy-builder textarea::placeholder { color: var(--rs-muted) !important; }
+.rs-legacy-builder .border { border-color: var(--rs-line); }
+.rs-legacy-builder button { color: var(--rs-ink); border-color: var(--rs-line); }
+.rs-legacy-builder button.bg-\\[white\\] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
