@@ -22,6 +22,6 @@ jobs:
       - name: TypeScript check
         run: bun run typecheck
       - name: Review acceptance regression tests
-        run: bun test
+        run: bun test src
       - name: Production build
         run: bun run build
