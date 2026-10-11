@@ -1,10 +1,10 @@
-import { tailorInputSchema, resumeOutputSchema } from "../modules/resume/resume.schema";
+import { tailorInputSchema } from "../modules/resume/resume.schema";
+import { tailorResume } from "../modules/tailoring/tailor.service";
 import fs from "fs";
 import type { Request, Response, NextFunction } from "express";
 import { chromium } from "playwright";
 import { AppError, asyncHandler } from "../middlewares/error.middleware";
 import { ResponseHelper } from "../utils/responseHelper";
-import Job from "../services/job.service";
 import { logger } from "../utils/logger";
 import {
   ENV,
@@ -22,10 +22,8 @@ export const uploadResume = asyncHandler(
       throw new AppError("Upload a valid PDF resume", 400);
     }
     // AI input and parsing remain in memory: no public upload paths.
-    const service = new Job(JSON.stringify(parsed.data.jobDescription), resume);
-    const result = resumeOutputSchema.safeParse(await service.returnTailorResume());
-    if (!result.success) throw new AppError("AI returned an invalid resume structure", 502);
-    return ResponseHelper.success(res, { data: result.data }, "Resume tailored successfully");
+    const result = await tailorResume(resume, parsed.data.jobDescription);
+    return ResponseHelper.success(res, { data: result }, "Resume tailored successfully");
   }
 );
 
