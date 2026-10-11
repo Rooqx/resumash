@@ -52,3 +52,29 @@
  .rs-document { width:210mm; min-height:297mm; padding:14mm 16mm; margin:0; box-shadow:none; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
  .rs-document .resume-entry { break-inside:avoid; }
 }
+
+/* A thumbnail is a small, inert document preview. Restrict its rendering
+   width without disturbing real A4 metrics or the live editor. */
+.rs-template-thumbnail {
+ position:relative;
+ display:flex;
+ justify-content:center;
+ height:205px;
+ overflow:hidden;
+ border:1px solid #d5dadd;
+ border-radius:6px;
+ background:#e9eaeb;
+ padding-top:10px;
+}
+.rs-template-thumbnail-paper {
+ width:190px;
+ height:269px;
+ flex:none;
+ position:relative;
+}
+.rs-template-thumbnail-paper .rs-document {
+ transform:scale(.2392947);
+ transform-origin:top left;
+ box-shadow:0 3px 20px #0002;
+ pointer-events:none;
+}
