@@ -50,7 +50,7 @@ export function saveBuilderView(view: { active: number; template: string }): boo
 }
 export function clearBuilderDraft(): void {
   for (const key of ['resumash:builder:inputs:v1', 'resumash:builder:fields:v1',
-    'resumash:builder:tags:v1', BUILDER_VIEW_KEY]) {
+    'resumash:builder:tags:v1', 'resumash:builder:questionnaire:v1', BUILDER_VIEW_KEY]) {
     try { localStorage.removeItem(key) } catch { /* Storage might be disabled */ }
   }
 }
