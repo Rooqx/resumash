@@ -1,48 +1,64 @@
-import axios from 'axios'
+import { createElement } from 'react'
 import { toast } from 'sonner'
 import useInputStore from '../stores/useInputStores'
 import useFieldStores from '../stores/useMultipleFieldStore'
 import { useTagStore } from '../stores/useInputTags'
+import type { ResumeTemplateId } from '@/features/resume-builder/templates/registry'
 
-export async function downloadResume(fileName: string, setIsDownloading: (value: boolean) => void, template: 'classic'|'modern'|'executive' = 'modern') {
+/**
+ * Generates a selectable-text PDF entirely within the browser.
+ *
+ * Benefits:
+ * - Resume data does not travel to the backend simply to be exported.
+ * - No Playwright/Chromium process or PDF-rendering server cost.
+ * - Existing editor state and the selected template are captured together.
+ *
+ * Heavy PDF-generation code is loaded only after a user clicks Download.
+ *
+ * @param fileName - Suggested filename shown in the browser's save dialog.
+ * @param setIsDownloading - UI callback for disabling duplicate clicks.
+ * @param template - User's current Classic, Modern or Executive template.
+ */
+export async function downloadResume(
+  fileName: string,
+  setIsDownloading: (value: boolean) => void,
+  template: ResumeTemplateId = 'modern',
+): Promise<void> {
   setIsDownloading(true)
-  // used .getState() because it important if u want to use with scrapers
-  const { inputValue } = useInputStore.getState()
-  const { fields } = useFieldStores.getState()
-  const tagFields = useTagStore.getState().fields
-  const payload = { inputValue, fields, tagFields, templateId: template }
-  const BACKEND_URL =
-    import.meta.env.VITE_ENV === 'production'
-      ? import.meta.env.VITE_BACKEND_URL
-      : import.meta.env.VITE_DEVELOPMENT_BACKEND_URL
-
   try {
-    const res = await axios.post<Blob>(
-      `${BACKEND_URL}/api/v1/resumes/download-resume`,
-      payload,
-      { responseType: 'blob' }, // IMPORTANT
-    )
-    // console.log('fetch:', res)
-    const blob = new Blob([res.data], { type: 'application/pdf' })
+    // Both renderer and PDF library remain outside the initial page bundle.
+    const [{ pdf }, { default: ResumePdfDocument }] = await Promise.all([
+      import('@react-pdf/renderer'),
+      import('@/features/resume-builder/export/ResumePdfDocument'),
+    ])
 
+    // One immutable snapshot prevents independent store reads during rendering.
+    const snapshot = {
+      inputValue: { ...useInputStore.getState().inputValue },
+      fields: structuredClone(useFieldStores.getState().fields),
+      tagFields: structuredClone(useTagStore.getState().fields),
+    }
+    if (!snapshot.inputValue.fullName?.trim()) {
+      throw new Error('Please enter your name before exporting the resume.')
+    }
+
+    const blob = await pdf(createElement(ResumePdfDocument, { snapshot, template })).toBlob()
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
+    const link = document.createElement('a')
 
-    a.href = url
-    a.download = fileName
-    a.click()
+    link.href = url
+    link.download = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
 
-    URL.revokeObjectURL(url) //  cleanup
-    setIsDownloading(false)
-    toast.success('Resume Downloaded')
+    // Delayed cleanup allows the browser to finish resolving the download.
+    window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
+    toast.success('Resume PDF generated')
   } catch (error) {
-    console.log('error:', error)
-    toast.error('Resume download failed')
+    const message = error instanceof Error ? error.message : 'PDF generation failed'
+    toast.error(message)
+  } finally {
     setIsDownloading(false)
   }
 }
-
-/* export default function DownloadButton() {
-  return <button onClick={downloadResume}>Download PDF</button>
-}
-*/
