@@ -37,6 +37,7 @@ export async function buildResumeFromQuestionnaire(input: Questionnaire) {
       country: rest.join(", "),
       label: input.targetRole,
       summary: proposed.summary,
+      additionalInfo: input.additionalInfo,
     },
     fields: {
       experience: input.experience.map(job => ({
