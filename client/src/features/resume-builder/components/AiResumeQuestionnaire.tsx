@@ -14,6 +14,8 @@ type Education = {
   institution: string
   degree: string
   dates: string
+  startDate: string
+  endDate: string
 }
 type Project = { name: string; description: string }
 type CareerLevel = 'student' | 'entry' | 'mid' | 'senior'
@@ -253,7 +255,8 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
                   {([
                     ['institution', 'School / university'],
                     ['degree', 'Degree / qualification'],
-                    ['dates', 'Year completed or expected'],
+                    ['startDate', 'Start date (optional)'],
+                    ['endDate', 'End date or expected graduation'],
                   ] as const).map(([key, label]) => (
                     <label key={key} className="block text-sm">{label}
                       <input className={fieldClass} style={fieldStyle} value={item[key]}
@@ -265,7 +268,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
                 </div>
               ))}
               <button className="rs-button rs-button-outline mt-4" type="button"
-                onClick={() => update('education', [...answers.education, { institution: '', degree: '', dates: '' }])}>
+                onClick={() => update('education', [...answers.education, { institution: '', degree: '', dates: '', startDate: '', endDate: '' }])}>
                 <Plus size={16}/> Add education
               </button>
             </section>
