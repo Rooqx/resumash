@@ -73,7 +73,7 @@ function TailorPage(){
    <p className="mt-2 opacity-75">Why: {suggestion.reason}</p>
    <p className="mt-1 opacity-75">Evidence: {suggestion.sourceQuote}</p>
    <label className="mt-3 flex items-start gap-2 font-medium"><input type="checkbox" checked={acceptedEdits.has(i)} onChange={event=>{setAcceptedEdits(current=>{const next=new Set(current);if(event.target.checked)next.add(i);else next.delete(i);return next});setApproved(false)}}/><span>Accept this specific rewrite</span></label>
-   {suggestion.requiresConfirmation&&<p className="mt-2 font-semibold">Requires your confirmation</p>}}
+   {suggestion.requiresConfirmation&&<p className="mt-2 font-semibold">Requires your confirmation</p>}
   </div>)}
   {result.missingRequirements.length>0&&<div><h4 className="font-semibold">Unverified job requirements</h4>{result.missingRequirements.map((r,i)=><p className="mt-2 text-xs" key={i}>{r}</p>)}</div>}
   {result.clarificationQuestions.length>0&&<div><h4 className="font-semibold">Questions to clarify</h4>{result.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question}</p>)}</div>}
