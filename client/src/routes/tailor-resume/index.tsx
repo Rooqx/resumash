@@ -34,7 +34,7 @@ function TailorPage(){
   let cancelled=false
   void restoreUploadedResume().then(saved=>{
     if(!cancelled&&saved)setFile(current=>current??saved)
-  }).catch(()=>{})
+  }).catch(()=>setStorageWarning(true))
   return ()=>{cancelled=true}
  },[])
 
