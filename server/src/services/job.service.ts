@@ -1,4 +1,3 @@
-import fs from "fs";
 import { PDFParse } from "pdf-parse";
 import { HF_TOKEN, MODEL } from "../configs/env.configs";
 import { OpenAI } from "openai";
@@ -9,8 +8,8 @@ import resumeRewritePrompt from "../utils/prompts/resume-tailor";
 
 class Job {
   jobDescription: string;
-  resume: any;
-  constructor(jobDescription: string, resume: any) {
+  resume: Buffer;
+  constructor(jobDescription: string, resume: Buffer) {
     this.jobDescription = jobDescription;
     this.resume = resume;
   }
@@ -74,7 +73,7 @@ class Job {
     if (!this.resume) {
       throw new AppError("file missing", 400);
     }
-    const dataBuffer = fs.readFileSync(this.resume as string);
+    const dataBuffer = this.resume;
 
     try {
       const data = new PDFParse({ data: dataBuffer }); //Main extraction
