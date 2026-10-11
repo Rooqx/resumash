@@ -70,6 +70,7 @@ export default function ResumeDocument({template='modern',printPayload=false}:Re
    {style==='classic'?(<>{showEducation&&(!showExperience)&&education}{summary}{experience}{showExperience&&education}{skills}{projects}{additional}</>)
    :style==='executive'?(<>{summary}{experience}{skills}{projects}{education}{additional}</>)
    :(<>{summary}{experience}{skills}{projects}{education}{additional}</>)}
+   {asText(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{asText(input.additionalInfo)}</p></Section>}
   </div>
  </article>
 }
