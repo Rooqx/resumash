@@ -23,7 +23,12 @@ const allowedOrigins = new Set(
   [
     process.env.FRONTEND_DEVELOPMENT_URL,
     process.env.FRONTEND_PRODUCTION_URL,
-  ].filter((origin): origin is string => Boolean(origin)),
+    ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:3000"]),
+  ].flatMap((value) => {
+    if (!value) return [];
+    try { return [new URL(value).origin]; }
+    catch { return []; }
+  }),
 );
 app.use(cors({
   origin(origin, callback) {
