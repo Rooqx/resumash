@@ -43,6 +43,7 @@
     "build": "tsc && tsc-esm-fix dist",
     "start": "node dist/app.js",
     "typecheck": "tsc --noEmit",
-    "eval:ai": "bun run src/modules/resume/ai-builder.eval.ts"
+    "eval:ai": "bun run src/modules/resume/ai-builder.eval.ts",
+    "eval:tailor": "bun run src/modules/tailoring/tailor.eval.ts"
   }
 }
