@@ -55,8 +55,9 @@ export async function buildResumeFromQuestionnaire(input: Questionnaire) {
         institution: edu.institution,
         studyType: edu.degree,
         area: "",
-        startDate: "",
-        endDate: edu.dates,
+        startDate: edu.startDate,
+        // Old single-field questionnaires are retained without guessing a start year.
+        endDate: edu.endDate || edu.dates,
       })),
       skills: input.skills.length ? [{ skillName: "Relevant Skills" }] : [],
       projects: input.projects.map(item => ({ name: item.name, description: item.description })),
