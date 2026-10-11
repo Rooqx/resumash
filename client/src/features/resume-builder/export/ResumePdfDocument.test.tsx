@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test'
 import { createElement, type ReactElement } from 'react'
 import { pdf, type DocumentProps } from '@react-pdf/renderer'
 import ResumePdfDocument from './ResumePdfDocument'
-import { sampleResume } from '../templates/sampleResume'
+import { sampleForTemplate } from '../templates/sampleResume'
 import { resumeTemplates } from '../templates/registry'
 
 /**
@@ -13,7 +13,7 @@ import { resumeTemplates } from '../templates/registry'
 for (const template of resumeTemplates) {
  test(`generates valid text PDF for ${template.name}`, async () => {
   const document = createElement(ResumePdfDocument, {
-   snapshot:sampleResume,template:template.id,
+   snapshot:sampleForTemplate(template.id),template:template.id,
   }) as ReactElement<DocumentProps>
   const blob = await pdf(document).toBlob()
   const header = new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())
