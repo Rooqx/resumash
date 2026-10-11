@@ -7,7 +7,7 @@ const MAX_CONCURRENT_GENERATIONS = 6;
 let activeGenerations = 0;
 
 /**
- * Lightweight Fireworks-compatible generation gateway.
+ * OpenAI-compatible Atria generation gateway.
  * Keeping this single function avoids a provider class hierarchy until a
  * second provider is actually needed.
  *
@@ -20,13 +20,36 @@ export async function generateJson<T extends z.ZodTypeAny>(
   input: unknown,
   schema: T
 ): Promise<z.infer<T>> {
-  const apiKey = process.env.HF_TOKEN;
+  const apiKey = process.env.LLM_API_KEY;
   const model = process.env.MODEL;
-  if (!apiKey || !model) throw new AppError("AI generation is not configured", 503);
+  const endpoint = process.env.LLM_URL;
+  if (!apiKey || !model || !endpoint) {
+    throw new AppError("AI generation is not configured", 503);
+  }
+  // The SDK automatically appends /chat/completions. Accept either a base URL
+  // or a full endpoint value from a deployment dashboard.
+  let baseURL: string;
+  try {
+    const url = new URL(endpoint);
+    if (url.protocol !== "https:" && !(url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname))) {
+      throw new Error("Unsupported API URL protocol");
+    }
+    const pathname = url.pathname.replace(/\/+$/, "");
+    const basePath = pathname.endsWith("/chat/completions")
+      ? pathname.slice(0, -"/chat/completions".length)
+      : pathname;
+    if (!basePath.endsWith("/v1") || url.search || url.hash) {
+      throw new Error("Expected /v1 or /v1/chat/completions URL");
+    }
+    url.pathname = basePath;
+    baseURL = url.toString().replace(/\/$/, "");
+  } catch {
+    throw new AppError("LLM_URL must be a valid /v1 Chat Completions API URL", 503);
+  }
 
   const client = new OpenAI({
     apiKey,
-    baseURL: "https://api.fireworks.ai/inference/v1",
+    baseURL,
     timeout: 60_000,
     maxRetries: 1,
   });
@@ -41,7 +64,6 @@ export async function generateJson<T extends z.ZodTypeAny>(
     const completion = await client.chat.completions.create({
       model,
       temperature: 0.2,
-      response_format: { type: "json_object" },
       messages: [
         { role: "system", content: instructions + "\nReturn one valid JSON object only." },
         { role: "user", content: JSON.stringify({ untrustedUserData: input }) },
