@@ -51,13 +51,27 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
   if (unsupportedNumbers.length > 0) {
     throw new AppError("AI suggested unsupported numerical claims; please try again", 502);
   }
+  // Never show a fabricated evidence quote as though it came from the PDF.
+  // A related or ambiguous claim stays review-required rather than verified.
   const verifiedSuggestions = generated.suggestions.filter(item =>
     quoteExists(sourceText, item.sourceQuote)
   );
+  const verifiedRequirements = generated.requirements.map(requirement => {
+    if (requirement.evidence === "missing") {
+      return { ...requirement, sourceQuote: "" };
+    }
+    if (!quoteExists(sourceText, requirement.sourceQuote)) {
+      return { ...requirement, evidence: "ambiguous" as const, sourceQuote: "" };
+    }
+    return requirement;
+  });
   return {
     ...generated.resume,
     suggestions: verifiedSuggestions.map(item => ({ ...item, requiresReview: true })),
+    requirements: verifiedRequirements,
     missingRequirements: generated.missingRequirements,
+    clarificationQuestions: generated.clarificationQuestions,
+    writingNotes: generated.writingNotes,
     requiresReview: true,
   };
 }
