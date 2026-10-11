@@ -42,6 +42,7 @@
     "dev": "bun --hot run src/app.ts",
     "build": "tsc && tsc-esm-fix dist",
     "start": "node dist/app.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval:ai": "bun run src/modules/resume/ai-builder.eval.ts"
   }
 }
