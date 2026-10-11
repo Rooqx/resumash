@@ -31,7 +31,9 @@ const steps=[
 ] as const
 
 function AdditionalSections(){
- return <div className="space-y-8"><Certificate/><Award/></div>
+ const details=useInputStore(s=>s.inputValue.additionalInfo??'')
+ const updateDetail=useInputStore(s=>s.setInputValue)
+ return <div className="space-y-8"><Certificate/><Award/><label className="block text-sm">Additional details<textarea className="mt-2 min-h-28 w-full rounded-lg border bg-transparent p-3 text-white" value={details} onChange={event=>updateDetail('additionalInfo',event.target.value)} placeholder="Relevant volunteering, memberships or other verified details…"/></label></div>
 }
 
 function BuilderPage(){
