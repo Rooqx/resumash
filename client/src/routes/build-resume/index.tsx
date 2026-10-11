@@ -70,9 +70,9 @@ function BuilderPage(){
   <div className="rs-container py-10 md:py-16">
    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
-    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
+    <div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-outline" onClick={()=>setShowAiQuestionnaire(open=>!open)}><Sparkles size={16}/>{showAiQuestionnaire?'Close AI Builder':'Build with AI'}</button><button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
    </div>
-   {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/ >}
+   {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/>}
    <div className="mb-5 flex gap-2 lg:hidden">
     <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
     <button onClick={()=>setMobilePreview(true)} className={`rs-button flex-1 ${mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Preview</button>
