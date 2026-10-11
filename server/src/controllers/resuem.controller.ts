@@ -12,45 +12,19 @@ import {
 } from "../configs/env.configs";
 
 export const uploadResume = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.body) {
-      throw new AppError("No body added", 400);
+  async (req: Request, res: Response) => {
+    const parsed = tailorInputSchema.safeParse(req.body);
+    if (!parsed.success) throw new AppError("Invalid job description (20–20,000 characters required)", 400);
+    const resume = req.file?.buffer;
+    // Check bytes: client-provided MIME and extension are not trustworthy.
+    if (!resume || resume.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      throw new AppError("Upload a valid PDF resume", 400);
     }
-    const { jobDescription } = req.body;
-
-    if (!jobDescription)
-      throw new AppError("Job description missing in the request body", 400);
-
-    //Stringy Job description best practice for ai prompting
-    const formattedJobDesc = JSON.stringify(jobDescription);
-
-    if (!req.file) {
-      throw new AppError("No file added", 400);
-    }
-
-    //Get file path
-    const fileUrl = await `uploads/${req?.file?.filename}`;
-
-    const newResume = new Job(formattedJobDesc, fileUrl);
-
-    const data = await newResume.returnTailorResume();
-    if (!data) {
-      throw new AppError("Data not added", 404);
-    }
-    logger.info("Resume Tailor Successful");
-    fs.rm(fileUrl, { recursive: true, force: true }, (err) => {
-      if (err) throw err;
-      logger.info(`File ${fileUrl} deleted successfully`);
-    });
-    return ResponseHelper.success(
-      res,
-      {
-        /* fileName: req?.file?.filename,
-        filePath: fileUrl,*/
-        data,
-      },
-      "File uploaded successfully!"
-    );
+    // AI input and parsing remain in memory: no public upload paths.
+    const service = new Job(JSON.stringify(parsed.data.jobDescription), resume);
+    const result = resumeOutputSchema.safeParse(await service.returnTailorResume());
+    if (!result.success) throw new AppError("AI returned an invalid resume structure", 502);
+    return ResponseHelper.success(res, { data: result.data }, "Resume tailored successfully");
   }
 );
 
