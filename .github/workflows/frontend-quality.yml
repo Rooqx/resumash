@@ -1,0 +1,25 @@
+name: Frontend quality
+
+on:
+  push:
+    branches: [feat/frontend-redesign]
+  pull_request:
+    paths:
+      - 'client/**'
+      - '.github/workflows/frontend-quality.yml'
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: TypeScript check
+        run: bun run typecheck
+      - name: Production build
+        run: bun run build
