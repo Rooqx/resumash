@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { Download, ChevronRight, FileText } from 'lucide-react'
+import { Download, ChevronRight, FileText, Sparkles } from 'lucide-react'
 import ResumashShell from '@/components/ResumashShell'
 import SEO from '@/components/SEO'
 import ResumeDocument from '@/features/resume-builder/templates/ResumeDocument'
@@ -17,7 +17,8 @@ import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 import { downloadResume } from '@/lib/serverActions/downloadPDF'
-import { tailoredResumeSchema } from '@/features/resume-tailor/schemas'
+import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
+import AiResumeQuestionnaire from '@/features/resume-builder/components/AiResumeQuestionnaire'
 
 export const Route=createFileRoute('/build-resume/')({component:BuilderPage})
 const steps=[
@@ -38,6 +39,7 @@ function BuilderPage(){
  const [template,setTemplate]=useState<ResumeTemplateId>('modern')
  const [mobilePreview,setMobilePreview]=useState(false)
  const [downloading,setDownloading]=useState(false)
+ const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
  const client=useQueryClient()
  const resume=client.getQueryData(['tailoredResume'])
  const updateInput=useInputStore(s=>s.setInputData)
@@ -48,6 +50,19 @@ function BuilderPage(){
   const parsed=tailoredResumeSchema.safeParse(resume)
   if(parsed.success){updateInput(parsed.data.inputValue);updateFields(parsed.data.fields);updateTags(parsed.data.tagFields??{})}
  },[resume,updateInput,updateFields,updateTags])
+ /**
+  * Replace the editor's current state with a reviewed AI draft.
+  * No separate AI draft store is maintained, so manual edits work normally.
+  */
+ const applyAiDraft=(draft:TailoredResume)=>{
+  client.removeQueries({queryKey:['tailoredResume'],exact:true})
+  updateInput(draft.inputValue)
+  updateFields(draft.fields)
+  updateTags(draft.tagFields??{})
+  setActive(0)
+  setMobilePreview(false)
+  setShowAiQuestionnaire(false)
+ }
  const StepComponent=steps[active]?.Component
  const filename=fullName?`${fullName.trim().replace(/\s+/g,'_')}_resume.pdf`:'resume.pdf'
  return <ResumashShell>
@@ -55,8 +70,9 @@ function BuilderPage(){
   <div className="rs-container py-10 md:py-16">
    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
-    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button>
+    <button className="rs-button rs-button-primary" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
    </div>
+   {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/ >}
    <div className="mb-5 flex gap-2 lg:hidden">
     <button onClick={()=>setMobilePreview(false)} className={`rs-button flex-1 ${!mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Edit resume</button>
     <button onClick={()=>setMobilePreview(true)} className={`rs-button flex-1 ${mobilePreview?'rs-button-primary':'rs-button-outline'}`}>Preview</button>
