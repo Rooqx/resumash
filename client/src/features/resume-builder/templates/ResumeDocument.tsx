@@ -10,6 +10,10 @@ import type { ResumeSnapshot } from '../export/ResumePdfDocument'
 
 type ResumeDocumentProps={template?:ResumeTemplateId; printPayload?:boolean; snapshot?:ResumeSnapshot}
 type Field=Record<string,unknown>
+// The sample gallery must not subscribe to changes in the user's private draft.
+const EMPTY_INPUT:Record<string,string>={}
+const EMPTY_FIELDS:Record<string,Array<Record<string,unknown>>>={}
+const EMPTY_TAGS:Record<string,{tags:string[];input:string;suggestions:string[]}>={}
 const asText=(value:unknown)=>typeof value==='string'?value.trim():''
 const join=(values:unknown[],separator=' · ')=>(values.map(asText).filter(Boolean)).join(separator)
 const asFields=(values:unknown):Field[]=>Array.isArray(values)?values.filter((item):item is Field=>typeof item==='object'&&item!==null&&!Array.isArray(item)):[]
@@ -25,9 +29,9 @@ function Entry({heading,subheading,date,detail,items}:{heading:string;subheading
  </div>
 }
 export default function ResumeDocument({template='modern',printPayload=false,snapshot}:ResumeDocumentProps){
- const savedInput=useInputStore(s=>s.inputValue)
- const savedFields=useFieldStores(s=>s.fields)
- const savedTags=useTagStore(s=>s.fields)
+ const savedInput=useInputStore(s=>snapshot?EMPTY_INPUT:s.inputValue)
+ const savedFields=useFieldStores(s=>snapshot?EMPTY_FIELDS:s.fields)
+ const savedTags=useTagStore(s=>snapshot?EMPTY_TAGS:s.fields)
  const input=snapshot?.inputValue??savedInput
  const fields=snapshot?.fields??savedFields
  const tags=snapshot?.tagFields??savedTags
