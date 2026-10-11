@@ -3,6 +3,7 @@ import { generateJson } from "../../shared/ai/generate-json";
 import { parseResumePdf } from "../resume/parse-pdf";
 import { TAILOR_INSTRUCTIONS } from "./tailor.prompt";
 import { tailoringResultSchema } from "./tailor.schema";
+import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
 import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality";
 
 /**
@@ -12,24 +13,6 @@ import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality
 function quoteExists(source: string, quote: string): boolean {
   const normalize = (value: string) => value.replace(/\s+/g, " ").trim().toLowerCase();
   return normalize(source).includes(normalize(quote));
-}
-
-/** Collect distinct numbers from structured resume content for hallucination checks. */
-function numericClaims(value: unknown): Set<string> {
-  const claims = new Set<string>();
-  const walk = (node: unknown) => {
-    if (typeof node === "string") {
-      for (const match of node.matchAll(/\b\d+(?:[.,]\d+)*(?:%|x)?\b/g)) {
-        if (match[0]) claims.add(match[0]);
-      }
-    } else if (Array.isArray(node)) {
-      for (const child of node) walk(child);
-    } else if (node && typeof node === "object") {
-      for (const child of Object.values(node)) walk(child);
-    }
-  };
-  walk(value);
-  return claims;
 }
 
 /**
@@ -45,14 +28,7 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
     tailoringResultSchema,
   );
 
-  const originalNumbers = numericClaims(sourceText);
-  // Inspect new AI prose, not dates, phone numbers, titles or immutable IDs.
-  const generatedNumbers = numericClaims(resumeProse(generated.resume));
-  const unsupportedNumbers = [...generatedNumbers].filter(n => !originalNumbers.has(n));
-
-  if (unsupportedNumbers.length > 0) {
-    throw new AppError("AI suggested unsupported numerical claims; please try again", 502);
-  }
+  assertNumericalClaimsSupported(sourceText, resumeProse(generated.resume));
   // Each review suggestion must refer to a distinct, real job requirement.
   const requirementIds = new Set(generated.requirements.map(item => item.id));
   if (requirementIds.size !== generated.requirements.length) {
