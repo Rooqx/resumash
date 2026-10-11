@@ -8,6 +8,7 @@ import SEO from '@/components/SEO'
 import { getTailoredResume } from '@/lib/serverActions/tailorResume'
 import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
 import ResumeReview from '@/features/resume-tailor/components/ResumeReview'
+import { applyApprovedChanges } from '@/features/resume-tailor/reviewChanges'
 
 export const Route=createFileRoute('/tailor-resume/')({component:TailorPage})
 function TailorPage(){
@@ -15,6 +16,7 @@ function TailorPage(){
  const [file,setFile]=useState<File|null>(null)
  const [result,setResult]=useState<TailoringResponse|null>(null)
  const [approved,setApproved]=useState(false)
+ const [acceptedEdits,setAcceptedEdits]=useState<Set<number>>(()=>new Set())
  const [view,setView]=useState<'tailored'|'original'|'comparison'>('tailored')
  const [originalUrl,setOriginalUrl]=useState<string|null>(null)
  useEffect(()=>{
@@ -37,6 +39,7 @@ function TailorPage(){
   onSuccess:(resume)=>{
    setResult(resume)
    setApproved(false)
+   setAcceptedEdits(new Set())
    query.removeQueries({queryKey:['tailoredResume'],exact:true})
    toast.success('Your tailored resume is ready to review.')
   },
@@ -55,25 +58,27 @@ function TailorPage(){
       {file?<FileCheck size={25}/>:<UploadCloud size={25}/>}
       <span className="max-w-full break-all text-sm font-semibold">{file?file.name:'Choose your resume'}</span>
       <span className="text-xs" style={{color:'var(--rs-muted)'}}>PDF resume • up to 10 MB</span>
-      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}setFile(next);setResult(null)}}/>
+      <input type="file" className="sr-only" accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set())}}/>
      </label>
      <button className="rs-button rs-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50" disabled={!file||!jobDescription.trim()||mutation.isPending} type="submit"><Sparkles size={17}/>{mutation.isPending?'Tailoring your resume…':'Tailor my resume'}<ArrowRight size={16}/></button>
     </form>
-    <ResumeReview result={result} originalUrl={originalUrl} view={view} onViewChange={setView} onContinue={()=>{if(result&&approved){query.setQueryData(['tailoredResume'],result);navigate({to:'/build-resume'})}}} canContinue={approved} />
+    <ResumeReview result={result} originalUrl={originalUrl} view={view} onViewChange={setView} onContinue={()=>{if(result&&approved){query.setQueryData(['tailoredResume'],applyApprovedChanges(result,acceptedEdits));navigate({to:'/build-resume'})}}} canContinue={approved} />
     <aside className={`rs-card p-5 md:p-6 ${view==='comparison' ? 'lg:col-span-2' : ''}`}><div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">AI insights</h2></div><p className="mt-3 text-sm leading-7" style={{color:'var(--rs-muted)'}}>The AI uses the job description to rewrite relevant information from your existing resume.</p><div className="mt-6 space-y-4">{['Review every generated statement for accuracy.','Emphasize relevant experience and skills.','Add measurable results only when they are genuine.'].map((tip,index)=><div key={tip} className="flex gap-3 border-t pt-4 text-sm leading-6" style={{borderColor:'var(--rs-line)'}}><span className="text-xs" style={{color:'var(--rs-muted)'}}>0{index+1}</span><span>{tip}</span></div>)}</div>{result&&<div className="mt-6 space-y-4">
   <h3 className="font-semibold">Evidence-backed review</h3>
+  <p className="text-xs opacity-75">All proposed edits start rejected. Accept only changes you have verified; unchanged source content is retained otherwise.</p>
   {result.suggestions.length===0?<p className="text-xs">No individually verified edits were returned. Inspect the entire generated draft carefully.</p>:result.suggestions.map((suggestion,i)=><div key={i} className="rounded-lg border p-3 text-xs" style={{borderColor:'var(--rs-line)'}}>
    <strong>{suggestion.priority.toUpperCase()} · {suggestion.section}</strong>
    <p className="mt-2">Original: {suggestion.original}</p>
    <p className="mt-2">Proposed: {suggestion.proposed}</p>
    <p className="mt-2 opacity-75">Why: {suggestion.reason}</p>
    <p className="mt-1 opacity-75">Evidence: {suggestion.sourceQuote}</p>
-   {suggestion.requiresConfirmation&&<p className="mt-2 font-semibold">Requires your confirmation</p>}
+   <label className="mt-3 flex items-start gap-2 font-medium"><input type="checkbox" checked={acceptedEdits.has(i)} onChange={event=>{setAcceptedEdits(current=>{const next=new Set(current);if(event.target.checked)next.add(i);else next.delete(i);return next});setApproved(false)}}/><span>Accept this specific rewrite</span></label>
+   {suggestion.requiresConfirmation&&<p className="mt-2 font-semibold">Requires your confirmation</p>}}
   </div>)}
   {result.missingRequirements.length>0&&<div><h4 className="font-semibold">Unverified job requirements</h4>{result.missingRequirements.map((r,i)=><p className="mt-2 text-xs" key={i}>{r}</p>)}</div>}
   {result.clarificationQuestions.length>0&&<div><h4 className="font-semibold">Questions to clarify</h4>{result.clarificationQuestions.map((q,i)=><p className="mt-2 text-xs" key={i}>{q.question}</p>)}</div>}
   {result.writingNotes.map((note,i)=><p key={i} className="text-xs">{note}</p>)}
-  <label className="flex items-start gap-2 text-xs leading-5"><input type="checkbox" checked={approved} onChange={e=>setApproved(e.target.checked)}/><span>I have reviewed the full proposed resume and agree to use it as an editable draft. I will verify its claims before applying.</span></label>
+  <label className="flex items-start gap-2 text-xs leading-5"><input type="checkbox" checked={approved} onChange={e=>setApproved(e.target.checked)}/><span>I have reviewed the baseline and selected changes. Only checked edits will be applied to the editable resume.</span></label>
  </div>}</aside>
    </div>
   </div>
