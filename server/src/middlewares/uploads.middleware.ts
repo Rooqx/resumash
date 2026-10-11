@@ -1,5 +1,6 @@
 import multer from "multer";
 import type { RequestHandler } from "express";
+import { AppError } from "./error.middleware";
 
 const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 
@@ -14,7 +15,7 @@ export default function uploadMiddleware(): RequestHandler {
     limits: { fileSize: MAX_RESUME_BYTES, files: 1, fields: 1 },
     fileFilter: (_request, file, callback) => {
       if (file.mimetype !== "application/pdf" || !file.originalname.toLowerCase().endsWith(".pdf")) {
-        callback(new Error("Only PDF resumes are currently supported"));
+        callback(new AppError("Only PDF resumes are currently supported", 415));
         return;
       }
       callback(null, true);
