@@ -3,7 +3,7 @@ import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/error.middleware";
-import { ENV, HF_TOKEN, MODEL, PORT } from "./configs/env.configs";
+import { ENV, MODEL, PORT } from "./configs/env.configs";
 import logRouter from "./routers/logs.route";
 import resumeRouter from "./routers/resume.router";
 import coverLetterRouter from "./routers/cover-letter.router";
