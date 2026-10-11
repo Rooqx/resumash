@@ -5,8 +5,9 @@ import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 import { tailoredResumeSchema } from '@/features/resume-tailor/schemas'
 import './resume-document.css'
+import type { ResumeSnapshot } from '../export/ResumePdfDocument'
 
-type ResumeDocumentProps={template?:ResumeTemplateId; printPayload?:boolean}
+type ResumeDocumentProps={template?:ResumeTemplateId; printPayload?:boolean; snapshot?:ResumeSnapshot}
 type Field=Record<string,unknown>
 const asText=(value:unknown)=>typeof value==='string'?value.trim():''
 const join=(values:unknown[],separator=' · ')=>(values.map(asText).filter(Boolean)).join(separator)
@@ -22,10 +23,13 @@ function Entry({heading,subheading,date,detail,items}:{heading:string;subheading
   {!!items?.length&&<ul className="resume-bullets">{items.map((item,i)=><li key={i}>{item}</li>)}</ul>}
  </div>
 }
-export default function ResumeDocument({template='modern',printPayload=false}:ResumeDocumentProps){
- const input=useInputStore(s=>s.inputValue)
- const fields=useFieldStores(s=>s.fields)
- const tags=useTagStore(s=>s.fields)
+export default function ResumeDocument({template='modern',printPayload=false,snapshot}:ResumeDocumentProps){
+ const savedInput=useInputStore(s=>s.inputValue)
+ const savedFields=useFieldStores(s=>s.fields)
+ const savedTags=useTagStore(s=>s.fields)
+ const input=snapshot?.inputValue??savedInput
+ const fields=snapshot?.fields??savedFields
+ const tags=snapshot?.tagFields??savedTags
  const setInput=useInputStore(s=>s.setInputData)
  const setFields=useFieldStores(s=>s.setFields)
  const setTags=useTagStore(s=>s.setTags)
@@ -67,7 +71,7 @@ export default function ResumeDocument({template='modern',printPayload=false}:Re
    <header className="resume-header"><h1>{name}</h1>{asText(input.label)&&<p className="resume-role">{input.label}</p>}
     <p className="resume-contacts">{join(contact)}{links.map(([label,url])=>{const href=makeUrl(url);return href?<span key={label}> · <a href={href}>{label}</a></span>:null})}</p>
    </header>
-   {style==='classic'?(<>{showEducation&&(!showExperience)&&education}{summary}{experience}{showExperience&&education}{skills}{projects}{additional}</>)
+   {style==='classic'?(<>{summary}{education}{projects}{skills}{experience}{additional}</>)
    :style==='executive'?(<>{summary}{experience}{skills}{projects}{education}{additional}</>)
    :(<>{summary}{experience}{skills}{projects}{education}{additional}</>)}
    {asText(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{asText(input.additionalInfo)}</p></Section>}
