@@ -39,4 +39,15 @@ export const resumeDraftSchema = z.object({
     index: z.number().int().min(0),
     bullets: z.array(z.string().min(8).max(350)).max(5),
   })).max(10),
+  projectBullets: z.array(z.object({
+    index: z.number().int().min(0),
+    bullets: z.array(z.string().min(8).max(350)).max(4),
+  })).max(10).default([]),
+  clarificationQuestions: z.array(z.object({
+    area: z.enum(["experience", "project", "education", "skills", "general"]),
+    index: z.number().int().min(0).nullable(),
+    question: z.string().min(12).max(350),
+    reason: z.string().min(5).max(250),
+  })).max(10).default([]),
+  writingNotes: z.array(z.string().max(250)).max(8).default([]),
 }).strict();
