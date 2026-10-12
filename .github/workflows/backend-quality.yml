@@ -1,7 +1,7 @@
 name: Backend quality
 on:
   push:
-    branches: [feat/frontend-redesign]
+    branches: [main, feat/frontend-redesign]
     paths: ['server/**', '.github/workflows/backend-quality.yml']
   pull_request:
     paths: ['server/**', '.github/workflows/backend-quality.yml']
