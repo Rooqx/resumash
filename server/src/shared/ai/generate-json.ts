@@ -20,7 +20,8 @@ let activeGenerations = 0;
 export async function generateJson<T extends z.ZodTypeAny>(
   instructions: string,
   input: unknown,
-  schema: T
+  schema: T,
+  options: { timeoutMs?: number; maxRetries?: number } = {},
 ): Promise<z.infer<T>> {
   const apiKey = process.env.LLM_API_KEY;
   const model = process.env.MODEL;
@@ -49,12 +50,10 @@ export async function generateJson<T extends z.ZodTypeAny>(
     throw new AppError("LLM_URL must be a valid /v1 Chat Completions API URL", 503);
   }
 
-  const client = new OpenAI({
-    apiKey,
-    baseURL,
-    timeout: 60_000,
-    maxRetries: 1,
-  });
+  // Tailoring can temporarily use a longer single attempt for latency diagnosis.
+  const timeoutMs = options.timeoutMs ?? 60_000;
+  const maxRetries = options.maxRetries ?? 1;
+  const client = new OpenAI({ apiKey, baseURL, timeout: timeoutMs, maxRetries });
   // Cap in-flight paid calls per Express instance. This is independent
   // of per-IP Redis quotas and protects against traffic from many IPs.
   if (activeGenerations >= MAX_CONCURRENT_GENERATIONS) {
@@ -84,7 +83,8 @@ export async function generateJson<T extends z.ZodTypeAny>(
       totalTokens:usage?.total_tokens ?? null,
       estimatedCostUsd:estimateAiCost(usage?.prompt_tokens, usage?.completion_tokens),
       finishReason:completion.choices[0]?.finish_reason ?? null,
-      maxSdkRetries:1,
+      maxSdkRetries:maxRetries,
+      configuredTimeoutMs:timeoutMs,
       costBasis:"reported_usage_only",
     });
   } catch (error) {
