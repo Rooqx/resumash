@@ -34,16 +34,16 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
   // Do not infer leadership merely because a target vacancy contains 'manager'.
   const seniorRole = /(?:director|executive|head of|chief|vice president)/i.test(role)
   const recommended: ResumeTemplateId = seniorRole && knownExperience>=2
-    ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'modern'
+    ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'ats-essential'
   return <>
     <section className="mb-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>Choose your presentation</p>
-          <h2 className="mt-2 text-xl font-semibold">Three layouts. One truthful story.</h2>
+          <h2 className="mt-2 text-xl font-semibold">Five reference-inspired layouts. Your story, unchanged.</h2>
           <p className="mt-1 text-sm" style={{color:'var(--rs-muted)'}}>Templates change presentation and section priority—not your facts. Sample content is fictional.</p>
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
           <SampleThumbnail template={item.id}/>
           <div className="mt-3 flex items-start justify-between gap-2">
@@ -51,7 +51,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
               <p className="mt-1 text-xs leading-5" style={{color:'var(--rs-muted)'}}>{item.description}</p></div>
             {item.id===recommended&&<span className="rounded border px-2 py-1 text-[10px]">Recommended</span>}
           </div>
-          <p className="mt-2 text-xs" style={{color:'var(--rs-muted)'}}>Best for: {item.bestFor}</p>
+          <p className="mt-2 text-xs font-semibold">{item.category} · {item.ats}</p><p className="mt-1 text-xs" style={{color:'var(--rs-muted)'}}>Best for: {item.bestFor}</p>
           <div className="mt-4 flex gap-2">
             <button type="button" className={`rs-button flex-1 !min-h-9 !px-2 text-xs ${selected===item.id?'rs-button-primary':'rs-button-outline'}`}
               onClick={()=>onSelect(item.id)}>{selected===item.id?<><Check size={13}/> Selected</>:'Use template'}</button>
