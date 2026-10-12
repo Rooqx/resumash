@@ -4,6 +4,7 @@ import { OpenAI } from "openai";
 import { AppError } from "../middlewares/error.middleware";
 import extractJSON from "../utils/extractJson";
 import { logger } from "../utils/logger";
+import { safeProviderError, getRequestContext, estimateAiCost } from "../utils/observability";
 import resumeRewritePrompt from "../utils/prompts/resume-tailor";
 
 class Job {
@@ -29,7 +30,10 @@ class Job {
       throw new AppError("OpenAI client not initialized", 500);
     }
 
-    const chatCompletion = await client.chat.completions.create({
+    const started = performance.now();
+    let chatCompletion;
+    try {
+      chatCompletion = await client.chat.completions.create({
       model: MODEL as string,
       messages: [
         {
@@ -45,13 +49,16 @@ class Job {
         },
       ],
     });
+    } catch (error) {
+      logger.error("ai.legacy.failed", { event:"ai.legacy.failed", requestId:getRequestContext()?.requestId, durationMs:Math.round(performance.now()-started), ...safeProviderError(error) });
+      throw new AppError("AI service is temporarily unavailable", 502);
+    }
 
     if (!chatCompletion) {
       throw new AppError("Failed to get chat completion", 500);
     }
 
-    logger.info("Query successful resume Tailored");
-    logger.info(`Total Token Used: ${chatCompletion.usage?.total_tokens}`);
+    logger.info("ai.legacy.completed", { event:"ai.legacy.completed", requestId:getRequestContext()?.requestId, durationMs:Math.round(performance.now()-started), promptTokens:chatCompletion.usage?.prompt_tokens??null, completionTokens:chatCompletion.usage?.completion_tokens??null, totalTokens:chatCompletion.usage?.total_tokens??null, estimatedCostUsd:estimateAiCost(chatCompletion.usage?.prompt_tokens,chatCompletion.usage?.completion_tokens) });
     return chatCompletion?.choices[0]?.message.content;
   }
 
@@ -189,7 +196,7 @@ class Job {
       // console.log("JSONBlock", JSONBlock);
       return JSONBlock;
     } catch (error) {
-      logger.error("❌ Error reading PDF:", error);
+      logger.error("resume.pdf.parse_failed", { event:"resume.pdf.parse_failed", requestId:getRequestContext()?.requestId });
       throw error;
     }
   }
