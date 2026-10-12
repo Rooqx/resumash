@@ -125,7 +125,9 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
 function Sidebar({snapshot,template,offset=0}:{snapshot:ResumeSnapshot;template:ResumeTemplateId;offset?:number}){
  const prestige=template==='executive', navy=template==='executive-modern'
  const name=txt(snapshot.inputValue.fullName)||'Your Name',initials=name.split(/\s+/).slice(0,2).map(v=>v[0]).join('').toUpperCase()
- const width=prestige?175:navy?163:147\n const portrait=typeof snapshot.inputValue.profilePhotoDataUrl==='string'&&/^data:image\\/(?:png|jpeg);base64,[A-Za-z0-9+/=]{1,650000}$/.test(snapshot.inputValue.profilePhotoDataUrl)?snapshot.inputValue.profilePhotoDataUrl:null
+ const width=prestige?175:navy?163:147
+ const photoValue=snapshot.inputValue.profilePhotoDataUrl
+ const portrait=typeof photoValue==='string'&&photoValue.length<=650000&&(photoValue.startsWith('data:image/jpeg;base64,')||photoValue.startsWith('data:image/png;base64,'))?photoValue:null
  const bg=prestige?'#262c34':navy?'#fff':'#ebebe8'
  // Fixed colored rail continues on subsequent pages; text remains selectable.
  return <>
