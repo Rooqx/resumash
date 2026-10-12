@@ -29,6 +29,9 @@ export async function tailorResume(file: Buffer, jobDescription: string) {
     TAILOR_INSTRUCTIONS,
     { candidateResume: sourceText, jobDescription },
     tailoringResultSchema,
+    // Temporary diagnostic: one Atria attempt of up to 5 minutes.
+    // No retry, so a 5-minute failure is unambiguously one timed-out request.
+    { timeoutMs: 300_000, maxRetries: 0 },
   );
 
   assertNumericalClaimsSupported(sourceText, resumeProse(generated.resume));
