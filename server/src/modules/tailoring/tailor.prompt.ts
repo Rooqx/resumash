@@ -72,6 +72,19 @@ quote the candidate resume verbatim.
 Only insert naturally supported keywords; no forced quotas or duplicated lists.
 Prioritize evidence, short readable bullets, appropriate career-level language,
 real contributions and useful interviewing detail.
+SCHEMA RULES: All top-level keys are required. Use [] for empty arrays, never null.
+Each suggestion needs section, target, sourceQuote (8-500 characters), original
+(max 750), proposed (max 750), reason (5-500), priority, changeType,
+requirementId, evidenceLevel, and requiresConfirmation (boolean).
+A target contains only section, key, and for fields index and field.
+Return no more than 15 suggestions, 25 requirements, 15 missingRequirements,
+8 clarificationQuestions, and 8 writingNotes.
+Each requirement needs id, requirement (4-250 chars), importance, evidence,
+and sourceQuote. Each clarification question needs requirementId,
+question (12-350 chars) and reason (5-250 chars).
+Do not invent absent summary or project details to fill fields.
+No additional top-level keys or extra suggestion target keys.
+
 Return JSON only, exactly these top-level keys:
 resume, suggestions, requirements, missingRequirements,
 clarificationQuestions, writingNotes.
