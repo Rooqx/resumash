@@ -54,8 +54,31 @@ jobs:
             base64 -w 2048 "/tmp/resume-audit/$id.png"
             echo "AUDIT_IMAGE_END:$id"
           done
+      - name: Render real downloadable PDFs and rasterize first pages
+        run: |
+          cat > src/resume-audit-pdf.tsx <<'TSX'
+          import React from 'react'
+          import {pdf} from '@react-pdf/renderer'
+          import {writeFileSync} from 'node:fs'
+          import ResumePdfDocument from './features/resume-builder/export/ResumePdfDocument'
+          import {sampleForTemplate} from './features/resume-builder/templates/sampleResume'
+          import {resumeTemplates} from './features/resume-builder/templates/registry'
+          for (const t of resumeTemplates) {
+            const data=await pdf(React.createElement(ResumePdfDocument,{snapshot:sampleForTemplate(t.id),template:t.id})).toBlob()
+            writeFileSync('/tmp/resume-audit/'+t.id+'.pdf',new Uint8Array(await data.arrayBuffer()))
+          }
+          TSX
+          bun src/resume-audit-pdf.tsx
+          if ! command -v pdftoppm >/dev/null 2>&1; then sudo apt-get update -qq && sudo apt-get install -y poppler-utils; fi
+          for id in executive classic modern executive-modern ats-essential; do
+            pdftoppm -f 1 -l 1 -singlefile -scale-to-x 794 -scale-to-y -1 -png "/tmp/resume-audit/$id.pdf" "/tmp/resume-audit/$id-pdf"
+            test -s "/tmp/resume-audit/$id-pdf.png"
+            echo "PDF_IMAGE_START:$id"
+            base64 -w 2048 "/tmp/resume-audit/$id-pdf.png"
+            echo "PDF_IMAGE_END:$id"
+          done
       - uses: actions/upload-artifact@v4
         with:
-          name: five-resume-visual-previews
-          path: /tmp/resume-audit/*.png
+          name: five-resume-visual-and-pdf-previews
+          path: |\n            /tmp/resume-audit/*.png\n            /tmp/resume-audit/*.pdf
           retention-days: 14
