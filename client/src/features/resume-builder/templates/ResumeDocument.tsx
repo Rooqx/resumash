@@ -16,7 +16,8 @@ const EMPTY_TAGS:Record<string,{tags:string[];input:string;suggestions:string[]}
 const text=(value:unknown)=>typeof value==='string'?value.trim():''
 const join=(values:unknown[],separator=' · ')=>(values.map(text).filter(Boolean)).join(separator)
 const asFields=(values:unknown):Field[]=>Array.isArray(values)?values.filter((item):item is Field=>typeof item==='object'&&item!==null&&!Array.isArray(item)):[]
-const safePortrait=(value:unknown)=>typeof value==='string' && /^data:image\\/(?:png|jpeg);base64,[A-Za-z0-9+/=]{1,650000}$/.test(value)?value:undefined\nconst safeUrl=(raw:unknown)=>{try{const value=new URL(text(raw));return ['http:','https:'].includes(value.protocol)?value.href:undefined}catch{return undefined}}
+const safePortrait=(value:unknown)=>typeof value==='string'&&value.length<=650000&&(value.startsWith('data:image/jpeg;base64,')||value.startsWith('data:image/png;base64,'))?value:undefined
+const safeUrl=(raw:unknown)=>{try{const value=new URL(text(raw));return ['http:','https:'].includes(value.protocol)?value.href:undefined}catch{return undefined}}
 
 function Section({title,children}:{title:string;children:ReactNode}){
  return <section className="resume-section"><h2>{title}</h2>{children}</section>
@@ -104,7 +105,8 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
     {selected==='ats-essential'?<p>{[input.phone,location,input.email,text(input.linkdlnUrl)].map(text).filter(Boolean).join('  |  ')}</p>:contactBlock}
   </div>}
  </header>
- const photo=safePortrait(input.profilePhotoDataUrl)\n const sidebar=<aside className="rs-sidebar">
+ const photo=safePortrait(input.profilePhotoDataUrl)
+ const sidebar=<aside className="rs-sidebar">
   {selected==='executive'&&<div className="rs-portrait" aria-label="Portrait placeholder">{photo?<img src={photo} alt="" />:<span>{initials}</span>}</div>}
   {(selected==='executive'||selected==='executive-modern')&&<section className="rs-sidebar-contact"><h2>Contact</h2>{contactBlock}</section>}
   {render(sidebarResumeSections(selected))}
