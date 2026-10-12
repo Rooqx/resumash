@@ -1,34 +1,37 @@
-import { useEffect, type CSSProperties } from 'react'
+import { useEffect, type ReactNode, type CSSProperties } from 'react'
 import { templateSchema, type ResumeTemplateId } from './registry'
-import { orderedResumeSections, templateConfigs } from './templateConfig'
+import { mainResumeSections, sidebarResumeSections, templateConfigs, type ResumeSectionKey } from './templateConfig'
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 import { tailoredResumeSchema } from '@/features/resume-tailor/schemas'
-import './resume-document.css'
 import type { ResumeSnapshot } from '../export/ResumePdfDocument'
+import './resume-document.css'
 
-type ResumeDocumentProps={template?:ResumeTemplateId; printPayload?:boolean; snapshot?:ResumeSnapshot}
+type ResumeDocumentProps = {template?:ResumeTemplateId;printPayload?:boolean;snapshot?:ResumeSnapshot}
 type Field=Record<string,unknown>
-// The sample gallery must not subscribe to changes in the user's private draft.
 const EMPTY_INPUT:Record<string,string>={}
-const EMPTY_FIELDS:Record<string,Array<Record<string,unknown>>>={}
+const EMPTY_FIELDS:Record<string,Field[]>={}
 const EMPTY_TAGS:Record<string,{tags:string[];input:string;suggestions:string[]}>={}
-const asText=(value:unknown)=>typeof value==='string'?value.trim():''
-const join=(values:unknown[],separator=' · ')=>(values.map(asText).filter(Boolean)).join(separator)
+const text=(value:unknown)=>typeof value==='string'?value.trim():''
+const join=(values:unknown[],separator=' · ')=>(values.map(text).filter(Boolean)).join(separator)
 const asFields=(values:unknown):Field[]=>Array.isArray(values)?values.filter((item):item is Field=>typeof item==='object'&&item!==null&&!Array.isArray(item)):[]
-const makeUrl=(url:unknown)=>{const value=asText(url);try{const normalized=new URL(value);return ['https:','http:'].includes(normalized.protocol)?normalized.href:undefined}catch{return undefined}}
-function Section({title,children}:{title:string;children:React.ReactNode}){
+const safeUrl=(raw:unknown)=>{try{const value=new URL(text(raw));return ['http:','https:'].includes(value.protocol)?value.href:undefined}catch{return undefined}}
+
+function Section({title,children}:{title:string;children:ReactNode}){
  return <section className="resume-section"><h2>{title}</h2>{children}</section>
 }
 function Entry({heading,subheading,date,detail,items}:{heading:string;subheading?:string;date?:string;detail?:string;items?:string[]}){
  return <div className="resume-entry">
-  <div className="resume-entry-top"><div><h3>{heading}</h3>{subheading&&<p className="resume-subheading">{subheading}</p>}</div>{date&&<span className="resume-date">{date}</span>}</div>
+  <div className="resume-entry-top">
+   <div className="resume-entry-name"><h3>{heading}</h3>{subheading&&<p className="resume-subheading">{subheading}</p>}</div>
+   {date&&<span className="resume-date">{date}</span>}
+  </div>
   {detail&&<p className="resume-paragraph">{detail}</p>}
-  {!!items?.length&&<ul className="resume-bullets">{items.map((item,i)=><li key={i}>{item}</li>)}</ul>}
+  {!!items?.length&&<ul className="resume-bullets">{items.filter(Boolean).map((item,i)=><li key={i}>{item}</li>)}</ul>}
  </div>
 }
-export default function ResumeDocument({template='modern',printPayload=false,snapshot}:ResumeDocumentProps){
+export default function ResumeDocument({template='ats-essential',printPayload=false,snapshot}:ResumeDocumentProps){
  const savedInput=useInputStore(s=>snapshot?EMPTY_INPUT:s.inputValue)
  const savedFields=useFieldStores(s=>snapshot?EMPTY_FIELDS:s.fields)
  const savedTags=useTagStore(s=>snapshot?EMPTY_TAGS:s.fields)
@@ -46,51 +49,74 @@ export default function ResumeDocument({template='modern',printPayload=false,sna
    const payload:unknown=JSON.parse(encoded)
    const parsed=tailoredResumeSchema.safeParse(payload)
    if(parsed.success){setInput(parsed.data.inputValue);setFields(parsed.data.fields);setTags(parsed.data.tagFields??{})}
-  }catch{ /* Ignore malformed print URL; don't crash the page. */ }
+  }catch{/* Bad print payloads cannot overwrite the draft. */}
  },[printPayload,setInput,setFields,setTags])
- const style=templateSchema.safeParse(template).data??'modern'
- const sections={
-  experience:asFields(fields.experience),
-  education:asFields(fields.education),
-  skills:asFields(fields.skills),
-  projects:asFields(fields.projects),
-  certificates:asFields(fields.certificates),
-  awards:asFields(fields.awards),
+
+ const selected=templateSchema.safeParse(template).data??'ats-essential'
+ const config=templateConfigs[selected]
+ const entries={
+  experience:asFields(fields.experience),education:asFields(fields.education),
+  skills:asFields(fields.skills),projects:asFields(fields.projects),
+  certificates:asFields(fields.certificates),awards:asFields(fields.awards),
  }
- const name=asText(input.fullName)||'Your Name'
- const contact=[input.email,input.phone,join([input.city,input.country],', ')]
+ const name=text(input.fullName)||'Your Name'
+ const initials=name.split(/\s+/).slice(0,2).map(part=>part.charAt(0)).join('').toUpperCase()
+ const location=join([input.city,input.country],', ')
+ const contact=[input.phone,input.email,location].map(text).filter(Boolean)
  const links=[['LinkedIn',input.linkdlnUrl],['GitHub',input.githubUrl],['Portfolio',input.portfolioUrl]] as const
- const showExperience=sections.experience.length>0
- const showEducation=sections.education.length>0
- const showSkills=sections.skills.length>0
- const showProjects=sections.projects.length>0
- const showAdditional=sections.certificates.length>0||sections.awards.length>0
- const experience=<>{showExperience&&<Section title="Professional Experience">{sections.experience.map((item,i)=><Entry key={i} heading={asText(item.jobPosition)||asText(item.companyName)} subheading={asText(item.companyName)} date={join([item.jobStartDate,item.jobEndDate||'Present'],' – ')} detail={asText(item.jobSummary)} items={tags[`jobHighlights-${i}`]?.tags}/>)}</Section>}</>
- const education=<>{showEducation&&<Section title="Education">{sections.education.map((item,i)=><Entry key={i} heading={asText(item.institution)} subheading={join([item.studyType,item.area],' in ')} date={join([item.startDate,item.endDate],' – ')} detail={asText(item.gpa)?`GPA: ${asText(item.gpa)}`:undefined}/>)}</Section>}</>
- const skills=<>{showSkills&&<Section title="Skills">{sections.skills.map((item,i)=><div className="resume-skill" key={i}><strong>{asText(item.skillName)}</strong><span>{tags[`skills-${i}`]?.tags?.join(', ')||''}</span></div>)}</Section>}</>
- const projects=<>{showProjects&&<Section title="Projects">{sections.projects.map((item,i)=><Entry key={i} heading={asText(item.name)} detail={asText(item.description)} items={tags[`projectHighlights-${i}`]?.tags}/>)}</Section>}</>
- const additional=<>{showAdditional&&<Section title="Additional">{sections.certificates.map((item,i)=><Entry key={`c-${i}`} heading={asText(item.certificateName)} subheading={asText(item.certificateIssuer)} date={asText(item.certificateDate)}/>)}{sections.awards.map((item,i)=><Entry key={`a-${i}`} heading={asText(item.awardTitle)} subheading={asText(item.awarder)} date={asText(item.awardDate)} detail={asText(item.awardSummary)}/>)}</Section>}</>
- const summary=asText(input.summary)&&<Section title={templateConfigs[style].summaryTitle}><p className="resume-paragraph">{asText(input.summary)}</p></Section>
- return <article className={`rs-document rs-template-${style}`} style={{
-  '--resume-ink':templateConfigs[style].ink,
-  '--resume-accent':templateConfigs[style].accent,
-  '--resume-name-size':`${templateConfigs[style].nameFontSize}px`,
-  '--resume-section-space':`${templateConfigs[style].sectionSpacing}px`,
-  '--resume-pad-top':`${templateConfigs[style].pagePadding.top*4/3}px`,
-  '--resume-pad-bottom':`${templateConfigs[style].pagePadding.bottom*4/3}px`,
-  '--resume-pad-horizontal':`${templateConfigs[style].pagePadding.horizontal*4/3}px`,
- } as CSSProperties} aria-label={`${style} resume preview`}>
-  <div className="rs-document-content">
-   <header className="resume-header"><h1>{name}</h1>{asText(input.label)&&<p className="resume-role">{input.label}</p>}
-    <p className="resume-contacts">{join(contact)}{links.map(([label,url])=>{const href=makeUrl(url);return href?<span key={label}> · <a href={href}>{label}</a></span>:null})}</p>
-   </header>
-   {orderedResumeSections(style).map(section=>(
-    <div key={section} className="resume-section-slot">{({
-     summary, experience, education, projects, skills,
-     additional,
-    } as Record<string,React.ReactNode>)[section]}</div>
-   ))}
-   {asText(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{asText(input.additionalInfo)}</p></Section>}
-  </div>
+ const contactBlock=<div className="rs-contact-lines">
+  {contact.map((line,i)=><p key={i}>{line}</p>)}
+  {links.map(([label,value])=>{const href=safeUrl(value);return href?<p key={label}><a href={href}>{label} · {text(value).replace(/^https?:\/\//,'')}</a></p>:null})}
+ </div>
+ const summary=text(input.summary)&&<Section title={config.summaryTitle}><p className="resume-paragraph">{text(input.summary)}</p></Section>
+ const experience=entries.experience.length>0&&<Section title={selected==='ats-essential'?'Work Experience':selected==='modern'?'Professional History':'Professional Experience'}>
+  {entries.experience.map((item,i)=><Entry key={i} heading={text(item.jobPosition)||text(item.companyName)}
+   subheading={text(item.companyName)} date={join([item.jobStartDate,item.jobEndDate||'Present'],' – ')}
+   detail={text(item.jobSummary)} items={tags[`jobHighlights-${i}`]?.tags}/>)}
+ </Section>
+ const education=entries.education.length>0&&<Section title="Education">
+  {entries.education.map((item,i)=><Entry key={i} heading={text(item.institution)}
+   subheading={join([item.studyType,item.area],' in ')} date={join([item.startDate,item.endDate],' – ')}
+   detail={text(item.gpa)?`GPA: ${text(item.gpa)}`:undefined}/>)}
+ </Section>
+ const skills=entries.skills.length>0&&<Section title={selected==='modern'?'Core Skills':'Skills'}>
+  {entries.skills.map((item,i)=><div className="resume-skill" key={i}><strong>{text(item.skillName)}</strong>
+   {tags[`skills-${i}`]?.tags?.length>0&&<span>{tags[`skills-${i}`]?.tags?.join(', ')}</span>}</div>)}
+ </Section>
+ const projects=entries.projects.length>0&&<Section title="Projects">
+  {entries.projects.map((item,i)=><Entry key={i} heading={text(item.name)} detail={text(item.description)}
+   items={tags[`projectHighlights-${i}`]?.tags}/>)}
+ </Section>
+ const additional=(entries.certificates.length>0||entries.awards.length>0)&&<Section title={selected==='executive'?'Professional Development':'Additional'}>
+  {entries.certificates.map((item,i)=><Entry key={`c-${i}`} heading={text(item.certificateName)} subheading={text(item.certificateIssuer)} date={text(item.certificateDate)}/>)}
+  {entries.awards.map((item,i)=><Entry key={`a-${i}`} heading={text(item.awardTitle)} subheading={text(item.awarder)} date={text(item.awardDate)} detail={text(item.awardSummary)}/>)}
+ </Section>
+ const nodes:Record<ResumeSectionKey,ReactNode>={summary,experience,education,skills,projects,additional}
+ const render=(keys:readonly ResumeSectionKey[])=><>{keys.map(key=><div className="resume-slot" key={key}>{nodes[key]}</div>)}</>
+ const additionalInfo=text(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{text(input.additionalInfo)}</p></Section>
+ const header=<header className="resume-header">
+  {selected==='executive-modern'&&<div className="rs-monogram">{initials}</div>}
+  <div className="rs-name-block"><h1>{name}</h1>{text(input.label)&&<p className="resume-role">{text(input.label)}</p>}</div>
+  {(selected==='classic'||selected==='modern'||selected==='ats-essential')&&<div className="resume-contacts">
+    {selected==='ats-essential'?<p>{[input.phone,location,input.email,text(input.linkdlnUrl)].map(text).filter(Boolean).join('  |  ')}</p>:contactBlock}
+  </div>}
+ </header>
+ const sidebar=<aside className="rs-sidebar">
+  {selected==='executive'&&<div className="rs-portrait" aria-label="Portrait placeholder"><span>{initials}</span></div>}
+  {(selected==='executive'||selected==='executive-modern')&&<section className="rs-sidebar-contact"><h2>Contact</h2>{contactBlock}</section>}
+  {render(sidebarResumeSections(selected))}
+ </aside>
+ return <article className={`rs-document rs-template-${selected}`} style={{
+  '--resume-ink':config.ink,'--resume-accent':config.accent,
+  '--resume-name-size':`${config.nameFontSize*4/3}px`,
+  '--resume-section-space':`${config.sectionSpacing*4/3}px`,
+  '--resume-pad-top':`${config.pagePadding.top*4/3}px`,
+  '--resume-pad-bottom':`${config.pagePadding.bottom*4/3}px`,
+  '--resume-pad-horizontal':`${config.pagePadding.horizontal*4/3}px`,
+ } as CSSProperties} aria-label={`${config.displayName} resume preview`}>
+  {selected==='executive'?<div className="rs-layout rs-charcoal">{sidebar}<main className="rs-main">{header}{render(mainResumeSections(selected))}{additionalInfo}</main></div>:
+   selected==='modern'?<>{header}<div className="rs-layout rs-stone">{sidebar}<main className="rs-main">{render(mainResumeSections(selected))}{additionalInfo}</main></div></>:
+   selected==='executive-modern'?<>{header}<div className="rs-layout rs-navy">{sidebar}<main className="rs-main">{render(mainResumeSections(selected))}{additionalInfo}</main></div></>:
+   <div className="rs-single">{header}<main>{render(mainResumeSections(selected))}{additionalInfo}</main></div>}
  </article>
 }
