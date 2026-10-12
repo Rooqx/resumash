@@ -99,7 +99,7 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
   stone?{minHeight:125,marginHorizontal:40,paddingTop:29,paddingBottom:16,borderBottomWidth:.8,borderBottomColor:'#8f8f8f',marginBottom:0}:{},
   ats?{alignItems:'center',marginBottom:23}:{},
  ]}>
-  {banner&&<View style={{backgroundColor:'#e7d29d',width:35,height:32,marginBottom:9,alignItems:'center',justifyContent:'center'}}><Text style={{fontFamily:'Times-Bold',color:'#2f4555',fontSize:12}}>{parts.map(p=>p[0]).join('').slice(0,2).toUpperCase()}</Text></View>}
+  {banner&&<View style={{backgroundColor:'#e7d29d',width:35,height:32,marginBottom:9,alignItems:'center',justifyContent:'center'}}><Text style={{fontFamily:'Times-Bold',color:'#2f4555',fontSize:12}}>{fullName.split(/\\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase()}</Text></View>}
   <Text style={[
    {fontFamily:side||stone?'Helvetica':'Times-Roman',fontSize:templateConfigs[template].nameFontSize*.76,color:templateConfigs[template].ink},
    side?{letterSpacing:3,textTransform:'uppercase'}:{},
