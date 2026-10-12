@@ -2,7 +2,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { ResponseHelper } from "../utils/responseHelper";
 import { logger } from "../utils/logger";
-import { getRequestContext } from "../utils/observability";
+import { getRequestContext, safePath, routeOperation } from "../utils/observability";
 
 /**
  * Custom Error class for application-specific errors
@@ -103,12 +103,13 @@ export const errorHandler = (
  * @param req - Express Request object for context
  */
 const logError = (error: Error, req: Request): void => {
-  logger.error("Error occurred:", {
+  logger.log(error instanceof AppError && error.statusCode < 500 ? "warn" : "error", "http.request.error", {
     event:"http.request.error",
     requestId:getRequestContext()?.requestId,
     method:req.method,
-    route:req.path,
-    errorType:error.constructor.name,
+    route:safePath(req.path),
+    operation:routeOperation(req.path),
+    errorType:error instanceof AppError ? error.constructor.name : "UnhandledError",
     statusCode:error instanceof AppError ? error.statusCode : 500,
     // Do not include error.message/stack: upstream errors can embed user content.
     // Provider failures have their own sanitized diagnostics in generate-json.ts.
