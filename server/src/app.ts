@@ -48,7 +48,6 @@ app.get("/", (_req, res) => {
 
 app.use("/api/v1/resumes", resumeRouter);
 app.use("/api/v1/cover-letters", coverLetterRouter);
-app.use("/api/v1/logs", logRouter);
 
 /** Translate Multer resource-limit errors into client-actionable statuses. */
 const uploadErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
