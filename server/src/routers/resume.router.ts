@@ -51,7 +51,7 @@ resumeRouter.post("/download-resume", async (req, res) => {
 
     res.send(pdf);
   } catch (err) {
-    logger.error("PDF generation failed:", err);
+    logger.error("resume.legacy_pdf.failed", { event:"resume.legacy_pdf.failed" });
     res.status(500).send("Failed to generate PDF");
   }
 });
