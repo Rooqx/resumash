@@ -15,6 +15,6 @@ export const getTailoredResume = async ({
  formData.append('resume', file)
  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_DEVELOPMENT_BACKEND_URL
  if (!backendUrl) throw new Error('Resume service is not configured.')
- const response = await axios.post(`${backendUrl}/api/v1/resumes/upload`, formData, {timeout:120000})
+ const response = await axios.post(`${backendUrl}/api/v1/resumes/upload`, formData, {timeout:330000})
  return response.data
 }
