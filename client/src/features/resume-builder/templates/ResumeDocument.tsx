@@ -96,7 +96,7 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
  const additionalInfo=text(input.additionalInfo)&&<Section title="Additional Information"><p className="resume-paragraph">{text(input.additionalInfo)}</p></Section>
  const header=<header className="resume-header">
   {selected==='executive-modern'&&<div className="rs-monogram">{initials}</div>}
-  <div className="rs-name-block"><h1>{name}</h1>{text(input.label)&&<p className="resume-role">{text(input.label)}</p>}</div>
+  <div className="rs-name-block"><h1>{selected==='executive'&&familyName?<><span>{givenNames} </span><span className="rs-family-name">{familyName}</span></>:name}</h1>{text(input.label)&&<p className="resume-role">{text(input.label)}</p>}</div>
   {(selected==='classic'||selected==='modern'||selected==='ats-essential')&&<div className="resume-contacts">
     {selected==='ats-essential'?<p>{[input.phone,location,input.email,text(input.linkdlnUrl)].map(text).filter(Boolean).join('  |  ')}</p>:contactBlock}
   </div>}
