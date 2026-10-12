@@ -15,6 +15,7 @@ if (process.env.TRUST_PROXY_HOPS) {
   if (!Number.isInteger(hops) || hops < 0 || hops > 5) throw new Error("Invalid TRUST_PROXY_HOPS");
   app.set("trust proxy", hops);
 }
+app.use(requestTelemetry);
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 // Only approved web frontends can read browser API responses.
@@ -65,10 +66,9 @@ app.use(uploadErrorHandler);
 app.use(errorHandler);
 
 app.listen(PORT, async () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log("MODEL", MODEL);
+  logger.info("server.started", { event:"server.started", port:PORT, model:MODEL, environment:ENV });
   //await connectToMongo();
   //await connectToRedis();
 
-  console.log(`Environment:${ENV}`);
+
 });
