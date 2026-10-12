@@ -100,14 +100,13 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
   ats?{alignItems:'center',marginBottom:23}:{},
  ]}>
   {banner&&<View style={{backgroundColor:'#e7d29d',width:35,height:32,marginBottom:9,alignItems:'center',justifyContent:'center'}}><Text style={{fontFamily:'Times-Bold',color:'#2f4555',fontSize:12}}>{fullName.trim().split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase()}</Text></View>}
-  <Text style={[
+  <View style={{minHeight:banner?40:ats?47:editorial?43:stone?39:34}}><Text style={[
    {fontFamily:side||stone?'Helvetica':'Times-Roman',fontSize:templateConfigs[template].nameFontSize*.76,color:templateConfigs[template].ink},
    side?{letterSpacing:3,textTransform:'uppercase'}:{},
    banner?{fontSize:29,color:'#e4cd92',letterSpacing:2.5,textAlign:'center'}:{},
    editorial?{fontSize:31}:{},stone?{fontSize:27,letterSpacing:3.3,textTransform:'uppercase'}:{},
    ats?{fontSize:35,letterSpacing:2.5,textTransform:'uppercase'}:{},
-   {lineHeight:banner?41:ats?47:editorial?42:stone?38:36},
-  ]}>{side&&last?<><Text>{first} </Text><Text style={{color:'#c5b17e'}}>{last}</Text></>:fullName}</Text>
+  ]}>{side&&last?<><Text>{first} </Text><Text style={{color:'#c5b17e'}}>{last}</Text></>:fullName}</Text></View>
   {!!role&&<Text style={[
    {fontSize:9,marginTop:6,letterSpacing:2,color:'#515151'},
    editorial?{fontFamily:'Times-Italic',letterSpacing:0,fontSize:9}:{},
@@ -115,7 +114,6 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
    side?{letterSpacing:3.3,fontSize:7.2}:{},
    stone?{letterSpacing:3,fontSize:7.4,color:'#777'}:{},
    banner?{letterSpacing:3,fontSize:8,color:'#e4cd92',textAlign:'center'}:{},
-   {lineHeight:ats?18:editorial?13:banner?13:12},
   ]}>{(side||stone||banner||ats)?role.toUpperCase():role}</Text>}
   {(editorial||stone)&&<View style={editorial?{position:'absolute',right:0,top:0,width:170,alignItems:'flex-end'}:{position:'absolute',right:0,top:30,width:132}}>
    <Contact input={input}/></View>}
