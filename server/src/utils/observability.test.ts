@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { estimateAiCost, safeProviderError } from "./observability";
+import { estimateAiCost, safeProviderError, safePath, routeOperation } from "./observability";
 
 describe("privacy-safe provider diagnostics", () => {
   test("keeps status and harmless error codes but drops raw provider content", () => {
@@ -41,5 +41,19 @@ describe("AI cost estimation", () => {
       if (oldOut === undefined) delete process.env.LLM_OUTPUT_USD_PER_MILLION;
       else process.env.LLM_OUTPUT_USD_PER_MILLION = oldOut;
     }
+  });
+});
+
+describe("bounded HTTP request telemetry", () => {
+  test("never logs unknown URL segments or query strings", () => {
+    expect(safePath("/api/v1/resumes/ai-build?token=secret")).toBe("/api/v1/resumes/*");
+    expect(safePath("/private/alex@example.com/secret")).toBe("/other");
+    expect(safePath("/")).toBe("/");
+  });
+  test("classifies only known feature operations", () => {
+    expect(routeOperation("/api/v1/resumes/ai-build")).toBe("resume.ai_build");
+    expect(routeOperation("/api/v1/resumes/upload")).toBe("resume.tailor");
+    expect(routeOperation("/api/v1/cover-letters/generate")).toBe("cover_letter.generate");
+    expect(routeOperation("/private/secret")).toBe("other");
   });
 });
