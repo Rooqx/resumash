@@ -61,7 +61,7 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
  }
  const name=text(input.fullName)||'Your Name'
  const initials=name.split(/\s+/).slice(0,2).map(part=>part.charAt(0)).join('').toUpperCase()
- const location=join([input.city,input.country],', ')
+ const nameWords=name.split(/\\s+/)\n const familyName=nameWords.length>1?nameWords.pop():''\n const givenNames=nameWords.join(' ')\n const location=join([input.city,input.country],', ')
  const contact=[input.phone,input.email,location].map(text).filter(Boolean)
  const links=[['LinkedIn',input.linkdlnUrl],['GitHub',input.githubUrl],['Portfolio',input.portfolioUrl]] as const
  const contactBlock=<div className="rs-contact-lines">
