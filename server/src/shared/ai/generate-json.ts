@@ -84,11 +84,14 @@ export async function generateJson<T extends z.ZodTypeAny>(
       totalTokens:usage?.total_tokens ?? null,
       estimatedCostUsd:estimateAiCost(usage?.prompt_tokens, usage?.completion_tokens),
       finishReason:completion.choices[0]?.finish_reason ?? null,
+      maxSdkRetries:1,
+      costBasis:"reported_usage_only",
     });
   } catch (error) {
     logger.error("ai.request.failed", {
       event:"ai.request.failed", requestId:trace?.requestId, provider:"atria",
       model, durationMs:Math.round(performance.now()-started),
+      maxSdkRetries:1,
       ...safeProviderError(error),
     });
     throw new AppError("AI service is temporarily unavailable", 502);
@@ -111,5 +114,6 @@ export async function generateJson<T extends z.ZodTypeAny>(
     logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"schema_validation", issueCount:validated.error.issues.length });
     throw new AppError("AI response did not match its expected structure", 502);
   }
+  logger.info("ai.response.validated", { event:"ai.response.validated", requestId:trace?.requestId, provider:"atria", model, totalDurationMs:Math.round(performance.now()-started) });
   return validated.data;
 }
