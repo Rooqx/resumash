@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer'
 import type { ReactNode } from 'react'
 import type { ResumeTemplateId } from '../templates/registry'
 import { templateConfigs, mainResumeSections, sidebarResumeSections, type ResumeSectionKey } from '../templates/templateConfig'
@@ -125,7 +125,7 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
 function Sidebar({snapshot,template,offset=0}:{snapshot:ResumeSnapshot;template:ResumeTemplateId;offset?:number}){
  const prestige=template==='executive', navy=template==='executive-modern'
  const name=txt(snapshot.inputValue.fullName)||'Your Name',initials=name.split(/\s+/).slice(0,2).map(v=>v[0]).join('').toUpperCase()
- const width=prestige?175:navy?163:147
+ const width=prestige?175:navy?163:147\n const portrait=typeof snapshot.inputValue.profilePhotoDataUrl==='string'&&/^data:image\\/(?:png|jpeg);base64,[A-Za-z0-9+/=]{1,650000}$/.test(snapshot.inputValue.profilePhotoDataUrl)?snapshot.inputValue.profilePhotoDataUrl:null
  const bg=prestige?'#262c34':navy?'#fff':'#ebebe8'
  // Fixed colored rail continues on subsequent pages; text remains selectable.
  return <>
@@ -134,7 +134,7 @@ function Sidebar({snapshot,template,offset=0}:{snapshot:ResumeSnapshot;template:
   <View style={{position:'absolute',left:prestige?16:navy?32:53,top:offset+(prestige?0:14),
    width:width-(prestige?32:navy?50:27),color:prestige?'#ddd':'#333'}}>
    {prestige&&<View style={{height:169,marginHorizontal:-16,backgroundColor:'#414850',alignItems:'center',justifyContent:'center',marginBottom:17}}>
-    <Text style={{color:'#d4c095',fontFamily:'Times-Roman',fontSize:29,letterSpacing:3}}>{initials}</Text>
+    {portrait?<Image src={portrait} style={{width:175,height:169}}/>:<Text style={{color:'#d4c095',fontFamily:'Times-Roman',fontSize:29,letterSpacing:3}}>{initials}</Text>}
    </View>}
    {(prestige||navy)&&<View style={{marginBottom:17}}>
     <Text style={[styles.sidebarTitle,prestige?{color:'#dfc991',borderBottomColor:'#858585'}:{}]}>Contact</Text>
