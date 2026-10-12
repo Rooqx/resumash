@@ -3,13 +3,14 @@ import { z } from "zod";
 import { AppError } from "../../middlewares/error.middleware";
 import { logger } from "../../utils/logger";
 import { estimateAiCost, getRequestContext, safeProviderError } from "../../utils/observability";
+import { normalizeAiResponse, summarizeSchemaIssues } from "./response-validation";
 
 /** Maximum number of simultaneous model requests on each API instance. */
 const MAX_CONCURRENT_GENERATIONS = 6;
 let activeGenerations = 0;
 
 /**
- * OpenAI-compatible Atria generation gateway.
+ * OpenAI-compatible generation gateway.
  * Keeping this single function avoids a provider class hierarchy until a
  * second provider is actually needed.
  *
@@ -26,6 +27,7 @@ export async function generateJson<T extends z.ZodTypeAny>(
   const apiKey = process.env.LLM_API_KEY;
   const model = process.env.MODEL;
   const endpoint = process.env.LLM_URL;
+  const provider = /^[a-z0-9_-]{1,48}$/i.test(process.env.LLM_PROVIDER ?? "") ? process.env.LLM_PROVIDER! : "openai-compatible";
   if (!apiKey || !model || !endpoint) {
     throw new AppError("AI generation is not configured", 503);
   }
@@ -62,7 +64,7 @@ export async function generateJson<T extends z.ZodTypeAny>(
   activeGenerations++;
   const started = performance.now();
   const trace = getRequestContext();
-  logger.info("ai.request.started", { event:"ai.request.started", requestId:trace?.requestId, provider:"atria", model, activeGenerations });
+  logger.info("ai.request.started", { event:"ai.request.started", requestId:trace?.requestId, provider, model, activeGenerations });
   let response: string | undefined | null;
   try {
     const completion = await client.chat.completions.create({
@@ -77,7 +79,7 @@ export async function generateJson<T extends z.ZodTypeAny>(
     const usage = completion.usage;
     logger.info("ai.request.completed", {
       event:"ai.request.completed", requestId:trace?.requestId,
-      provider:"atria", model, durationMs:Math.round(performance.now()-started),
+      provider, model, durationMs:Math.round(performance.now()-started),
       promptTokens:usage?.prompt_tokens ?? null,
       completionTokens:usage?.completion_tokens ?? null,
       totalTokens:usage?.total_tokens ?? null,
@@ -89,9 +91,10 @@ export async function generateJson<T extends z.ZodTypeAny>(
     });
   } catch (error) {
     logger.error("ai.request.failed", {
-      event:"ai.request.failed", requestId:trace?.requestId, provider:"atria",
+      event:"ai.request.failed", requestId:trace?.requestId, provider,
       model, durationMs:Math.round(performance.now()-started),
-      maxSdkRetries:1,
+      maxSdkRetries:maxRetries,
+      configuredTimeoutMs:timeoutMs,
       ...safeProviderError(error),
     });
     throw new AppError("AI service is temporarily unavailable", 502);
@@ -109,11 +112,11 @@ export async function generateJson<T extends z.ZodTypeAny>(
     logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"json_parse" });
     throw new AppError("AI response was not valid JSON", 502);
   }
-  const validated = schema.safeParse(parsed);
+  const validated = schema.safeParse(normalizeAiResponse(parsed));
   if (!validated.success) {
-    logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"schema_validation", issueCount:validated.error.issues.length });
+    logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"schema_validation", issueCount:validated.error.issues.length, issues:summarizeSchemaIssues(validated.error) });
     throw new AppError("AI response did not match its expected structure", 502);
   }
-  logger.info("ai.response.validated", { event:"ai.response.validated", requestId:trace?.requestId, provider:"atria", model, totalDurationMs:Math.round(performance.now()-started) });
+  logger.info("ai.response.validated", { event:"ai.response.validated", requestId:trace?.requestId, provider, model, totalDurationMs:Math.round(performance.now()-started) });
   return validated.data;
 }
