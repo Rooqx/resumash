@@ -1,276 +1,175 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import type { ReactNode } from 'react'
 import type { ResumeTemplateId } from '../templates/registry'
-import { orderedResumeSections, templateConfigs } from '../templates/templateConfig'
+import { templateConfigs, mainResumeSections, sidebarResumeSections, type ResumeSectionKey } from '../templates/templateConfig'
 
-/**
- * Immutable snapshot of the current resume editor.
- *
- * inputValue: Simple candidate fields such as name, email, summary.
- * fields: Repeatable experience, education, skills and projects.
- * tagFields: Bullet lists associated with the corresponding field index.
- *
- * The same snapshot drives all three printable resume designs. No backend
- * request or DOM screenshot is required to generate the actual PDF.
- */
+/** Same verified editor snapshot is used for HTML and selectable-text A4 PDFs. */
 export interface ResumeSnapshot {
-  inputValue: Record<string, string>
-  fields: Record<string, Array<Record<string, unknown>>>
-  tagFields: Record<string, { tags: string[] }>
+  inputValue: Record<string,string>
+  fields: Record<string,Array<Record<string,unknown>>>
+  tagFields: Record<string,{tags:string[]}>
 }
-
-interface ResumePdfDocumentProps {
-  snapshot: ResumeSnapshot
-  template: ResumeTemplateId
-}
-
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 40,
-    paddingBottom: 42,
-    paddingHorizontal: 47,
-    fontSize: 9.3,
-    lineHeight: 1.42,
-    color: '#1b1b1b',
-    backgroundColor: '#fff',
-  },
-  classicPage: { fontFamily: 'Times-Roman', paddingTop: 35 },
-  modernPage: { fontFamily: 'Helvetica', paddingTop: 45 },
-  executivePage: { fontFamily: 'Times-Roman', paddingTop: 50 },
-  header: { borderBottomWidth: 1, borderBottomColor: '#282828', paddingBottom: 10, marginBottom: 13 },
-  classicHeader: { alignItems: 'flex-start', borderBottomWidth: 1.2, borderBottomColor: '#304752' },
-  executiveHeader: { borderBottomWidth: 0, marginBottom: 19 },
-  name: { fontSize: 21, fontFamily: 'Helvetica-Bold', marginBottom: 5 },
-  classicName: { fontSize: 22, fontFamily: 'Times-Bold', color: '#203946' },
-  executiveName: { fontSize: 28, fontFamily: 'Times-Roman', color: '#273024' },
-  role: { fontSize: 10.5, marginBottom: 4 },
-  contact: { fontSize: 8.5, color: '#434343' },
-  section: { marginBottom: 12 },
-  classicSection: { marginBottom: 10 },
-  executiveSection: { marginBottom: 18 },
-  sectionTitle: {
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 9.1,
-    marginBottom: 7,
-    borderBottomColor: '#a5a5a5',
-    borderBottomWidth: .55,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: .7,
-  },
-  classicSectionTitle: { fontFamily: 'Times-Bold', borderBottomColor: '#333' },
-  executiveSectionTitle: { fontFamily: 'Times-Bold', borderBottomWidth: 0, letterSpacing: 1.3 },
-  entry: { marginBottom: 8 },
-  entryTitle: { fontFamily: 'Helvetica-Bold', fontSize: 9.4, marginBottom: 2 },
-  serifEntryTitle: { fontFamily: 'Times-Bold' },
-  detail: { fontSize: 9.1, marginTop: 2, marginBottom: 1 },
-  date: { fontSize: 8.4, color: '#4b4b4b', marginBottom: 2 },
-  body: { fontSize: 9.1, marginTop: 2, lineHeight: 1.43 },
-  bullet: { fontSize: 9.1, marginLeft: 11, marginTop: 2, lineHeight: 1.42 },
-  skill: { fontSize: 9.1, marginBottom: 3 },
+interface Props {snapshot:ResumeSnapshot;template:ResumeTemplateId}
+const txt=(v:unknown):string=>typeof v==='string'?v.trim():''
+const join=(vs:unknown[],sep=' · '):string=>vs.map(txt).filter(Boolean).join(sep)
+const entries=(snap:ResumeSnapshot,key:string)=>Array.isArray(snap.fields[key])?
+  snap.fields[key].filter(v=>v&&typeof v==='object'&&!Array.isArray(v)):[]
+const styles=StyleSheet.create({
+  page:{backgroundColor:'#fff',color:'#252525',fontFamily:'Helvetica',fontSize:9,lineHeight:1.42},
+  section:{marginBottom:12},
+  title:{fontFamily:'Helvetica-Bold',fontSize:9.2,textTransform:'uppercase',letterSpacing:1,borderBottomWidth:.6,borderBottomColor:'#a0a0a0',paddingBottom:4,marginBottom:7},
+  entry:{marginBottom:9},
+  entryTitle:{fontFamily:'Helvetica-Bold',fontSize:9.5},
+  subheading:{fontSize:8.8,color:'#565656',marginTop:1},
+  date:{fontSize:8,color:'#666',marginTop:2},
+  body:{fontSize:8.85,lineHeight:1.45,marginTop:3},
+  bullet:{fontSize:8.6,lineHeight:1.42,marginTop:2,marginLeft:9},
+  skill:{fontSize:8.6,marginBottom:4},
+  contact:{fontSize:8.1,lineHeight:1.5},
+  leftRule:{borderBottomWidth:.7,borderBottomColor:'#777'},
+  sidebarTitle:{fontSize:8.3,letterSpacing:1.4,fontFamily:'Helvetica-Bold',textTransform:'uppercase',borderBottomWidth:.6,borderBottomColor:'#a4a4a4',paddingBottom:4,marginBottom:8},
 })
 
-const text = (value: unknown): string => typeof value === 'string' ? value.trim() : ''
-const join = (values: unknown[], separator = ' · '): string =>
-  values.map(text).filter(Boolean).join(separator)
-
-/** Gets existing editor entries without trusting the runtime shape. */
-function entries(snapshot: ResumeSnapshot, section: string): Array<Record<string, unknown>> {
-  const value = snapshot.fields[section]
-  return Array.isArray(value)
-    ? value.filter(entry => entry !== null && typeof entry === 'object' && !Array.isArray(entry))
-    : []
+function Section({title,template,sidebar=false,children}:{title:string;template:ResumeTemplateId;sidebar?:boolean;children:ReactNode}){
+ const executive=template==='executive', editorial=template==='classic',ats=template==='ats-essential'
+ return <View style={[styles.section,{marginBottom:sidebar?12:templateConfigs[template].sectionSpacing*.8}]}>
+   <Text style={[
+     sidebar?styles.sidebarTitle:styles.title,
+     editorial||ats?{fontFamily:'Times-Bold'}:{},
+     executive?{color:sidebar?'#d9c18d':'#b29a64',fontFamily:'Helvetica',letterSpacing:sidebar?1.5:2.2}:{},
+     template==='executive-modern'&&!sidebar?{borderBottomColor:'#afafaf'}:{},
+     ats?{fontSize:10.4,letterSpacing:.5,borderBottomColor:'#333'}:{},
+     sidebar&&executive?{borderBottomColor:'#7c8085'}:{},
+   ]}>{title}</Text>{children}
+  </View>
 }
-
-function Section({
-  title,
-  template,
-  children,
-}: {
-  title: string
-  template: ResumeTemplateId
-  children: ReactNode
-}) {
-  return (
-    <View style={[
-      styles.section,
-      template === 'classic' ? styles.classicSection : {},
-      template === 'executive' ? styles.executiveSection : {},
-      {marginBottom:templateConfigs[template].sectionSpacing * 0.75},
-    ]}>
-      <Text style={[
-        styles.sectionTitle,
-        template === 'classic' ? styles.classicSectionTitle : {},
-        template === 'executive' ? styles.executiveSectionTitle : {},
-      ]}>{title}</Text>
-      {children}
-    </View>
-  )
+function Entry({title,subtitle,date,description,bullets=[],template,sidebar=false}:{title:string;subtitle?:string;date?:string;description?:string;bullets?:string[];template:ResumeTemplateId;sidebar?:boolean}){
+ const serif=template==='classic'||template==='ats-essential'
+ return <View style={[styles.entry,{marginBottom:sidebar?8:10}]} wrap={false}>
+  {!!title&&<Text style={[styles.entryTitle,serif?{fontFamily:'Times-Bold'}:{},sidebar?{fontSize:8.5}:{}]}>{title}</Text>}
+  {!!subtitle&&<Text style={[styles.subheading,sidebar?{fontSize:7.8}:{}]}>{subtitle}</Text>}
+  {!!date&&<Text style={[styles.date,sidebar?{fontSize:7.5}:{}]}>{date}</Text>}
+  {!!description&&<Text style={[styles.body,sidebar?{fontSize:8}:{}]}>{description}</Text>}
+  {bullets.filter(Boolean).map((bullet,i)=><Text key={i} style={[styles.bullet,sidebar?{fontSize:7.8}:{}]}>• {bullet}</Text>)}
+ </View>
 }
-
-function Entry({
-  title,
-  subtitle,
-  date,
-  description,
-  bullets = [],
-  template,
-}: {
-  title: string
-  subtitle?: string
-  date?: string
-  description?: string
-  bullets?: string[]
-  template: ResumeTemplateId
-}) {
-  return (
-    <View style={styles.entry}>
-      {!!title && <Text style={[styles.entryTitle, template === 'modern' ? {} : styles.serifEntryTitle]}>{title}</Text>}
-      {!!subtitle && <Text style={styles.detail}>{subtitle}</Text>}
-      {!!date && <Text style={styles.date}>{date}</Text>}
-      {!!description && <Text style={styles.body}>{description}</Text>}
-      {bullets.filter(Boolean).map((bullet, i) => (
-        <Text key={i} style={styles.bullet}>• {bullet}</Text>
-      ))}
-    </View>
-  )
+function Contact({input,light=false}:{input:Record<string,string>;light?:boolean}){
+ const items=[input.phone,input.email,join([input.city,input.country],', '),input.linkdlnUrl,input.githubUrl,input.portfolioUrl].map(txt).filter(Boolean)
+ return <View>{items.map((item,i)=><Text key={i} style={[styles.contact,light?{color:'#dadada',fontSize:7.6}:{color:'#555'}]}>{item}</Text>)}</View>
 }
-
-/**
- * Selectable-text PDF renderer, not a screenshot of the editor.
- * React PDF automatically flows longer content across A4 pages.
- */
-export default function ResumePdfDocument({ snapshot, template }: ResumePdfDocumentProps) {
-  const basics = snapshot.inputValue
-  const experienceEntries = entries(snapshot, 'experience')
-  const educationEntries = entries(snapshot, 'education')
-  const skillEntries = entries(snapshot, 'skills')
-  const projectEntries = entries(snapshot, 'projects')
-  const certificateEntries = entries(snapshot, 'certificates')
-  const awardEntries = entries(snapshot, 'awards')
-
-  const experience = experienceEntries.length > 0 && (
-    <Section title="Professional Experience" template={template}>
-      {experienceEntries.map((job, index) => (
-        <Entry key={index} template={template}
-          title={text(job.jobPosition) || text(job.companyName)}
-          subtitle={text(job.companyName)}
-          date={join([job.jobStartDate, job.jobEndDate || 'Present'], ' – ')}
-          description={text(job.jobSummary)}
-          bullets={snapshot.tagFields[`jobHighlights-${index}`]?.tags || []}
-        />
-      ))}
-    </Section>
-  )
-
-  const education = educationEntries.length > 0 && (
-    <Section title="Education" template={template}>
-      {educationEntries.map((entry, index) => (
-        <Entry key={index} template={template}
-          title={text(entry.institution)}
-          subtitle={join([entry.studyType, entry.area], ' in ')}
-          date={join([entry.startDate, entry.endDate], ' – ')}
-          description={text(entry.gpa) ? `GPA: ${text(entry.gpa)}` : ''}
-        />
-      ))}
-    </Section>
-  )
-
-  const skills = skillEntries.length > 0 && (
-    <Section title="Skills" template={template}>
-      {skillEntries.map((entry, index) => (
-        <Text style={styles.skill} key={index}>
-          {text(entry.skillName)}{snapshot.tagFields[`skills-${index}`]?.tags?.length
-            ? `: ${snapshot.tagFields[`skills-${index}`]?.tags.join(', ')}`
-            : ''}
-        </Text>
-      ))}
-    </Section>
-  )
-
-  const projects = projectEntries.length > 0 && (
-    <Section title="Projects" template={template}>
-      {projectEntries.map((entry, index) => (
-        <Entry key={index} template={template}
-          title={text(entry.name)}
-          description={text(entry.description)}
-          bullets={snapshot.tagFields[`projectHighlights-${index}`]?.tags || []}
-        />
-      ))}
-    </Section>
-  )
-
-  const additional = (certificateEntries.length > 0 || awardEntries.length > 0) && (
-    <Section title="Additional" template={template}>
-      {certificateEntries.map((entry, i) => (
-        <Entry key={`cert-${i}`} template={template}
-          title={text(entry.certificateName)}
-          subtitle={text(entry.certificateIssuer)}
-          date={text(entry.certificateDate)}
-        />
-      ))}
-      {awardEntries.map((entry, i) => (
-        <Entry key={`award-${i}`} template={template}
-          title={text(entry.awardTitle)}
-          subtitle={text(entry.awarder)}
-          date={text(entry.awardDate)}
-          description={text(entry.awardSummary)}
-        />
-      ))}
-    </Section>
-  )
-
-  const summary = !!text(basics.summary) && (
-    <Section title={templateConfigs[template].summaryTitle} template={template}>
-      <Text style={styles.body}>{text(basics.summary)}</Text>
-    </Section>
-  )
-
-  const location = join([basics.city, basics.country], ', ')
-  const contact = join([
-    basics.email,
-    basics.phone,
-    location,
-    basics.linkdlnUrl,
-    basics.githubUrl,
-    basics.portfolioUrl,
-  ])
-
-  return (
-    <Document title={text(basics.fullName) ? `${basics.fullName} — Resume` : 'Resume'} creator="Resumash">
-      <Page size="A4" wrap style={[
-        styles.page,
-        {
-          paddingTop:templateConfigs[template].pagePadding.top,
-          paddingBottom:templateConfigs[template].pagePadding.bottom,
-          paddingHorizontal:templateConfigs[template].pagePadding.horizontal,
-          color:templateConfigs[template].ink,
-        },
-        template === 'classic' ? styles.classicPage : {},
-        template === 'modern' ? styles.modernPage : {},
-        template === 'executive' ? styles.executivePage : {},
-      ]}>
-        <View style={[
-          styles.header,
-          template === 'classic' ? styles.classicHeader : {},
-          template === 'executive' ? styles.executiveHeader : {},
-        ]}>
-          <Text style={[
-            styles.name,
-            template === 'classic' ? styles.classicName : {},
-            template === 'executive' ? styles.executiveName : {},
-            {fontSize:templateConfigs[template].nameFontSize * 0.75},
-          ]}>{text(basics.fullName) || 'Your Name'}</Text>
-          {!!text(basics.label) && <Text style={styles.role}>{text(basics.label)}</Text>}
-          {!!contact && <Text style={styles.contact}>{contact}</Text>}
-        </View>
-        {orderedResumeSections(template).map(key=>(
-          <View key={key}>
-            {({ summary, experience, education, projects, skills, additional } as Record<string,ReactNode>)[key]}
-          </View>
-        ))}
-        {!!text(basics.additionalInfo) && <Section title="Additional Information" template={template}><Text style={styles.body}>{text(basics.additionalInfo)}</Text></Section>}
-      </Page>
-    </Document>
-  )
+function ContentSections({snapshot,template,keys,sidebar=false}:{snapshot:ResumeSnapshot;template:ResumeTemplateId;keys:readonly ResumeSectionKey[];sidebar?:boolean}){
+ const input=snapshot.inputValue, config=templateConfigs[template]
+ const exp=entries(snapshot,'experience'),edu=entries(snapshot,'education'),skills=entries(snapshot,'skills'),projects=entries(snapshot,'projects'),certs=entries(snapshot,'certificates'),awards=entries(snapshot,'awards')
+ const summary=!!txt(input.summary)&&<Section title={config.summaryTitle} template={template} sidebar={sidebar}><Text style={[styles.body,sidebar?{fontSize:8}:{},template==='classic'||template==='ats-essential'?{fontFamily:'Times-Roman'}:{}]}>{txt(input.summary)}</Text></Section>
+ const experience=exp.length>0&&<Section title={template==='ats-essential'?'Work Experience':template==='modern'?'Professional History':'Professional Experience'} template={template} sidebar={sidebar}>
+  {exp.map((v,i)=><Entry key={i} template={template} sidebar={sidebar} title={txt(v.jobPosition)||txt(v.companyName)}
+   subtitle={txt(v.companyName)} date={join([v.jobStartDate,v.jobEndDate||'Present'],' – ')} description={txt(v.jobSummary)}
+   bullets={snapshot.tagFields[`jobHighlights-${i}`]?.tags||[]}/>)}
+ </Section>
+ const education=edu.length>0&&<Section title="Education" template={template} sidebar={sidebar}>
+  {edu.map((v,i)=><Entry key={i} template={template} sidebar={sidebar} title={txt(v.institution)}
+   subtitle={join([v.studyType,v.area],' in ')} date={join([v.startDate,v.endDate],' – ')} description={txt(v.gpa)?`GPA: ${txt(v.gpa)}`:undefined}/>)}
+ </Section>
+ const skillsSection=skills.length>0&&<Section title={template==='modern'?'Core Skills':'Skills'} template={template} sidebar={sidebar}>
+  <View style={template==='classic'?{flexDirection:'row',flexWrap:'wrap'}:{}}>
+   {skills.map((v,i)=><Text key={i} style={[styles.skill,sidebar?{fontSize:8}: {},
+     template==='classic'?{width:'33%',paddingRight:6}:{}
+   ]}>{txt(v.skillName)}{snapshot.tagFields[`skills-${i}`]?.tags?.length?
+    `: ${snapshot.tagFields[`skills-${i}`].tags.join(', ')}`:''}</Text>)}
+  </View>
+ </Section>
+ const projectsSection=projects.length>0&&<Section title="Projects" template={template} sidebar={sidebar}>
+  {projects.map((v,i)=><Entry key={i} template={template} sidebar={sidebar} title={txt(v.name)} description={txt(v.description)}
+   bullets={snapshot.tagFields[`projectHighlights-${i}`]?.tags||[]}/>)}
+ </Section>
+ const additional=(certs.length>0||awards.length>0)&&<Section title={template==='executive'?'Professional Development':'Additional'} template={template} sidebar={sidebar}>
+  {certs.map((v,i)=><Entry key={`c${i}`} template={template} sidebar={sidebar} title={txt(v.certificateName)} subtitle={txt(v.certificateIssuer)} date={txt(v.certificateDate)}/>)}
+  {awards.map((v,i)=><Entry key={`a${i}`} template={template} sidebar={sidebar} title={txt(v.awardTitle)} subtitle={txt(v.awarder)} date={txt(v.awardDate)} description={txt(v.awardSummary)}/>)}
+ </Section>
+ const content:Record<ResumeSectionKey,ReactNode>={summary,experience,education,skills:skillsSection,projects:projectsSection,additional}
+ return <>{keys.map(key=><View key={key}>{content[key]}</View>)}</>
+}
+function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemplateId}){
+ const input=snapshot.inputValue,fullName=txt(input.fullName)||'Your Name',role=txt(input.label)
+ const side=template==='executive',banner=template==='executive-modern',ats=template==='ats-essential',editorial=template==='classic',stone=template==='modern'
+ const parts=fullName.trim().split(/\s+/),last=parts.length>1?parts.pop():'',first=parts.join(' ')
+ return <View style={[
+  banner?{backgroundColor:'#2f4555',minHeight:149,paddingTop:16,paddingBottom:17,alignItems:'center',justifyContent:'center'}:{},
+  side?{marginBottom:21}:{},editorial?{borderBottomWidth:.8,borderBottomColor:'#aaa',paddingBottom:12,marginBottom:17}:{},
+  stone?{minHeight:125,marginHorizontal:40,paddingTop:29,paddingBottom:16,borderBottomWidth:.8,borderBottomColor:'#8f8f8f',marginBottom:0}:{},
+  ats?{alignItems:'center',marginBottom:23}:{},
+ ]}>
+  {banner&&<View style={{backgroundColor:'#e7d29d',width:35,height:32,marginBottom:9,alignItems:'center',justifyContent:'center'}}><Text style={{fontFamily:'Times-Bold',color:'#2f4555',fontSize:12}}>{parts.map(p=>p[0]).join('').slice(0,2).toUpperCase()}</Text></View>}
+  <Text style={[
+   {fontFamily:side||stone?'Helvetica':'Times-Roman',fontSize:templateConfigs[template].nameFontSize*.76,color:templateConfigs[template].ink},
+   side?{letterSpacing:3,textTransform:'uppercase'}:{},
+   banner?{fontSize:29,color:'#e4cd92',letterSpacing:2.5,textAlign:'center'}:{},
+   editorial?{fontSize:31}:{},stone?{fontSize:27,letterSpacing:3.3,textTransform:'uppercase'}:{},
+   ats?{fontSize:35,letterSpacing:2.5,textTransform:'uppercase'}:{},
+  ]}>{side&&last?<><Text>{first} </Text><Text style={{color:'#c5b17e'}}>{last}</Text></>:fullName}</Text>
+  {!!role&&<Text style={[
+   {fontSize:9,marginTop:6,letterSpacing:2,color:'#515151'},
+   editorial?{fontFamily:'Times-Italic',letterSpacing:0,fontSize:9}:{},
+   ats?{fontFamily:'Times-Roman',fontSize:13,letterSpacing:1.7,marginTop:6}:{},
+   side?{letterSpacing:3.3,fontSize:7.2}:{},
+   stone?{letterSpacing:3,fontSize:7.4,color:'#777'}:{},
+   banner?{letterSpacing:3,fontSize:8,color:'#e4cd92',textAlign:'center'}:{},
+  ]}>{(side||stone||banner||ats)?role.toUpperCase():role}</Text>}
+  {(editorial||stone)&&<View style={editorial?{position:'absolute',right:0,top:0,width:170,alignItems:'flex-end'}:{position:'absolute',right:0,top:30,width:132}}>
+   <Contact input={input}/></View>}
+  {ats&&<View style={{borderTopWidth:1.5,borderBottomWidth:1.5,borderColor:'#444',paddingVertical:7,marginTop:14,width:'100%'}}>
+   <Text style={{textAlign:'center',fontFamily:'Times-Roman',fontSize:8.5}}>{join([input.phone,join([input.city,input.country],', '),input.email,input.linkdlnUrl],'  |  ')}</Text>
+  </View>}
+ </View>
+}
+function Sidebar({snapshot,template,offset=0}:{snapshot:ResumeSnapshot;template:ResumeTemplateId;offset?:number}){
+ const prestige=template==='executive', navy=template==='executive-modern'
+ const name=txt(snapshot.inputValue.fullName)||'Your Name',initials=name.split(/\s+/).slice(0,2).map(v=>v[0]).join('').toUpperCase()
+ const width=prestige?175:navy?163:147
+ const bg=prestige?'#262c34':navy?'#fff':'#ebebe8'
+ // Fixed colored rail continues on subsequent pages; text remains selectable.
+ return <>
+  <View fixed style={{position:'absolute',left:prestige?0:navy?0:40,top:offset,
+   width:navy?163:width,bottom:0,backgroundColor:bg}}/>
+  <View style={{position:'absolute',left:prestige?16:navy?32:53,top:offset+(prestige?0:14),
+   width:width-(prestige?32:navy?50:27),color:prestige?'#ddd':'#333'}}>
+   {prestige&&<View style={{height:169,marginHorizontal:-16,backgroundColor:'#414850',alignItems:'center',justifyContent:'center',marginBottom:17}}>
+    <Text style={{color:'#d4c095',fontFamily:'Times-Roman',fontSize:29,letterSpacing:3}}>{initials}</Text>
+   </View>}
+   {(prestige||navy)&&<View style={{marginBottom:17}}>
+    <Text style={[styles.sidebarTitle,prestige?{color:'#dfc991',borderBottomColor:'#858585'}:{}]}>Contact</Text>
+    <Contact input={snapshot.inputValue} light={prestige}/>
+   </View>}
+   <ContentSections snapshot={snapshot} template={template} sidebar keys={sidebarResumeSections(template)}/>
+  </View>
+ </>
+}
+export default function ResumePdfDocument({snapshot,template}:Props){
+ const config=templateConfigs[template],prestige=template==='executive',stone=template==='modern',navy=template==='executive-modern'
+ const hasSidebar=prestige||stone||navy
+ const content=<>
+  <ContentSections snapshot={snapshot} template={template} keys={mainResumeSections(template)}/>
+  {!!txt(snapshot.inputValue.additionalInfo)&&<Section title="Additional Information" template={template}><Text style={styles.body}>{txt(snapshot.inputValue.additionalInfo)}</Text></Section>}
+ </>
+ return <Document creator="Resumash" title={txt(snapshot.inputValue.fullName)?`${txt(snapshot.inputValue.fullName)} — Resume`:'Resume'}>
+  <Page size="A4" wrap style={[styles.page,{color:config.ink,backgroundColor:'#fff',fontFamily:config.fontFamily}]}>
+   {hasSidebar&&<Sidebar snapshot={snapshot} template={template} offset={stone?133:navy?152:0}/>}
+   {navy&&<Header snapshot={snapshot} template={template}/>}
+   {stone&&<Header snapshot={snapshot} template={template}/>}
+   <View style={hasSidebar?{
+     marginLeft:prestige?175:stone?207:163,
+     paddingTop:prestige?32:stone?16:navy?18:32,
+     paddingRight:prestige?28:stone?40:navy?28:32,
+     paddingBottom:config.pagePadding.bottom,
+     paddingLeft:prestige?21:stone?0:navy?19:21,
+   }:{
+     paddingTop:config.pagePadding.top,paddingHorizontal:config.pagePadding.horizontal,
+     paddingBottom:config.pagePadding.bottom,
+   }}>
+    {!hasSidebar&&<Header snapshot={snapshot} template={template}/>}
+    {prestige&&<Header snapshot={snapshot} template={template}/>}
+    {content}
+   </View>
+  </Page>
+ </Document>
 }
