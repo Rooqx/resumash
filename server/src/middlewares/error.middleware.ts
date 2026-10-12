@@ -2,6 +2,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { ResponseHelper } from "../utils/responseHelper";
 import { logger } from "../utils/logger";
+import { getRequestContext } from "../utils/observability";
 
 /**
  * Custom Error class for application-specific errors
@@ -103,17 +104,14 @@ export const errorHandler = (
  */
 const logError = (error: Error, req: Request): void => {
   logger.error("Error occurred:", {
-    timestamp: new Date().toISOString(),
-    message: error.message,
-    stack: error.stack,
-    url: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-    // Don't log sensitive headers
-    headers: {
-      "user-agent": req.get("user-agent"),
-      "content-type": req.get("content-type"),
-    },
+    event:"http.request.error",
+    requestId:getRequestContext()?.requestId,
+    method:req.method,
+    route:req.path,
+    errorType:error.constructor.name,
+    statusCode:error instanceof AppError ? error.statusCode : 500,
+    // Do not include error.message/stack: upstream errors can embed user content.
+    // Provider failures have their own sanitized diagnostics in generate-json.ts.
   });
 };
 
