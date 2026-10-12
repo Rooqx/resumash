@@ -2,7 +2,7 @@ name: Frontend quality
 
 on:
   push:
-    branches: [feat/frontend-redesign]
+    branches: [main, feat/frontend-redesign]
   pull_request:
     paths:
       - 'client/**'
