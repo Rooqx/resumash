@@ -44,7 +44,7 @@
 .rs-template-executive .rs-main{padding:43px 36px 44px 28px;}
 .rs-template-executive .resume-header{margin-bottom:29px;}
 .rs-template-executive .resume-header h1{font-weight:400;letter-spacing:.17em;font-size:39px;text-transform:uppercase;color:#30343a;}
-.rs-template-executive .resume-header h1::first-letter{color:#c8b180;}
+.rs-template-executive .resume-header .rs-family-name{color:#c8b180;}
 .rs-template-executive .resume-role{color:#54545b;font-size:10px;letter-spacing:.42em;}
 .rs-template-executive .rs-main .resume-section > h2{color:#b39b66;border-color:#d8d8d8;font-weight:400;letter-spacing:.35em;}
 .rs-template-executive .rs-main .resume-entry h3{font-weight:500;}
