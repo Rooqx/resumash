@@ -29,7 +29,7 @@ export const uploadResume = asyncHandler(
 
 export async function generateResumePDF(zustandState: any, template: "classic" | "modern" | "executive" = "modern") {
   try {
-    console.log("initializing pdf download");
+    
 
     const browser = await chromium.launch({
       headless: true,
@@ -61,6 +61,6 @@ export async function generateResumePDF(zustandState: any, template: "classic" |
     await browser.close();
     return pdfBuffer;
   } catch (err) {
-    logger.error("PDF generation failed:", err);
+    logger.error("resume.pdf.generation_failed", { event:"resume.pdf.generation_failed" });
   }
 }
