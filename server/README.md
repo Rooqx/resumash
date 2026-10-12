@@ -11,8 +11,9 @@ rendered in the browser with the existing React PDF dependency.
 | `PORT` | HTTP listen port |
 | `NODE_ENV` | `development` / `production` |
 | `LLM_API_KEY` | Atria API key |
-| `LLM_URL` | Atria API URL, either `https://api.atria-asi.ai/v1` or the full `/v1/chat/completions` endpoint |
-| `MODEL` | Atria model identifier; for example `Atria-Dawn-Preview`; return valid JSON per prompt |
+| `LLM_URL` | OpenAI-compatible provider API URL ending in `/v1` or `/v1/chat/completions` |
+| `LLM_PROVIDER` | Optional safe provider label for observability, e.g. `tokenharbor` (defaults to `openai-compatible`) |
+| `MODEL` | OpenAI-compatible model identifier; for example `Atria-Dawn-Preview`; return valid JSON per prompt |
 | `REDIS_URI` | Required shared Redis/Valkey URL for atomic AI quotas |
 | `FRONTEND_DEVELOPMENT_URL` | Allowed development web origin |
 | `FRONTEND_PRODUCTION_URL` | Allowed production web origin |
@@ -177,3 +178,14 @@ request/response bodies, resumes, prompts, provider error messages, cookies,
 authorization headers and API credentials. Without authentication Resumash
 does **not** know which individual user made a request; request IDs show
 per-request activity, not a personal activity history.
+
+### Tailor response validation
+
+Schema validation failures emit `ai.response.invalid` with a bounded `issues`
+array containing only safe structural paths and Zod error codes. No model
+response text, source quotes, unknown property names, or candidate data are logged.
+The minimal response normalizer accepts a single `result` wrapper but does not
+alter evidence claims, missing data, or incompatible types. Backend numeric,
+source-entity, baseline-prose and citation checks still run after validation.
+Provider identity is configured with `LLM_PROVIDER`; model, endpoint, and
+credentials remain separately configurable.
