@@ -1,88 +1,129 @@
-/* Text-first, linear DOM order and print-safe resume documents.
-   No tables, sidebar grids, rasterized text, icons or skill bars. */
-.rs-document { width:794px; min-height:1122px; box-sizing:border-box; padding:52px 58px; background:#fff!important; color:#171717!important; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:1.42; box-shadow:0 6px 22px #0001; }
-.rs-document-content { width:100%; overflow-wrap:break-word; }
-.rs-document h1,.rs-document h2,.rs-document h3,.rs-document p { margin:0; color:inherit; }
-.rs-document .resume-header { padding-bottom:12px; margin-bottom:15px; border-bottom:1px solid #333; }
-.rs-document .resume-header h1 { font-size:30px; line-height:1.1; letter-spacing:-.03em; font-weight:700; }
-.rs-document .resume-role { font-size:14px; margin-top:5px; }
-.rs-document .resume-contacts { font-size:11px; margin-top:9px; line-height:1.5; }
-.rs-document .resume-contacts a { color:inherit; text-decoration:none; }
-.rs-document .resume-section { margin-bottom:16px; break-inside:auto; }
-.rs-document .resume-section > h2 { font-size:12px; letter-spacing:.085em; text-transform:uppercase; font-weight:700; margin:0 0 9px; padding-bottom:4px; border-bottom:1px solid #aaa; }
-.rs-document .resume-entry { margin-bottom:11px; break-inside:avoid; }
-.rs-document .resume-entry-top { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:2px 12px; }
-.rs-document .resume-entry h3 { font-size:13px; font-weight:700; }
-.rs-document .resume-subheading { font-size:12px; margin-top:1px; }
-.rs-document .resume-date { font-size:11px; white-space:nowrap; }
-.rs-document .resume-paragraph { font-size:12px; line-height:1.5; margin-top:5px; white-space:pre-line; }
-.rs-document .resume-bullets { padding-left:18px; margin:5px 0 0; list-style:disc; }
-.rs-document .resume-bullets li { margin:2px 0; font-size:12px; line-height:1.5; }
-.rs-document .resume-skill { font-size:12px; margin:3px 0; }
-.rs-document .resume-skill strong { margin-right:7px; }
-/* Recruiter Standard — quick scan, familiar headings, compact evidence. */
-.rs-template-modern { font-family:Arial,Helvetica,sans-serif; padding:48px 55px; }
-.rs-template-modern .resume-header { border-bottom:2px solid #202a30; margin-bottom:13px; }
-.rs-template-modern .resume-header h1 { font-size:29px; color:#182329; }
-.rs-template-modern .resume-section > h2 { letter-spacing:.075em; border-bottom:1px solid #cfd7db; }
-.rs-template-modern .resume-section { margin-bottom:13px; }
+/* A4 sheet. All five templates render real selectable text, not canvas images. */
+.rs-document{width:794px;min-height:1122px;box-sizing:border-box;background:#fff;color:var(--resume-ink,#262626);font-family:Arial,Helvetica,sans-serif;font-size:12.5px;line-height:1.42;box-shadow:0 6px 22px #0002;overflow-wrap:anywhere;}
+.rs-document *, .rs-document *::before, .rs-document *::after{box-sizing:border-box;}
+.rs-document h1,.rs-document h2,.rs-document h3,.rs-document p{margin:0;color:inherit;}
+.rs-document a{color:inherit;text-decoration:none;overflow-wrap:anywhere;}
+.rs-document .resume-header h1{font-size:var(--resume-name-size,38px);line-height:1.08;font-weight:400;}
+.rs-document .resume-role{font-size:12px;margin-top:7px;letter-spacing:.28em;text-transform:uppercase;}
+.rs-document .resume-section{margin-bottom:var(--resume-section-space,17px);break-inside:auto;}
+.rs-document .resume-section > h2{font-weight:700;text-transform:uppercase;letter-spacing:.18em;font-size:11px;margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid #8f9294;}
+.rs-document .resume-entry{margin-bottom:11px;break-inside:avoid;}
+.rs-document .resume-entry-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.rs-document .resume-entry-name{min-width:0;flex:1;}
+.rs-document .resume-entry h3{font-size:12.4px;font-weight:700;}
+.rs-document .resume-subheading{font-size:11px;margin-top:2px;}
+.rs-document .resume-date{font-size:10px;color:#555;white-space:nowrap;text-align:right;}
+.rs-document .resume-paragraph{font-size:11.7px;line-height:1.5;margin-top:4px;white-space:pre-line;}
+.rs-document .resume-bullets{padding-left:17px;margin:4px 0 0;list-style:disc;}
+.rs-document .resume-bullets li{font-size:11.3px;line-height:1.43;margin:3px 0;}
+.rs-document .resume-skill{font-size:11px;margin:5px 0;line-height:1.42;}
+.rs-document .resume-skill strong{display:block;font-size:10.5px;}
+.rs-document .rs-contact-lines{font-size:10px;line-height:1.6;}
+.rs-document .rs-contact-lines p{margin:0 0 4px;}
+.rs-document .rs-layout{display:grid;align-items:stretch;min-height:1122px;}
+.rs-document .rs-sidebar{min-width:0;}
+.rs-document .rs-main{min-width:0;}
+.rs-document .resume-slot:empty{display:none;}
 
-/* Emerging Talent — a clear, academic-inspired hierarchy: education and
-   projects precede job history when this layout is selected. */
-.rs-template-classic { font-family:Georgia,'Times New Roman',serif; padding:44px 57px; color:#203946!important; }
-.rs-template-classic .resume-header { text-align:left; border-bottom:1.5px solid #304752; }
-.rs-template-classic .resume-header h1 { font-size:29px; letter-spacing:-.015em; }
-.rs-template-classic .resume-role { color:#405764; }
-.rs-template-classic .resume-section > h2 { border-bottom:1px solid #8d9da4; letter-spacing:.035em; }
-.rs-template-classic .resume-section { margin-bottom:12px; }
-.rs-template-classic .resume-entry h3 { font-size:13px; }
+/* 01 — GREGORY WADE: deep charcoal portrait rail, off-white main, champagne accents. */
+.rs-document.rs-template-executive{background:#fff;font-family:Arial,Helvetica,sans-serif;}
+.rs-template-executive .rs-charcoal{grid-template-columns:234px minmax(0,1fr);}
+.rs-template-executive .rs-sidebar{background:#252a32;color:#dddcd7;padding:0 24px 42px;}
+.rs-template-executive .rs-portrait{height:230px;background:linear-gradient(145deg,#4b5156 0%,#303740 55%,#151b24 100%);margin:0 -24px 20px;display:flex;align-items:center;justify-content:center;position:relative;}
+.rs-template-executive .rs-portrait::before{content:'';position:absolute;width:100px;height:100px;border:2px solid #d4c5a6;border-radius:50%;opacity:.45;top:40px;}
+.rs-template-executive .rs-portrait span{color:#ddcfad;font-family:Georgia,serif;font-size:42px;letter-spacing:.08em;}
+.rs-template-executive .rs-sidebar-contact{margin-bottom:22px;}
+.rs-template-executive .rs-sidebar h2{color:#d5be81!important;border-bottom:1px solid #7b8186!important;letter-spacing:.32em;font-weight:400;}
+.rs-template-executive .rs-sidebar .resume-section{margin-bottom:18px;}
+.rs-template-executive .rs-sidebar .resume-section > h2{font-size:10px;}
+.rs-template-executive .rs-sidebar .resume-entry{margin-bottom:12px;}
+.rs-template-executive .rs-sidebar .resume-entry h3,.rs-template-executive .rs-sidebar .resume-skill strong{color:#eee;font-size:10.5px;}
+.rs-template-executive .rs-sidebar .resume-subheading,.rs-template-executive .rs-sidebar .resume-date,.rs-template-executive .rs-sidebar .resume-paragraph,.rs-template-executive .rs-sidebar .resume-skill{color:#ccc;font-size:9.7px;text-align:left;}
+.rs-template-executive .rs-sidebar .resume-entry-top{display:block;}
+.rs-template-executive .rs-sidebar .resume-date{display:block;text-align:left;margin-top:3px;}
+.rs-template-executive .rs-main{padding:43px 36px 44px 28px;}
+.rs-template-executive .resume-header{margin-bottom:29px;}
+.rs-template-executive .resume-header h1{font-weight:400;letter-spacing:.17em;font-size:39px;text-transform:uppercase;color:#30343a;}
+.rs-template-executive .resume-header h1::first-letter{color:#c8b180;}
+.rs-template-executive .resume-role{color:#54545b;font-size:10px;letter-spacing:.42em;}
+.rs-template-executive .rs-main .resume-section > h2{color:#b39b66;border-color:#d8d8d8;font-weight:400;letter-spacing:.35em;}
+.rs-template-executive .rs-main .resume-entry h3{font-weight:500;}
 
-/* Leadership Profile — restrained executive editorial feel without sidebar,
-   photo or text rendered as imagery; remains a linear, selectable document. */
-.rs-template-executive { font-family:Cambria,Georgia,serif; padding:58px 66px; color:#242d25!important; }
-.rs-template-executive .resume-header { border-bottom:0; padding-bottom:20px; margin-bottom:16px; }
-.rs-template-executive .resume-header h1 { font-size:38px; font-weight:400; letter-spacing:-.04em; }
-.rs-template-executive .resume-role { font-size:13px; text-transform:uppercase; letter-spacing:.105em; }
-.rs-template-executive .resume-section > h2 { border-bottom:0; border-top:1px solid #7a8378; padding-top:8px; font-size:12px; letter-spacing:.12em; }
-.rs-template-executive .resume-section { margin-bottom:19px; }
-.rs-template-executive .resume-entry { margin-bottom:15px; }
-@media print {
- @page { size:A4; margin:0; }
- html,body,#app { margin:0!important; padding:0!important; background:#fff!important; }
- .rs-document { width:210mm; min-height:297mm; padding:14mm 16mm; margin:0; box-shadow:none; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
- .rs-document .resume-entry { break-inside:avoid; }
+/* 02 — ANNA MCDONALD: one-column serif, right-justified contacts, fine rules. */
+.rs-document.rs-template-classic{font-family:Georgia,'Times New Roman',serif;padding:var(--resume-pad-top) var(--resume-pad-horizontal) var(--resume-pad-bottom);}
+.rs-template-classic .resume-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #939393;padding-bottom:13px;margin-bottom:18px;gap:18px;}
+.rs-template-classic .resume-header h1{font-size:43px;font-weight:400;letter-spacing:-.035em;}
+.rs-template-classic .resume-role{font-size:11px;font-style:italic;text-transform:none;letter-spacing:0;margin-top:11px;color:#666;}
+.rs-template-classic .resume-contacts{min-width:195px;text-align:right;padding-top:4px;}
+.rs-template-classic .resume-contacts .rs-contact-lines{font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.2;color:#696969;}
+.rs-template-classic .resume-section > h2{font-size:11px;letter-spacing:.28em;border-color:#a5a5a5;font-weight:600;}
+.rs-template-classic .resume-entry{margin-bottom:13px;}
+.rs-template-classic .resume-entry h3{font-size:12px;}
+.rs-template-classic .resume-skill{display:inline-block;width:33.333%;vertical-align:top;padding-right:12px;}
+.rs-template-classic .resume-skill strong{font-family:Arial,Helvetica,sans-serif;letter-spacing:.01em;}
+.rs-template-classic .resume-paragraph{font-size:11.3px;}
+.rs-template-classic .resume-date{font-family:Arial,Helvetica,sans-serif;font-size:10px;}
+
+/* 03 — RILEY COOPER: oversized upper header, soft grey information sidebar. */
+.rs-document.rs-template-modern{font-family:Arial,Helvetica,sans-serif;}
+.rs-template-modern > .resume-header{min-height:180px;margin:0 54px 0;padding:40px 0 24px;border-bottom:1px solid #999;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
+.rs-template-modern .resume-header h1{font-size:38px;text-transform:uppercase;letter-spacing:.16em;font-weight:400;}
+.rs-template-modern .resume-role{font-size:10px;letter-spacing:.5em;color:#868686;margin-top:9px;}
+.rs-template-modern .resume-contacts{text-align:left;width:178px;flex:none;}
+.rs-template-modern .resume-contacts .rs-contact-lines{font-size:10px;line-height:1.32;}
+.rs-template-modern .rs-stone{grid-template-columns:196px minmax(0,1fr);min-height:942px;padding:0 53px 38px;column-gap:23px;}
+.rs-template-modern .rs-sidebar{background:#ededea;padding:22px 17px 24px;}
+.rs-template-modern .rs-sidebar .resume-section > h2{font-size:11px;letter-spacing:.15em;border-color:#bcbdbb;}
+.rs-template-modern .rs-sidebar .resume-entry-top{display:block;}
+.rs-template-modern .rs-sidebar .resume-date{display:block;text-align:left;margin-top:3px;}
+.rs-template-modern .rs-sidebar .resume-entry h3{font-size:11px;}
+.rs-template-modern .rs-sidebar .resume-subheading,.rs-template-modern .rs-sidebar .resume-date{font-size:9.8px;color:#686868;}
+.rs-template-modern .rs-sidebar .resume-skill{margin-bottom:8px;font-size:10px;}
+.rs-template-modern .rs-main{padding:22px 0 24px;}
+.rs-template-modern .resume-section > h2{letter-spacing:.2em;border-color:#7d7d7d;font-size:12px;}
+.rs-template-modern .rs-main .resume-section > h2{margin-bottom:10px;}
+
+/* 04 — MARK WILLIAMS: midnight-blue top banner and narrow information rail. */
+.rs-document.rs-template-executive-modern{font-family:Arial,Helvetica,sans-serif;}
+.rs-template-executive-modern > .resume-header{background:#2e4453;color:#ecd7a0;min-height:205px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 48px 20px;}
+.rs-template-executive-modern .rs-monogram{height:43px;min-width:43px;background:#e6d1a0;color:#2e4453;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;margin-bottom:11px;}
+.rs-template-executive-modern .resume-header h1{font-size:40px;color:#e2c68c;text-transform:uppercase;font-family:Georgia,'Times New Roman',serif;letter-spacing:.09em;}
+.rs-template-executive-modern .resume-role{color:#e0cf9c;font-size:10px;letter-spacing:.38em;}
+.rs-template-executive-modern .rs-navy{grid-template-columns:218px minmax(0,1fr);column-gap:0;min-height:917px;}
+.rs-template-executive-modern .rs-sidebar{padding:21px 23px 30px 43px;border-right:1px solid #bababa;}
+.rs-template-executive-modern .rs-sidebar-contact{margin-bottom:20px;}
+.rs-template-executive-modern .rs-sidebar .resume-section > h2,.rs-template-executive-modern .rs-sidebar-contact > h2{font-size:10px;letter-spacing:.16em;border-color:#a6a6a6;margin:0 0 8px;padding-bottom:5px;text-transform:uppercase;}
+.rs-template-executive-modern .rs-sidebar .resume-entry-top{display:block;}
+.rs-template-executive-modern .rs-sidebar .resume-date{display:block;text-align:left;}
+.rs-template-executive-modern .rs-sidebar .resume-entry h3{font-size:10px;}
+.rs-template-executive-modern .rs-sidebar .resume-skill{font-size:10px;}
+.rs-template-executive-modern .rs-main{padding:25px 39px 37px 24px;}
+.rs-template-executive-modern .rs-main .resume-section > h2{font-size:11px;letter-spacing:.2em;border-color:#b6b6b6;}
+.rs-template-executive-modern .rs-main .resume-entry h3{font-size:11.8px;}
+
+/* 05 — SOPHIA EVANS: ATS-forward monochrome with double contact rule. */
+.rs-document.rs-template-ats-essential{font-family:'Times New Roman',Times,serif;padding:var(--resume-pad-top) var(--resume-pad-horizontal) var(--resume-pad-bottom);}
+.rs-template-ats-essential .resume-header{text-align:center;margin-bottom:31px;}
+.rs-template-ats-essential .resume-header h1{font-size:49px;font-weight:400;text-transform:uppercase;letter-spacing:.075em;}
+.rs-template-ats-essential .resume-role{font-size:17px;letter-spacing:.14em;margin:9px 0 18px;}
+.rs-template-ats-essential .resume-contacts{border-top:3px double #444;border-bottom:3px double #444;padding:7px 0;text-align:center;}
+.rs-template-ats-essential .resume-contacts p{font-size:11px;}
+.rs-template-ats-essential .resume-section > h2{font-size:13px;letter-spacing:.08em;border-bottom:1.2px solid #3e3e3e;padding-bottom:4px;}
+.rs-template-ats-essential .resume-section{margin-bottom:22px;}
+.rs-template-ats-essential .resume-entry h3{font-size:12px;}
+.rs-template-ats-essential .resume-entry-top{display:block;}
+.rs-template-ats-essential .resume-date{display:inline;color:#555;font-size:10px;}
+.rs-template-ats-essential .resume-subheading{display:inline;font-size:10.5px;}
+.rs-template-ats-essential .resume-paragraph{font-size:11.5px;line-height:1.44;}
+.rs-template-ats-essential .resume-bullets li{font-size:11.5px;line-height:1.38;}
+.rs-template-ats-essential .resume-skill strong{display:inline;margin-right:6px;}
+
+@media print{
+ @page{size:A4;margin:0;}
+ html,body,#app{margin:0!important;padding:0!important;background:#fff!important;}
+ .rs-document{width:210mm;min-height:297mm;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
 }
-
-/* A thumbnail is a small, inert document preview. Restrict its rendering
-   width without disturbing real A4 metrics or the live editor. */
-.rs-template-thumbnail {
- position:relative;
- display:flex;
- justify-content:center;
- height:205px;
- overflow:hidden;
- border:1px solid #d5dadd;
- border-radius:6px;
- background:#e9eaeb;
- padding-top:10px;
-}
-.rs-template-thumbnail-paper {
- width:190px;
- height:269px;
- flex:none;
- position:relative;
-}
-.rs-template-thumbnail-paper .rs-document {
- transform:scale(.2392947);
- transform-origin:top left;
- box-shadow:0 3px 20px #0002;
- pointer-events:none;
-}
-
-/* Shared design tokens keep the live HTML proof aligned with PDF settings. */
-.rs-document { color:var(--resume-ink,#171717)!important; }
-.rs-document .resume-header h1 { font-size:var(--resume-name-size,30px); }
-.rs-document .resume-section { margin-bottom:var(--resume-section-space,16px); }
-
-/* Convert PDF point-based page metrics into CSS pixels (96/72). */
-.rs-document {padding:var(--resume-pad-top,56px) var(--resume-pad-horizontal,63px) var(--resume-pad-bottom,57px)!important;}
+/* Thumbnail is an inert scaled A4 page, not a separate mockup. */
+.rs-template-thumbnail{position:relative;display:flex;justify-content:center;height:215px;overflow:hidden;border:1px solid #d5dadd;border-radius:6px;background:#e9eaeb;padding-top:9px;}
+.rs-template-thumbnail-paper{width:190px;height:269px;flex:none;position:relative;}
+.rs-template-thumbnail-paper .rs-document{transform:scale(.2392947);transform-origin:top left;box-shadow:0 3px 20px #0002;pointer-events:none;}
