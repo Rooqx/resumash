@@ -47,3 +47,14 @@ for(const template of resumeTemplates){
   expect(blob.size).toBeGreaterThan(2500)
  },30000)
 }
+
+test('Executive Prestige exports an actual embedded PNG portrait',async()=>{
+ const sample=sampleForTemplate('executive')
+ // Small generated sample pixel, not user data or an external URL.
+ const photo='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGPs6e1jYGBgYmBgYGBgAAAT/AGr6auGtgAAAABJRU5ErkJggg=='
+ const snapshot={...sample,inputValue:{...sample.inputValue,profilePhotoDataUrl:photo}}
+ const doc=createElement(ResumePdfDocument,{snapshot,template:'executive'}) as ReactElement<DocumentProps>
+ const blob=await pdf(doc).toBlob()
+ expect(new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())).toBe('%PDF-')
+ expect(blob.size).toBeGreaterThan(1000)
+},30000)
