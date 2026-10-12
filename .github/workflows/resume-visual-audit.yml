@@ -80,5 +80,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: five-resume-visual-and-pdf-previews
-          path: |\n            /tmp/resume-audit/*.png\n            /tmp/resume-audit/*.pdf
+          path: |
+            /tmp/resume-audit/*.png
+            /tmp/resume-audit/*.pdf
           retention-days: 14
