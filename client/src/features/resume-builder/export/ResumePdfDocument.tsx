@@ -47,8 +47,8 @@ function Entry({title,subtitle,date,description,bullets=[],template,sidebar=fals
  const serif=template==='classic'||template==='ats-essential'
  return <View style={[styles.entry,{marginBottom:sidebar?8:10}]} wrap={false}>
   {!!title&&<Text style={[styles.entryTitle,serif?{fontFamily:'Times-Bold'}:{},sidebar?{fontSize:8.5}:{}]}>{title}</Text>}
-  {!!subtitle&&<Text style={[styles.subheading,sidebar?{fontSize:7.8}:{}]}>{subtitle}</Text>}
-  {!!date&&<Text style={[styles.date,sidebar?{fontSize:7.5}:{}]}>{date}</Text>}
+  {!!subtitle&&<Text style={[styles.subheading,sidebar?{fontSize:7.8}:{},sidebar&&template==='executive'?{color:'#e0dfdc'}:{}]}>{subtitle}</Text>}
+  {!!date&&<Text style={[styles.date,sidebar?{fontSize:7.5}:{},sidebar&&template==='executive'?{color:'#d4d4d1'}:{}]}>{date}</Text>}
   {!!description&&<Text style={[styles.body,sidebar?{fontSize:8}:{}]}>{description}</Text>}
   {bullets.filter(Boolean).map((bullet,i)=><Text key={i} style={[styles.bullet,sidebar?{fontSize:7.8}:{}]}>• {bullet}</Text>)}
  </View>
