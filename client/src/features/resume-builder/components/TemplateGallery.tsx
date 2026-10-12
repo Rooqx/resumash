@@ -27,6 +27,9 @@ interface Props {
  */
 export default function TemplateGallery({ selected, onSelect }: Props) {
   const [open, setOpen] = useState<ResumeTemplateId|null>(null)
+  const [portraitError,setPortraitError]=useState('')
+  const setInputValue=useInputStore(s=>s.setInputValue)
+  const savedPortrait=useInputStore(s=>s.inputValue.profilePhotoDataUrl)
   const role = useInputStore(s=>s.inputValue.label??'')
   const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
   const earlyCareerEvidence = useFieldStores(s=>(s.fields.education?.length??0)+(s.fields.projects?.length??0))
