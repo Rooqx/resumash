@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import { AppError } from "../../middlewares/error.middleware";
+import { logger } from "../../utils/logger";
+import { estimateAiCost, getRequestContext, safeProviderError } from "../../utils/observability";
 
 /** Maximum number of simultaneous model requests on each API instance. */
 const MAX_CONCURRENT_GENERATIONS = 6;
@@ -59,6 +61,9 @@ export async function generateJson<T extends z.ZodTypeAny>(
     throw new AppError("AI service is busy. Please retry shortly.", 503);
   }
   activeGenerations++;
+  const started = performance.now();
+  const trace = getRequestContext();
+  logger.info("ai.request.started", { event:"ai.request.started", requestId:trace?.requestId, provider:"atria", model, activeGenerations });
   let response: string | undefined | null;
   try {
     const completion = await client.chat.completions.create({
@@ -70,22 +75,40 @@ export async function generateJson<T extends z.ZodTypeAny>(
       ],
     });
     response = completion.choices[0]?.message?.content;
-  } catch {
+    const usage = completion.usage;
+    logger.info("ai.request.completed", {
+      event:"ai.request.completed", requestId:trace?.requestId,
+      provider:"atria", model, durationMs:Math.round(performance.now()-started),
+      promptTokens:usage?.prompt_tokens ?? null,
+      completionTokens:usage?.completion_tokens ?? null,
+      totalTokens:usage?.total_tokens ?? null,
+      estimatedCostUsd:estimateAiCost(usage?.prompt_tokens, usage?.completion_tokens),
+      finishReason:completion.choices[0]?.finish_reason ?? null,
+    });
+  } catch (error) {
+    logger.error("ai.request.failed", {
+      event:"ai.request.failed", requestId:trace?.requestId, provider:"atria",
+      model, durationMs:Math.round(performance.now()-started),
+      ...safeProviderError(error),
+    });
     throw new AppError("AI service is temporarily unavailable", 502);
   } finally {
     activeGenerations--;
   }
   if (!response || response.length > 100_000) {
+    logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"empty_or_oversized" });
     throw new AppError("AI generated an empty or oversized response", 502);
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(response);
   } catch {
+    logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"json_parse" });
     throw new AppError("AI response was not valid JSON", 502);
   }
   const validated = schema.safeParse(parsed);
   if (!validated.success) {
+    logger.warn("ai.response.invalid", { event:"ai.response.invalid", requestId:trace?.requestId, reason:"schema_validation", issueCount:validated.error.issues.length });
     throw new AppError("AI response did not match its expected structure", 502);
   }
   return validated.data;
