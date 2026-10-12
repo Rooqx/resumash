@@ -10,9 +10,9 @@ rendered in the browser with the existing React PDF dependency.
 | --- | --- |
 | `PORT` | HTTP listen port |
 | `NODE_ENV` | `development` / `production` |
-| `LLM_API_KEY` | Fireworks API credential (the legacy variable name is retained) |
+| `LLM_API_KEY` | Atria API key |
 | `LLM_URL` | Atria API URL, either `https://api.atria-asi.ai/v1` or the full `/v1/chat/completions` endpoint |
-| `MODEL` | Fireworks model identifier; for example `Atria-Dawn-Preview`; return valid JSON per prompt |
+| `MODEL` | Atria model identifier; for example `Atria-Dawn-Preview`; return valid JSON per prompt |
 | `REDIS_URI` | Required shared Redis/Valkey URL for atomic AI quotas |
 | `FRONTEND_DEVELOPMENT_URL` | Allowed development web origin |
 | `FRONTEND_PRODUCTION_URL` | Allowed production web origin |
@@ -132,3 +132,48 @@ branch and pull requests. No new automated test suite was added per scope.
 - Candidate review is mandatory; numerical checking and source quotes do not
   establish the truthfulness of every generated claim.
 - Frontend PDF pagination/text extraction must be visually checked on longer resumes.
+
+## Production observability
+
+Server logs are **single-line JSON** on stdout/stderr, suitable for Render
+Logs, CloudWatch, Datadog or another configured log sink. No server-side log
+files or publicly accessible log endpoint are created.
+
+- `http.request.started`: server-generated request ID, HTTP method, path
+- `http.request.completed`: request ID, HTTP status and latency in milliseconds
+- `http.request.error`: request ID, error class and HTTP status
+- `ai.request.started`: request ID, model, provider and in-flight AI calls
+- `ai.request.failed`: provider HTTP status, normalized category (authentication,
+  rate_limit, billing, timeout, connection, provider_failure), optional error
+  code and upstream request ID; never the provider's raw error/body
+- `ai.request.completed`: model, latency, input/output/total tokens and
+  optional estimated USD cost (not billed cost)
+- `ai.response.invalid`: empty output, JSON parse or schema validation failure,
+  plus issue count only; no generated text
+
+The API includes `X-Request-ID` in responses. Search your provider's logs for
+that ID to find the related HTTP and AI events. On failed requests, look for
+`ai.request.failed` to see the actual upstream **status/category**. If the
+provider returns a successful HTTP response but invalid JSON, inspect
+`ai.response.invalid`.
+
+### Optional token cost estimates
+
+Set both values (USD **per million** tokens):
+
+```dotenv
+LLM_INPUT_USD_PER_MILLION=YOUR_VERIFIED_INPUT_RATE
+LLM_OUTPUT_USD_PER_MILLION=YOUR_VERIFIED_OUTPUT_RATE
+LOG_LEVEL=info
+```
+
+Do not guess the prices; retrieve the current rates for your specific
+Atria model from your account. `estimatedCostUsd` stays `null` unless both
+rates and token counts are present. Retry calls, discounts, minimum charges,
+cache rates and provider-specific billing can make the true bill different.
+
+Logs deliberately exclude IP addresses, user identity, query strings,
+request/response bodies, resumes, prompts, provider error messages, cookies,
+authorization headers and API credentials. Without authentication Resumash
+does **not** know which individual user made a request; request IDs show
+per-request activity, not a personal activity history.
