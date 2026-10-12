@@ -21,3 +21,29 @@ for (const template of resumeTemplates) {
   expect(blob.size).toBeGreaterThan(1000)
  }, 30000)
 }
+
+/** Overflow-proofing: many jobs and long bullets must not throw, rasterize,
+ * or truncate the PDF generation path for any of the five layout engines. */
+for(const template of resumeTemplates){
+ test(`long multi-entry resume renders for ${template.name}`,async()=>{
+  const sample=sampleForTemplate(template.id)
+  const jobs=sample.fields.experience??[]
+  const longSnapshot={
+   ...sample,
+   fields:{...sample.fields,experience:Array.from({length:9},(_,i)=>({
+    ...jobs[i%jobs.length],jobStartDate:String(2015+i),jobEndDate:String(2016+i),
+    jobSummary:'Coordinated project delivery, documented decisions, and maintained accurate cross-functional handoff records.'
+   }))},
+   tagFields:{...sample.tagFields,...Object.fromEntries(Array.from({length:9},(_,i)=>[
+    `jobHighlights-${i}`,{tags:[
+      'Maintained reliable task and project records across multiple stakeholders.',
+      'Documented changes, delivered updates, and tracked follow-up actions through completion.',
+    ]},
+   ]))},
+  }
+  const doc=createElement(ResumePdfDocument,{snapshot:longSnapshot,template:template.id}) as ReactElement<DocumentProps>
+  const blob=await pdf(doc).toBlob()
+  expect(new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())).toBe('%PDF-')
+  expect(blob.size).toBeGreaterThan(2500)
+ },30000)
+}
