@@ -11,7 +11,7 @@ import { generateCoverLetter } from '@/features/cover-letter/services/generateCo
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
-import { restoreTailorDraft } from '@/lib/persistence/resumeDrafts'
+import { restoreTailorDraft, restoreBuilderView } from '@/lib/persistence/resumeDrafts'
 import { applyApprovedChanges } from '@/features/resume-tailor/reviewChanges'
 
 export const Route = createFileRoute('/cover-letter/')({ component: CoverLetterPage })
@@ -21,16 +21,18 @@ const draftSchema = z.object({
   description: z.string(), experience: z.string(),
   tone: z.enum(['Professional', 'Conversational', 'Enthusiastic', 'Concise']),
   letter: z.string(),
+  layout: z.enum(['ats', 'modern']).default('ats'),
 })
 type Draft = z.infer<typeof draftSchema>
 const empty: Draft = {
   name: '', role: '', company: '', description: '',
-  experience: '', tone: 'Professional', letter: '',
+  experience: '', tone: 'Professional', letter: '', layout: 'ats',
 }
 function restore(): Draft {
   try {
     const raw = localStorage.getItem(DRAFT_KEY)
-    return raw ? draftSchema.parse(JSON.parse(raw)) : empty
+    const template = restoreBuilderView()?.template
+    return raw ? draftSchema.parse(JSON.parse(raw)) : {...empty, layout:template && !['ats-essential','classic'].includes(template) ? 'modern' : 'ats'}
   } catch { return empty }
 }
 
@@ -142,7 +144,7 @@ function CoverLetterPage() {
     } finally { setExporting(false) }
   }
 
-  const preview = <div className="rs-letter-page mx-auto min-h-[650px] max-w-[680px] bg-white px-6 py-9 text-neutral-900 shadow-md sm:px-12 sm:py-14">
+  const preview = <div className={`rs-letter-page mx-auto min-h-[650px] max-w-[680px] bg-white px-6 py-9 text-neutral-900 shadow-md sm:px-12 sm:py-14 ${data.layout==='modern'?'border-l-4 border-neutral-700':''}`}>
     <div className="border-b border-neutral-300 pb-5">
       <h2 className="text-2xl font-bold">{data.name || 'Your Name'}</h2>
       <p className="mt-2 text-sm text-neutral-600">{[data.role, data.company].filter(Boolean).join(' · ')}</p>
@@ -175,6 +177,7 @@ function CoverLetterPage() {
           <label className="block text-sm">Company *<input required className="rs-form-input" value={data.company} onChange={e=>update('company',e.target.value)} placeholder="Employer name"/></label>
           <label className="block text-sm">Job description *<textarea required minLength={20} rows={5} className="rs-form-input resize-y" value={data.description} onChange={e=>update('description',e.target.value)} placeholder="Paste the job listing…"/></label>
           <label className="block text-sm">Your real experience *<textarea required minLength={20} rows={5} className="rs-form-input resize-y" value={data.experience} onChange={e=>update('experience',e.target.value)} placeholder="Your experience and real achievements. Or use your saved resume."/></label>
+          <fieldset><legend className="mb-2 text-sm font-semibold">Letter style</legend><div className="flex flex-wrap gap-2">{(['ats','modern'] as const).map(style=><button type="button" key={style} aria-pressed={data.layout===style} onClick={()=>update('layout',style)} className={`rs-button !min-h-10 !px-4 text-xs ${data.layout===style?'rs-button-primary':'rs-button-outline'}`}>{style==='ats'?'ATS / Classic':'Modern'}</button>)}</div></fieldset>
           <fieldset><legend className="mb-2 text-sm font-semibold">Writing tone</legend><div className="grid grid-cols-2 gap-2">
             {(['Professional','Conversational','Enthusiastic','Concise'] as const).map(tone => <button type="button" key={tone} aria-pressed={data.tone===tone} onClick={()=>update('tone',tone)} className={`rs-button !min-h-10 !px-2 text-xs ${data.tone===tone?'rs-button-primary':'rs-button-outline'}`}>{tone}</button>)}
           </div></fieldset>
