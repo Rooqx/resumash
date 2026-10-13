@@ -9,11 +9,13 @@ const MAX_RESUME_BYTES = 10 * 1024 * 1024;
  * publicly exposed static directory or retained on disk by Multer.
  * One in-flight request uses at most 10 MiB for the uploaded PDF.
  * Tailoring sends jobDescription, optimizationMode and one resume PDF.
+ * Limiting fields and files separately is sufficient; a separate parts limit
+ * can reject an otherwise valid multipart message at the exact boundary.
  */
 export default function uploadMiddleware(): RequestHandler {
   return multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: MAX_RESUME_BYTES, files: 1, fields: 2, parts: 3 },
+    limits: { fileSize: MAX_RESUME_BYTES, files: 1, fields: 2 },
     fileFilter: (_request, file, callback) => {
       if (file.mimetype !== "application/pdf" || !file.originalname.toLowerCase().endsWith(".pdf")) {
         callback(new AppError("Only PDF resumes are currently supported", 415));
