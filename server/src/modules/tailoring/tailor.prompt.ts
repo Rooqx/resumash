@@ -67,7 +67,7 @@ quote the candidate resume verbatim.
 "missingRequirements": concise descriptions of absent requirements.
 "clarificationQuestions": up to 8 targeted questions:
  { "requirementId":string, "question":string, "reason":string }
-"writingNotes": a short array of honest, actionable observations.
+"writingNotes": 0-4 concise, nonduplicate, actionable observations (absolute maximum 8). Do not repeat requirements or explain your process.
 
 Only insert naturally supported keywords; no forced quotas or duplicated lists.
 Prioritize evidence, short readable bullets, appropriate career-level language,
@@ -166,7 +166,7 @@ or related evidence; otherwise empty. Never claim job listing as source.
 "missingRequirements": up to 15 genuinely absent skills/qualifications.
 "clarificationQuestions": up to 8 objects:
  { "requirementId":string,"question":string,"reason":string }.
-"writingNotes": up to 8 concise evidence or information-preservation notes.
+"writingNotes": ideally 0-4 concise, nonduplicate evidence or preservation notes (absolute maximum 8). Do not repeat requirements or add commentary about your process.
 If data is ambiguous or unsupported, flag it instead of creating a fact.
 
 SCHEMA RULES

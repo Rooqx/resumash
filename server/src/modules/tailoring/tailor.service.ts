@@ -4,6 +4,7 @@ import { parseResumePdf } from "../resume/parse-pdf";
 import { TAILOR_INSTRUCTIONS, TAILOR_FULL_INSTRUCTIONS } from "./tailor.prompt";
 import type { OptimizationMode } from "./optimization-mode";
 import { tailoringResultSchema } from "./tailor.schema";
+import { mergeTailoringWritingNotes } from "./writing-notes";
 import { validatedReviewSuggestions } from "./review-target";
 import { assertBaselineProseSupported } from "./baseline-evidence";
 import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
@@ -74,7 +75,9 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
     clarificationQuestions: generated.clarificationQuestions.filter(
       item => !item.requirementId || requirementIds.has(item.requirementId)
     ),
-    writingNotes: [...new Set([...generated.writingNotes, ...auditResumeWriting(resumeProse(generated.resume))])],
+    writingNotes: mergeTailoringWritingNotes(
+      generated.writingNotes, auditResumeWriting(resumeProse(generated.resume)),
+    ),
     requiresReview: true,
   };
 }

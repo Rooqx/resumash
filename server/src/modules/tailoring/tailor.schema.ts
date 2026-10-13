@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { resumeOutputSchema } from "../resume/resume.schema";
+import { MAX_TAILORING_WRITING_NOTES, capValidWritingNotes } from "./writing-notes";
 
 export const tailoringResultSchema = z.object({
   resume: resumeOutputSchema,
@@ -34,5 +35,10 @@ export const tailoringResultSchema = z.object({
     question: z.string().min(12).max(350),
     reason: z.string().min(5).max(250),
   })).max(8).default([]),
-  writingNotes: z.array(z.string().max(250)).max(8).default([]),
+  // Model-generated notes are optional guidance, not resume evidence.
+  // Trim only a surplus of structurally valid notes; invalid content still fails.
+  writingNotes: z.preprocess(
+    capValidWritingNotes,
+    z.array(z.string().max(250)).max(MAX_TAILORING_WRITING_NOTES).default([]),
+  ),
 }).strict();
