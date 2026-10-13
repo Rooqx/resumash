@@ -37,7 +37,7 @@ export default function Experience() {
         )}
       </span>
       {fields['experience']?.map((field: any, i: number) => (
-        <details key={field.id ?? i} name="resumash-experience" defaultOpen={openNewId ? openNewId === field.id : i === 0} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
+        <details key={field.id ?? i} defaultOpen={openNewId ? openNewId === field.id : i === 0} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-4 text-sm font-semibold"><span>{field.jobPosition || field.companyName || 'Untitled experience'}</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180"/></summary>
           <div className="space-y-4 p-4 pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
