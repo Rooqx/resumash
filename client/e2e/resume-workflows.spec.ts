@@ -57,3 +57,40 @@ test('tailoring restores original uploaded PDF and clears it on request',async (
  await expect(page.getByText('Choose your resume')).toBeVisible()
  await expect(description).toHaveValue('')
 })
+
+test('anonymous tailoring survives refresh and fetches a completed resume with its token',async({page})=>{
+ let submissionId=''
+ let secret=''
+ let statusChecks=0
+ let finished=false
+ await page.route('**/api/v1/resumes/tailor',async route=>{
+  const request=route.request()
+  submissionId=request.headers()['x-resume-job-id']??''
+  secret=request.headers()['x-resume-job-token']??''
+  expect(submissionId).toMatch(/^[0-9a-f-]{36}$/)
+  expect(secret).toMatch(/^[0-9a-f]{64}$/)
+  await route.fulfill({status:202,contentType:'application/json',body:JSON.stringify({jobId:submissionId,status:'queued'})})
+ })
+ await page.route('**/api/v1/resumes/tailor/*',async route=>{
+  const request=route.request()
+  expect(request.url()).toContain(submissionId)
+  expect(request.headers()['x-resume-job-token']).toBe(secret)
+  statusChecks++
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(
+   finished?{jobId:submissionId,status:'completed',result:{inputValue:{fullName:'Synthetic Candidate'},fields:{},suggestions:[],requirements:[],missingRequirements:[],clarificationQuestions:[],writingNotes:[],requiresReview:true}}:{jobId:submissionId,status:'queued'}
+  )})
+ })
+ await page.goto('/tailor-resume/')
+ await page.getByRole('textbox',{name:'Job description'}).fill('A customer support role that requires handling incoming requests and documenting issues.')
+ await page.locator('input[type="file"]').setInputFiles({
+  name:'synthetic.pdf',mimeType:'application/pdf',
+  buffer:Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF'),
+ })
+ await page.getByRole('button',{name:'Tailor my resume'}).click()
+ await expect.poll(()=>statusChecks).toBeGreaterThan(0)
+ expect(submissionId).toBeTruthy()
+ finished=true
+ await page.reload()
+ await expect(page.getByText('Evidence-backed review')).toBeVisible({timeout:15000})
+ await expect(page.getByRole('textbox',{name:'Job description'})).toHaveValue(/customer support role/)
+})
