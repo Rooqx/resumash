@@ -5,14 +5,33 @@ import {
   uploadResume,
 } from "../controllers/resuem.controller";
 import uploadMiddleware from "../middlewares/uploads.middleware";
+import { submitTailoringJob, tailoringJobStatus } from "../controllers/tailor-job.controller";
+import { getAuthorizedJob, validateCredentials } from "../modules/tailoring/tailor-job-store";
 import { tailorRateLimit, aiRateLimit } from "../middlewares/tailor-rate-limit";
 import { questionnaireSchema } from "../modules/resume/ai-builder.schema";
 import { buildResumeFromQuestionnaire } from "../modules/resume/ai-builder.service";
 import { logger } from "../utils/logger";
-import { AppError } from "../middlewares/error.middleware";
+import { AppError, asyncHandler } from "../middlewares/error.middleware";
 const resumeRouter = Router();
 
 const upload = uploadMiddleware();
+// Check for a previously accepted idempotency key before charging quota again.
+// Replay never starts another model request, including after the first response was lost.
+resumeRouter.post("/tailor", asyncHandler(async (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  const id = req.header("X-Resume-Job-Id");
+  const token = req.header("X-Resume-Job-Token");
+  validateCredentials(id, token);
+  const existing = await getAuthorizedJob(id, token!);
+  if (existing) {
+    res.status(202).json({ jobId: id, status: existing.status });
+    return;
+  }
+  next();
+}), tailorRateLimit, upload, submitTailoringJob);
+resumeRouter.get("/tailor/:jobId", tailoringJobStatus);
+
+// Keep the original synchronous route for existing integrations.
 resumeRouter.post("/upload", tailorRateLimit, upload, uploadResume);
 
 /** Generate an editable, review-required resume draft from a short questionnaire. */

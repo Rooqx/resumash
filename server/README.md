@@ -189,3 +189,59 @@ alter evidence claims, missing data, or incompatible types. Backend numeric,
 source-entity, baseline-prose and citation checks still run after validation.
 Provider identity is configured with `LLM_PROVIDER`; model, endpoint, and
 credentials remain separately configurable.
+
+## Durable, account-free tailoring jobs
+
+For the browser workflow use `POST /api/v1/resumes/tailor` (multipart PDF and
+job description). The browser generates a random UUID and a cryptographically
+random 32-byte hex recovery token **before** sending the upload, and persists
+both in IndexedDB. Send them in `X-Resume-Job-Id` and
+`X-Resume-Job-Token` headers. The API responds quickly with HTTP 202:
+`{ "jobId": "...", "status": "queued" }`.
+
+Poll `GET /api/v1/resumes/tailor/:jobId` with the token in the same
+`X-Resume-Job-Token` header. The response has a `status` of `queued`,
+`processing`, `completed` (with `result`), or `failed` (with a safe
+`error` message). The result retains the same evidence/approval checks
+as synchronous tailoring. Never place the token in a query string.
+
+Both job capability and result expire 24 hours after submission. PDF bytes
+remain in the upload request only: parsed resume text and job description are
+queued in Redis and removed from BullMQ immediately after success or failure.
+Use an encrypted-at-rest Redis instance with TLS; disable persistence or
+configure retention appropriately for sensitive data. Redis must have enough
+memory for queued text, metadata and completed results. The queue is not a
+long-term resume store.
+
+### Deployment
+
+Run **two services** against the same Redis/Valkey URL:
+
+- HTTP API: `bun run build && bun run start`
+- Independent worker: `bun run build && bun run start:worker`
+
+The worker must always be running or jobs will remain queued. Its concurrency
+is 2; an instance's provider concurrency limit remains 6. Workers use a
+single generation attempt to avoid unintentional duplicate AI charges after
+an ambiguous provider failure. Jobs interrupted by a worker crash are
+reported as failed instead of staying pending indefinitely. Monitor queue
+wait times and result memory usage, and configure Redis durability/failover
+for your SLA.
+
+The legacy `POST /upload` route remains synchronous for compatibility, but
+the website uses `POST /tailor` exclusively. Polling does not consume the
+per-IP AI submission allowance. An idempotent POST replay of an already
+registered job also bypasses the quota and does not start a second AI call.
+A *new* job counts toward the existing allowance (10/IP/5 hours).
+
+### Local smoke test
+
+1. Start Redis, API and worker processes.
+2. Submit a valid resume and job description; expect `202` quickly.
+3. Poll with the token; expect queued/processing, then completed with the
+   review-required resume. Try an incorrect token (must be denied).
+4. Retry the exact same POST credentials; confirm no second model invocation.
+5. Refresh the browser while processing and verify recovery from IndexedDB.
+6. Kill a worker during generation; verify that job transitions to failed,
+   rather than creating an automatic duplicate paid request.
+7. Run the backend and frontend CI checks before deploying.

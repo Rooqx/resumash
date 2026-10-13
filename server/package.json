@@ -23,7 +23,9 @@
     "playwright": "^1.56.1",
     "redis": "^5.8.2",
     "winston": "^3.18.3",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "bullmq": "^5.58.0",
+    "ioredis": "^5.4.2"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -44,6 +46,8 @@
     "start": "node dist/app.js",
     "typecheck": "tsc --noEmit",
     "eval:ai": "bun run src/modules/resume/ai-builder.eval.ts",
-    "eval:tailor": "bun run src/modules/tailoring/tailor.eval.ts"
+    "eval:tailor": "bun run src/modules/tailoring/tailor.eval.ts",
+    "start:worker": "node dist/workers/tailor.worker.js",
+    "dev:worker": "bun --watch run src/workers/tailor.worker.ts"
   }
 }
