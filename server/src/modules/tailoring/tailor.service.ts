@@ -10,6 +10,8 @@ import { assertBaselineProseSupported } from "./baseline-evidence";
 import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
 import { assertSourceEntitiesPreserved } from "../../shared/ai/source-entities";
 import { auditResumeWriting, resumeProse } from "../../shared/ai/writing-quality";
+import { logger } from "../../utils/logger";
+import { omitUnverifiedSkills, skillClearlyInSource } from "./skill-evidence";
 
 /**
  * Verify a cited quote exists in the original candidate document.
@@ -30,8 +32,12 @@ export async function tailorResume(file: Buffer, jobDescription: string, optimiz
   return tailorResumeFromText(sourceText, jobDescription, optimizationMode);
 }
 
+type TailorCheckStage =
+  | "resume_numbers" | "suggestion_numbers" | "source_entities"
+  | "baseline_prose" | "skill_evidence" | "requirement_ids";
+
 /** Runs in a background worker on already extracted PDF text. */
-export async function tailorResumeFromText(sourceText: string, jobDescription: string, optimizationMode: OptimizationMode = "full") {
+export async function tailorResumeFromText(sourceText: string, jobDescription: string, optimizationMode: OptimizationMode = "full", jobId?: string) {
   const generated = await generateJson(
     optimizationMode === "full" ? TAILOR_FULL_INSTRUCTIONS : TAILOR_INSTRUCTIONS,
     { candidateResume: sourceText, jobDescription },
@@ -41,17 +47,46 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
     { timeoutMs: 300_000, maxRetries: 0 },
   );
 
-  assertNumericalClaimsSupported(sourceText, resumeProse(generated.resume));
-  // The proposed change is never applied server-side; validate its numeric claims too.
-  assertNumericalClaimsSupported(sourceText, generated.suggestions.map(item => item.proposed));
-  assertSourceEntitiesPreserved(sourceText, generated.resume.fields);
-  if (optimizationMode === "conservative") assertBaselineProseSupported(sourceText, generated.resume);
-  else assertTailoredSkillTagsSupported(sourceText, generated.resume);
-  // Each review suggestion must refer to a distinct, real job requirement.
-  const requirementIds = new Set(generated.requirements.map(item => item.id));
-  if (requirementIds.size !== generated.requirements.length) {
-    throw new AppError("AI returned duplicate requirement references", 502);
+  // Use fixed, privacy-safe stage identifiers: never emit source text or
+  // model-generated claims in server logs, even when a validator throws.
+  const check = (stage: TailorCheckStage, action: () => void) => {
+    try { action(); }
+    catch (error) {
+      logger.warn("tailor.validation.failed", {
+        event: "tailor.validation.failed", stage, jobId,
+        optimizationMode, errorType: error instanceof AppError ? "AppError" : "UnexpectedError",
+      });
+      throw error;
+    }
+  };
+
+  // Only skills are safely recoverable: omit skills not demonstrably present in
+  // candidate evidence, rather than failing an otherwise usable draft or
+  // presenting model-invented proficiency. Preserve factual validation below.
+  const sanitized = optimizationMode === "full"
+    ? omitUnverifiedSkills(sourceText, generated.resume)
+    : { resume: generated.resume, removedCount: 0 };
+  if (sanitized.removedCount) {
+    logger.info("tailor.skills.omitted", {
+      event: "tailor.skills.omitted", jobId, count: sanitized.removedCount,
+      // Never record generated skill names or candidate evidence.
+    });
   }
+  const validatedResume = sanitized.resume;
+
+  check("resume_numbers", () => assertNumericalClaimsSupported(sourceText, resumeProse(validatedResume)));
+  check("suggestion_numbers", () => assertNumericalClaimsSupported(sourceText, generated.suggestions.map(item => item.proposed)));
+  check("source_entities", () => assertSourceEntitiesPreserved(sourceText, validatedResume.fields));
+  if (optimizationMode === "conservative")
+    check("baseline_prose", () => assertBaselineProseSupported(sourceText, validatedResume));
+  else
+    check("skill_evidence", () => assertTailoredSkillTagsSupported(sourceText, validatedResume));
+  const requirementIds = new Set(generated.requirements.map(item => item.id));
+  check("requirement_ids", () => {
+    if (requirementIds.size !== generated.requirements.length) {
+      throw new AppError("AI returned duplicate requirement references", 502);
+    }
+  });
   // Never show a fabricated evidence quote as though it came from the PDF.
   // A related or ambiguous claim stays review-required rather than verified.
   const verifiedSuggestions = validatedReviewSuggestions(generated, sourceText)
@@ -67,7 +102,7 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
     return requirement;
   });
   return {
-    ...generated.resume,
+    ...validatedResume,
     optimizationMode,
     suggestions: verifiedSuggestions.map(item => ({ ...item, requiresReview: true })),
     requirements: verifiedRequirements,
@@ -76,7 +111,13 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
       item => !item.requirementId || requirementIds.has(item.requirementId)
     ),
     writingNotes: mergeTailoringWritingNotes(
-      generated.writingNotes, auditResumeWriting(resumeProse(generated.resume)),
+      [
+        ...(sanitized.removedCount
+          ? ["Some AI-suggested skills were omitted because they were not supported by the uploaded resume; review your skills."]
+          : []),
+        ...generated.writingNotes,
+      ],
+      auditResumeWriting(resumeProse(validatedResume)),
     ),
     requiresReview: true,
   };
@@ -92,15 +133,12 @@ export function assertTailoredSkillTagsSupported(
   source: string,
   resume: { fields: Record<string, Array<Record<string, unknown>>>; tagFields?: Record<string, { tags: string[] }> },
 ): void {
-  const compact = (s: string) => s.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
-  const haystack = compact(source);
   const category = /^(languages|programming languages|frameworks|libraries|frontend|backend|web development|databases|data & storage|cloud & infrastructure|cloud|devops|infrastructure|tools|testing|testing & quality|data engineering|data & analytics|apis & integrations|other skills|technical skills)$/i;
   for (const [index, entry] of (resume.fields.skills ?? []).entries()) {
     const name = typeof entry.skillName === "string" ? entry.skillName.trim() : "";
     const tags = resume.tagFields?.[`skills-${index}`]?.tags ?? [];
     for (const skill of [...tags, ...(tags.length === 0 && name && !category.test(name) ? [name] : [])]) {
-      const needle = compact(skill);
-      if (needle.length >= 3 && !haystack.includes(needle)) {
+      if (!skillClearlyInSource(source, skill)) {
         throw new AppError("AI returned a skill not clearly supported by the uploaded resume", 502);
       }
     }

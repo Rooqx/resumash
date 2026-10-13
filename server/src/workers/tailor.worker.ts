@@ -24,7 +24,7 @@ const worker = new Worker<Record<string, never>>(
     }
     if (!await updateJob(job.id!, "processing")) return;
     try {
-      const result = await tailorResumeFromText(input.sourceText, input.jobDescription, input.optimizationMode ?? "conservative");
+      const result = await tailorResumeFromText(input.sourceText, input.jobDescription, input.optimizationMode ?? "conservative", job.id);
       await completeJob(job.id!, result);
       logger.info("tailor.job.completed", { event: "tailor.job.completed", jobId: job.id });
     } catch (error) {
