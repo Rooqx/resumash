@@ -91,7 +91,8 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
         let stay = false
         toast.success('Your tailored resume is ready!', {
           duration: 7500,
-          action: { label: 'Stay here', onClick: () => { stay = true } },
+          action: { label: 'View resume', onClick: () => { stay = true; void navigate({ to: '/tailor-resume' }) } },
+          cancel: { label: 'Stay here', onClick: () => { stay = true } },
         })
         if (window.location.pathname !== '/tailor-resume') {
           window.setTimeout(() => {
