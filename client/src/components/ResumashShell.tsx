@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Menu, Moon, Sun, X } from 'lucide-react'
 import '../resumash.css'
-import { ToasterProvider } from '@/components/Toaster'
 
 const navigation = [
  { to: '/tailor-resume' as const, label: 'Tailor' },
@@ -32,7 +31,6 @@ export default function ResumashShell({children}:{children:React.ReactNode}) {
    {menu&&<nav className="rs-mobile-menu rs-container pb-5" aria-label="Mobile navigation"><div className="flex flex-col gap-5">{navigation.map(item=><Link key={item.to} to={item.to} className="rs-nav-link" onClick={()=>setMenu(false)}>{item.label}</Link>)}<Link to="/cover-letter" className="rs-nav-link" activeProps={{'data-status':'active'}} onClick={()=>setMenu(false)}>Cover letter</Link></div></nav>}
   </header>
   <main>{children}</main>
-  <ToasterProvider/>
   <footer className="rs-footer"><div className="rs-container flex min-h-24 flex-wrap items-center justify-between gap-3 py-5"><span className="text-sm font-semibold" style={{color:'var(--rs-ink)'}}>resumash.</span><span className="text-xs">Build. Tailor. Apply. No account required.</span></div></footer>
  </div>
 }
