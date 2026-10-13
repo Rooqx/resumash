@@ -18,15 +18,12 @@ suite("anonymous job lifecycle with real Redis", () => {
   const wrongToken = randomBytes(32).toString("hex");
 
   beforeAll(async () => {
-    worker = new Worker(TAILOR_QUEUE, async job => {
-      calls++;
-      await updateJob(job.id!, "processing");
-      await completeJob(job.id!, { inputValue: { fullName: "Example" }, fields: {}, requiresReview: true });
-    }, { connection: new IORedis(redisURL!, { maxRetriesPerRequest: null }), concurrency: 1 });
-    await worker.waitUntilReady();
+    // Inspect the queued input before starting a worker; otherwise a fast
+    // runner could finish the job before our assertions execute.
+    await jobQueue().waitUntilReady();
   });
   afterAll(async () => {
-    await worker.close();
+    if (worker) await worker.close();
     await jobQueue().close();
     await jobRedis().del(`resumash:tailor:job:${id}`, `resumash:tailor:result:${id}`, `resumash:tailor:input:${id}`);
     await jobRedis().quit();
@@ -37,6 +34,12 @@ suite("anonymous job lifecycle with real Redis", () => {
     expect((await readJobInput(id))?.sourceText).toBe("Synthetic resume");
     const queuedJob = await jobQueue().getJob(id);
     expect(JSON.stringify(queuedJob?.data)).not.toContain("Synthetic resume");
+    worker = new Worker(TAILOR_QUEUE, async job => {
+      calls++;
+      await updateJob(job.id!, "processing");
+      await completeJob(job.id!, { inputValue: { fullName: "Example" }, fields: {}, requiresReview: true });
+    }, { connection: new IORedis(redisURL!, { maxRetriesPerRequest: null }), concurrency: 1 });
+    await worker.waitUntilReady();
     await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
     await expect(getAuthorizedJob(id, wrongToken)).rejects.toMatchObject({ statusCode: 404 });
 
