@@ -7,7 +7,7 @@ interface InputProps {
   inputTittle?: string
   inputWidth?: string
   value?: string // optional controlled value
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void // controlled change handler
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void // controlled change handler
   inputBG?: string
   inputHeight?: string
   labelFor: string
@@ -45,7 +45,7 @@ export default function Textarea({
   const { inputValue, setInputValue } = useInputStore()
 
   // Handle input change and update store
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(labelFor, e.target.value)
   }
 
@@ -76,9 +76,9 @@ export default function Textarea({
             }
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
               if (onChange) {
-                onChange(e as any) // controlled case
+                onChange(e) // controlled case
               } else {
-                handleChange(e as any) // Zustand fallback
+                handleChange(e) // Zustand fallback
               }
             }}
             className={className ?? 'min-h-[140px] w-full resize-y rounded-lg border px-3 py-2.5 text-sm outline-offset-2'}
