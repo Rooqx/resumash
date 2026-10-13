@@ -26,7 +26,7 @@ export const submitTailoringJob = asyncHandler(async (req: Request, res: Respons
   const previous = await getAuthorizedJob(id, token!);
   if (!previous) {
     const sourceText = await parseResumePdf(file);
-    await enqueueTailoring(id, token!, sourceText, input.data.jobDescription);
+    await enqueueTailoring(id, token!, sourceText, input.data.jobDescription, input.data.optimizationMode);
   }
   res.status(202).json({ jobId: id, status: previous?.status ?? "queued" });
 });

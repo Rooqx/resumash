@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { optimizationModeSchema } from "../tailoring/optimization-mode";
 
 /** Constraints apply to the text extracted from untrusted uploads. */
 export const tailorInputSchema = z.object({
   jobDescription: z.string().trim().min(20).max(20_000),
+  optimizationMode: optimizationModeSchema,
 });
 
 export const resumeOutputSchema = z.object({

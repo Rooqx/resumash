@@ -89,3 +89,91 @@ Return JSON only, exactly these top-level keys:
 resume, suggestions, requirements, missingRequirements,
 clarificationQuestions, writingNotes.
 `;
+
+
+/**
+ * Default optimization: a job-targeted, review-required FULL resume.
+ * The conservative prompt above remains intact for explicit opt-out.
+ */
+export const TAILOR_FULL_INSTRUCTIONS = `
+${RESUME_WRITING_STANDARDS}
+TASK
+Write a COMPLETE, professionally optimized, ATS-readable resume FOR THE
+SPECIFIC JOB POSTING, not a verbatim transcription. User-provided candidateResume
+is the EXCLUSIVE evidence about the candidate. jobDescription defines what
+the employer wants; it NEVER proves a candidate has a skill or responsibility.
+Make source-supported, meaningful improvements directly inside the "resume"
+object. This includes summary, relevant experience descriptions, project
+descriptions, and all bullet points in tagFields.jobHighlights-{index}.tags.
+The user must still review the resulting draft before importing it.
+
+PRIORITIZATION AND PRESERVATION
+Read the full target listing: emphasize matching database, data ingestion, APIs,
+search, backend, infrastructure, AI-data or other role-specific experience
+ONLY where present in candidateResume. Rewrite supported bullets with concrete
+actions and verified results; selectively reorder and emphasize the most
+relevant original accomplishments rather than rewriting every sentence.
+Retain every real employer, role title, date, school, degree, credential,
+and contact/portfolio fact. Preserve coursework, GPA, awards, GitHub and
+portfolio information where clearly available in candidateResume.
+Never invent a past job title, employer, metric, educational accomplishment,
+certification, responsibility, tech stack, project or unsupported skill.
+Never upgrade exposure to a technology into mastery. Related experience may
+be described as transferable but not the same as direct experience.
+No unsupported Python, scraping, Redis, vector databases, data science,
+scientific datasets, leadership or any job-listing keyword.
+Job titles in work history must stay real. A headline must not misrepresent
+the candidate as having held the target role.
+Use concise ATS-recognized headings; no filler or fabricated outcomes.
+
+OUTPUT SHAPE
+"resume": {
+ "inputValue": { "fullName":"","label":"","email":"","phone":"",
+  "city":"","country":"","linkdlnUrl":"","githubUrl":"","portfolioUrl":"",
+  "summary":"" },
+ "fields": {
+  "experience":[{"companyName":"","jobPosition":"","jobStartDate":"",
+    "jobEndDate":"","jobSummary":""}],
+  "education":[{"institution":"","studyType":"","area":"",
+    "startDate":"","endDate":""}],
+  "skills":[{"skillName":"Languages"},{"skillName":"Data & Storage"}],
+  "projects":[{"name":"","description":"","url":""}],
+  "certificates":[], "awards":[]
+ },
+ "tagFields": {
+  "jobHighlights-0":{"tags":["Truthful optimized achievement"],"input":"","suggestions":[]},
+  "skills-0":{"tags":["Skill found in candidateResume"],"input":"","suggestions":[]}
+ }
+}
+Use actual rows, no fake placeholders. Experience bullet tags MUST exist for
+roles with original bullet points. Keep appropriate original metrics unchanged.
+Group skills into logical categories (ideally 3-6: languages, data/storage,
+backend/APIs, cloud/infrastructure, testing, etc.) rather than individual
+skill rows; all concrete skills MUST be supported by candidateResume.
+Tag indexes MUST match the corresponding experience/skills array indexes.
+Do not add a skill because jobDescription requests it.
+
+REVIEW METADATA
+"suggestions": [] because the FULLY optimized proposed resume is ALREADY in
+"resume" and must not require hidden individually accepted suggestions.
+"requirements": up to 25 objects:
+ { "id":string,"requirement":string,
+   "importance":"essential"|"preferred"|"contextual",
+   "evidence":"direct"|"related"|"ambiguous"|"missing",
+   "sourceQuote":string }
+Use sourceQuote as an EXACT verbatim excerpt from candidateResume for direct
+or related evidence; otherwise empty. Never claim job listing as source.
+"missingRequirements": up to 15 genuinely absent skills/qualifications.
+"clarificationQuestions": up to 8 objects:
+ { "requirementId":string,"question":string,"reason":string }.
+"writingNotes": up to 8 concise evidence or information-preservation notes.
+If data is ambiguous or unsupported, flag it instead of creating a fact.
+
+SCHEMA RULES
+Return JSON only with exactly all six keys:
+resume, suggestions, requirements, missingRequirements,
+clarificationQuestions, writingNotes.
+Empty arrays for absent sections, no nulls, no extra top-level keys.
+The document must be significantly role-relevant when the candidate provides
+matching evidence, and must never fabricate qualifications.
+`;

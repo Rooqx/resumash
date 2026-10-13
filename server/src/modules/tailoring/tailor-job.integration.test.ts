@@ -30,8 +30,9 @@ suite("anonymous job lifecycle with real Redis", () => {
   });
 
   it("queues once, securely retrieves the result and deduplicates an accepted replay", async () => {
-    await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
+    await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description", "conservative");
     expect((await readJobInput(id))?.sourceText).toBe("Synthetic resume");
+    expect((await readJobInput(id))?.optimizationMode).toBe("conservative");
     const queuedJob = await jobQueue().getJob(id);
     expect(JSON.stringify(queuedJob?.data)).not.toContain("Synthetic resume");
     worker = new Worker(TAILOR_QUEUE, async job => {
