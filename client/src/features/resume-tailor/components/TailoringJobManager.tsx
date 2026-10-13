@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { GripVertical, LoaderCircle, Minus, Maximize2, FileCheck2 } from 'lucide-react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { createTailorJobCredentials, getTailoringJob, submitTailoringJob } from '@/lib/serverActions/tailorResume'
 import { clearActiveTailorJob, restoreActiveTailorJob, restoreTailorDraft, saveActiveTailorJob, saveTailorDraft, type TailorJobCredentials } from '@/lib/persistence/resumeDrafts'
 import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
@@ -193,31 +194,22 @@ function TailoringProgress({ status, minimized, setMinimized }: {
 }) {
   const [position, setPosition] = useState<{ x: number, y: number } | null>(null)
   const drag = useRef<{ x: number, y: number, left: number, top: number } | null>(null)
-  const minimizeButton = useRef<HTMLButtonElement>(null)
-  useEffect(() => {
-    if (!minimized) minimizeButton.current?.focus()
-  }, [minimized])
-  useEffect(() => {
-    if (minimized) return
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMinimized(true)
-    }
-    window.addEventListener('keydown', escape)
-    return () => window.removeEventListener('keydown', escape)
-  }, [minimized, setMinimized])
   const message = status === 'processing' ? 'AI is reviewing and tailoring your resume.' : 'Your request is queued. We will continue checking in the background.'
-  if (!minimized) return <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4" onMouseDown={event => { if (event.target === event.currentTarget) setMinimized(true) }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="tailoring-progress-title" aria-describedby="tailoring-progress-description" className="rs-card w-full max-w-md p-6 shadow-2xl md:p-8">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--rs-page)' }}><LoaderCircle className="animate-spin" size={23}/></div>
-        <button ref={minimizeButton} type="button" className="rs-button rs-button-outline !min-h-10 !px-3" onClick={() => setMinimized(true)}><Minus size={16}/> Minimize</button>
-      </div>
-      <h2 id="tailoring-progress-title" className="mt-6 text-2xl font-semibold">Tailoring your resume</h2>
-      <p id="tailoring-progress-description" className="mt-3 text-sm leading-7" style={{ color: 'var(--rs-muted)' }}>{message}</p>
-      <div className="mt-6 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--rs-line)' }}><div className="h-full w-1/3 animate-pulse rounded-full" style={{ background: 'var(--rs-ink)' }}/></div>
-      <p className="mt-4 text-xs" style={{ color: 'var(--rs-muted)' }}>You can minimize this window and keep working. This is an activity indicator, not a percentage estimate.</p>
-    </section>
-  </div>
+  if (!minimized) return <Dialog.Root open onOpenChange={open => { if (!open) setMinimized(true) }}>
+    <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/55"/>
+      <Dialog.Content className="rs-card fixed left-1/2 top-1/2 z-[81] w-[calc(100vw-32px)] max-w-md -translate-x-1/2 -translate-y-1/2 p-6 shadow-2xl md:p-8">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--rs-page)' }}><LoaderCircle className="animate-spin" size={23}/></div>
+          <button type="button" className="rs-button rs-button-outline !min-h-10 !px-3" onClick={() => setMinimized(true)}><Minus size={16}/> Minimize</button>
+        </div>
+        <Dialog.Title className="mt-6 text-2xl font-semibold">Tailoring your resume</Dialog.Title>
+        <Dialog.Description className="mt-3 text-sm leading-7" style={{ color: 'var(--rs-muted)' }}>{message}</Dialog.Description>
+        <div className="mt-6 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--rs-line)' }}><div className="h-full w-1/3 animate-pulse rounded-full" style={{ background: 'var(--rs-ink)' }}/></div>
+        <p className="mt-4 text-xs" style={{ color: 'var(--rs-muted)' }}>You can minimize this window and keep working. This is an activity indicator, not a percentage estimate.</p>
+      </Dialog.Content>
+    </Dialog.Portal>
+  </Dialog.Root>
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'touch' || window.innerWidth < 768) return
@@ -235,7 +227,7 @@ function TailoringProgress({ status, minimized, setMinimized }: {
       y: Math.max(8, Math.min(window.innerHeight - 100, top + event.clientY - y)),
     })
   }
-  return <aside role="status" aria-live="polite" className="fixed z-[75] bottom-5 right-4 w-[min(320px,calc(100vw-32px))] rounded-xl border p-3 shadow-2xl md:bottom-8 md:right-8" style={{
+  return <aside role="status" aria-live="polite" className="fixed z-[75] bottom-[88px] right-4 w-[min(320px,calc(100vw-32px))] rounded-xl border p-3 shadow-2xl md:bottom-8 md:right-8" style={{
     background: 'var(--rs-surface)', borderColor: 'var(--rs-line)',
     ...(position && window.innerWidth >= 768 ? { position: 'fixed', left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : {}),
   }}>
