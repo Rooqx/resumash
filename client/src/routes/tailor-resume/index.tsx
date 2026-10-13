@@ -8,6 +8,7 @@ import SEO from '@/components/SEO'
 import { useTailoringJob } from '@/features/resume-tailor/components/TailoringJobManager'
 import { type TailoringResponse } from '@/features/resume-tailor/schemas'
 import ResumeReview from '@/features/resume-tailor/components/ResumeReview'
+import type { OptimizationMode } from '@/lib/serverActions/tailorResume'
 import { applyApprovedChanges } from '@/features/resume-tailor/reviewChanges'
 import { restoreTailorDraft, saveTailorDraft, clearTailorDraft, saveUploadedResume, restoreUploadedResume, clearUploadedResume } from '@/lib/persistence/resumeDrafts'
 
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/tailor-resume/')({ component: TailorPage 
 function TailorPage() {
   const [saved] = useState(() => restoreTailorDraft())
   const [jobDescription, setJobDescription] = useState(saved?.jobDescription ?? '')
+  const [optimizationMode, setOptimizationMode] = useState<OptimizationMode>(saved?.optimizationMode ?? 'full')
   const [file, setFile] = useState<File | null>(null)
   const [result, setResult] = useState<TailoringResponse | null>(saved?.result ?? null)
   const [mode, setMode] = useState<'setup' | 'review'>(saved?.result && !saved.sourceDirty ? 'review' : 'setup')
@@ -72,7 +74,7 @@ function TailorPage() {
   useEffect(() => {
     const persist = () => {
       if (!jobDescription.trim() && !result) { clearTailorDraft(); return }
-      if (!saveTailorDraft({ version: 1, jobDescription, result, approved, acceptedEdits: [...acceptedEdits], view, sourceDirty })) {
+      if (!saveTailorDraft({ version: 1, jobDescription, optimizationMode, result, approved, acceptedEdits: [...acceptedEdits], view, sourceDirty })) {
         setStorageWarning(true)
       }
     }
@@ -82,7 +84,7 @@ function TailorPage() {
       window.clearTimeout(timer)
       window.removeEventListener('pagehide', persist)
     }
-  }, [jobDescription, result, approved, acceptedEdits, view, sourceDirty])
+  }, [jobDescription, optimizationMode, result, approved, acceptedEdits, view, sourceDirty])
 
   const submit = async () => {
     if (working || !file || !jobDescription.trim()) return
@@ -92,11 +94,11 @@ function TailorPage() {
     setChangingSource(false)
     setSourceDirty(false)
     // The global handler may finish while this route is unmounted.
-    if (!saveTailorDraft({ version: 1, jobDescription, result: null, approved: false, acceptedEdits: [], view: 'tailored', sourceDirty: false })) {
+    if (!saveTailorDraft({ version: 1, jobDescription, optimizationMode, result: null, approved: false, acceptedEdits: [], view: 'tailored', sourceDirty: false })) {
       setStorageWarning(true)
     }
     try {
-      await job.start(file, jobDescription)
+      await job.start(file, jobDescription, optimizationMode)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to submit resume')
     }
@@ -109,6 +111,7 @@ function TailorPage() {
     clearTailorDraft()
     void clearUploadedResume().catch(() => setStorageWarning(true))
     setJobDescription('')
+    setOptimizationMode('full')
     setFile(null)
     setResult(null)
     setApproved(false)
@@ -158,6 +161,22 @@ function TailorPage() {
             </div>}
             <div><span className="rs-eyebrow" style={{ color: 'var(--rs-muted)' }}>Step 01</span><h2 className="mt-2 text-xl font-semibold">Job description</h2><p className="mt-2 text-sm" style={{ color: 'var(--rs-muted)' }}>Paste the job listing you want to apply for.</p></div>
             <textarea required aria-label="Job description" className="min-h-[180px] w-full resize-y rounded-xl border bg-transparent p-4 text-sm leading-6" style={{ borderColor: 'var(--rs-line)' }} value={jobDescription} disabled={working} onChange={event => { if (result && event.target.value !== jobDescription) { setSourceDirty(true); setApproved(false) } setJobDescription(event.target.value) }} placeholder="Paste the full job description…"/>
+            <div className="rounded-xl border p-4" style={{borderColor:'var(--rs-line)'}}>
+              <div className="flex items-center justify-between gap-4">
+                <div><p className="text-sm font-semibold">Full optimization</p>
+                  <p id="optimization-explainer" className="mt-1 text-xs leading-5" style={{color:'var(--rs-muted)'}}>{optimizationMode === 'full'
+                    ? 'Recommended: write a fully job-targeted draft using your actual evidence. Review before using it.'
+                    : 'Conservative: preserve your original content and suggest optional individual rewrites.'}</p></div>
+                <button type="button" role="switch" aria-label="Full optimization" aria-checked={optimizationMode === 'full'}
+                  aria-describedby="optimization-explainer" disabled={working}
+                  onClick={()=>{setOptimizationMode(current=>current==='full'?'conservative':'full');if(result){setSourceDirty(true);setApproved(false)}}}
+                  className="relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{background:optimizationMode==='full'?'var(--rs-ink)':'var(--rs-line)',borderColor:'var(--rs-line)'}}>
+                  <span className="absolute left-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform"
+                    style={{transform:optimizationMode==='full'?'translateX(24px)':'translateX(0)'}}/>
+                </button>
+              </div>
+            </div>
             <div><span className="rs-eyebrow" style={{ color: 'var(--rs-muted)' }}>Step 02</span><h2 className="mt-2 text-xl font-semibold">Your resume</h2></div>
             <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-5 text-center" style={{ borderColor: 'var(--rs-line)' }}>
               {file ? <FileCheck size={24}/> : <UploadCloud size={24}/>}
@@ -172,7 +191,7 @@ function TailorPage() {
         </div>
       </> : <>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4" style={{ borderColor: 'var(--rs-line)' }}>
-          <div className="flex items-center gap-3"><FileCheck size={24}/><div><h2 tabIndex={-1} ref={reviewHeading} className="font-semibold">Your tailored resume is ready</h2><p className="text-xs" style={{ color: 'var(--rs-muted)' }}>Review suggested changes before accepting them.</p></div></div>
+          <div className="flex items-center gap-3"><FileCheck size={24}/><div><h2 tabIndex={-1} ref={reviewHeading} className="font-semibold">Your tailored resume is ready</h2><p className="text-xs" style={{ color: 'var(--rs-muted)' }}>{result.optimizationMode === 'full' ? 'An optimized draft is ready. Review all claims before using it.' : 'Review suggested changes before accepting them.'}</p></div></div>
           <button type="button" className="rs-button rs-button-outline !min-h-10" onClick={() => { setMode('setup'); setChangingSource(true) }}><Pencil size={15}/> Update sources</button>
         </div>
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(290px,.75fr)]">
@@ -190,10 +209,10 @@ function TailorPage() {
           /></div>
           <aside ref={changesPanel} className="rs-card min-w-0 scroll-mt-24 p-5 md:p-6">
             <div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">Evidence-backed review</h2></div>
-            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--rs-muted)' }}>All proposed edits begin unselected. Accept only changes supported by your real experience.</p>
+            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--rs-muted)' }}>{result.optimizationMode === 'full' ? 'Full optimization is already applied to this proposed draft. Compare against your original and approve only if accurate.' : 'Conservative mode: all suggested edits begin unselected; accept only supported changes.'}</p>
             <div className="mt-5 max-h-[min(75vh,760px)] space-y-4 overflow-y-auto pr-1">
-              {result.suggestions.length === 0 && <p className="text-sm">No individual edits were returned. Inspect the full generated draft.</p>}
-              {result.suggestions.map((suggestion, index) => <div key={index} className="rounded-lg border p-4 text-sm" style={{ borderColor: 'var(--rs-line)' }}>
+              {result.optimizationMode === 'conservative' && result.suggestions.length === 0 && <p className="text-sm">No individual edits were returned. Inspect the original draft.</p>}
+              {result.optimizationMode === 'conservative' && result.suggestions.map((suggestion, index) => <div key={index} className="rounded-lg border p-4 text-sm" style={{ borderColor: 'var(--rs-line)' }}>
                 <strong className="text-xs">{suggestion.priority.toUpperCase()} · {suggestion.section}</strong>
                 <p className="mt-2"><strong>Original:</strong> {suggestion.original}</p>
                 <p className="mt-2"><strong>Proposed:</strong> {suggestion.proposed}</p>
@@ -211,7 +230,7 @@ function TailorPage() {
             </div>
             <label className="mt-6 flex items-start gap-3 border-t pt-4 text-sm leading-6" style={{ borderColor: 'var(--rs-line)' }}>
               <input type="checkbox" className="mt-1" checked={approved} onChange={event => setApproved(event.target.checked)}/>
-              <span>I reviewed the original resume and selected changes. Only accepted rewrites will be transferred to the editor.</span>
+              <span>{result.optimizationMode === 'full' ? 'I reviewed the optimized draft against my real experience and approve it for editing. I will correct any unsupported claim.' : 'I reviewed the original resume and selected changes. Only accepted rewrites will be transferred to the editor.'}</span>
             </label>
             <button type="button" disabled={!approved} className="rs-button rs-button-primary mt-5 w-full disabled:opacity-40" onClick={() => {
               query.setQueryData(['tailoredResume'], applyApprovedChanges(result, acceptedEdits))

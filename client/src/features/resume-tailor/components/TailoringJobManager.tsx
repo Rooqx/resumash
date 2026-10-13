@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import axios from 'axios'
 import { GripVertical, LoaderCircle, Minus, Maximize2, FileCheck2 } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { createTailorJobCredentials, getTailoringJob, submitTailoringJob } from '@/lib/serverActions/tailorResume'
+import { createTailorJobCredentials, getTailoringJob, submitTailoringJob, type OptimizationMode } from '@/lib/serverActions/tailorResume'
 import { clearActiveTailorJob, restoreActiveTailorJob, restoreTailorDraft, saveActiveTailorJob, saveTailorDraft, type TailorJobCredentials } from '@/lib/persistence/resumeDrafts'
 import { tailoringResponseSchema, type TailoringResponse } from '@/features/resume-tailor/schemas'
 
@@ -17,7 +17,7 @@ type JobContext = {
   status: JobState
   result: TailoringResponse | null
   error: string | null
-  start: (file: File, jobDescription: string) => Promise<void>
+  start: (file: File, jobDescription: string, optimizationMode: OptimizationMode) => Promise<void>
   forget: () => Promise<void>
 }
 const Context = createContext<JobContext | null>(null)
@@ -76,6 +76,7 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
         const saved = saveTailorDraft({
           version: 1,
           jobDescription: draft?.jobDescription ?? '',
+          optimizationMode: parsed.data.optimizationMode,
           result: parsed.data,
           approved: false,
           acceptedEdits: [],
@@ -125,7 +126,7 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
     }
   }, [activeJob, statusQuery.error])
 
-  const start = async (file: File, jobDescription: string) => {
+  const start = async (file: File, jobDescription: string, optimizationMode: OptimizationMode) => {
     if (restoring || submitting || activeJob) throw new Error('A tailoring job is already in progress.')
     const credentials = createTailorJobCredentials()
     setSubmitting(true)
@@ -136,7 +137,7 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
       // Persist the capability BEFORE uploading. Do not start an unrecoverable job.
       await saveActiveTailorJob(credentials)
       setActiveJob(credentials)
-      const response = await submitTailoringJob({ file, jobDescription, credentials })
+      const response = await submitTailoringJob({ file, jobDescription, credentials, optimizationMode })
       if (response.jobId !== credentials.jobId || !['queued', 'processing', 'completed'].includes(response.status)) {
         throw new Error('Unexpected tailoring acceptance response.')
       }

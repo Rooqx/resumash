@@ -39,6 +39,7 @@ const requirementSchema = z.object({
  sourceQuote: z.string(),
 })
 export const tailoringResponseSchema = tailoredResumeSchema.extend({
+ optimizationMode: z.enum(['full','conservative']).default('conservative'),
  suggestions: z.array(reviewSuggestionSchema).default([]),
  requirements: z.array(requirementSchema).default([]),
  missingRequirements: z.array(z.string()).default([]),
