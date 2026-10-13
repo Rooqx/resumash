@@ -70,6 +70,9 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
    return
   }
   const request=route.request()
+  // A newly submitted job must use the default source-grounded full optimization.
+  expect(request.postData()).toContain('name="optimizationMode"')
+  expect(request.postData()).toContain('full')
   submissionId=request.headers()['x-resume-job-id']??''
   secret=request.headers()['x-resume-job-token']??''
   expect(submissionId).toMatch(/^[0-9a-f-]{36}$/)
