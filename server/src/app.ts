@@ -1,8 +1,8 @@
-import express, { type ErrorRequestHandler } from "express";
+import express from "express";
 import cors from "cors";
-import multer from "multer";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/error.middleware";
+import { uploadErrorHandler } from "./middlewares/uploads.middleware";
 import { ENV, MODEL, PORT } from "./configs/env.configs";
 import { requestTelemetry } from "./utils/observability";
 import { logger } from "./utils/logger";
@@ -50,18 +50,6 @@ app.get("/", (_req, res) => {
 app.use("/api/v1/resumes", resumeRouter);
 app.use("/api/v1/cover-letters", coverLetterRouter);
 
-/** Translate Multer resource-limit errors into client-actionable statuses. */
-const uploadErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
-  if (error instanceof multer.MulterError) {
-    response.status(error.code === "LIMIT_FILE_SIZE" ? 413 : 400).json({
-      message: error.code === "LIMIT_FILE_SIZE"
-        ? "Resume file is too large (maximum 10 MB)."
-        : "Invalid resume upload.",
-    });
-    return;
-  }
-  next(error);
-};
 app.use(uploadErrorHandler);
 app.use(errorHandler);
 

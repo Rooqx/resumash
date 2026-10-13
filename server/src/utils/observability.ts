@@ -25,9 +25,11 @@ export function routeOperation(path: string): string {
   const operations: Record<string,string> = {
     "/api/v1/resumes/ai-build": "resume.ai_build",
     "/api/v1/resumes/upload": "resume.tailor",
+    "/api/v1/resumes/tailor": "resume.tailor",
     "/api/v1/resumes/download-resume": "resume.legacy_pdf",
     "/api/v1/cover-letters/generate": "cover_letter.generate",
   };
+  if (/^\/api\/v1\/resumes\/tailor\/[0-9a-f-]{36}$/i.test(path)) return "resume.tailor_status";
   return operations[path] ?? "other";
 }
 
