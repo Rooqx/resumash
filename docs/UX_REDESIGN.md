@@ -20,6 +20,7 @@ No step may overwrite the user's existing draft without an explicit selection or
 - All suggestions start rejected. Only checked edits are applied after an explicit review acknowledgement.
 - `Change resume or job` goes back to setup; current completed result is retained until a replacement is submitted.
 - A reviewed result can be handed to the resume builder without reentering the AI onboarding interview.
+- Changing the source PDF or job description after completion marks the previous result as stale. Never compare it to a new source or present its old suggestions for approval. Persist this invalidation across reloads; a fresh generation resets it.
 
 ## Resume builder
 
@@ -29,7 +30,7 @@ No step may overwrite the user's existing draft without an explicit selection or
 - For fresh resumes, default to **ATS Essential**; gallery order is ATS Essential, Professional Classic, then the three design-led options. Once chosen, use a compact current-template summary with **Change template**.
 - Desktop uses a bounded internal form panel while retaining a preview alongside it. On phones, avoid nested form scrolling, and provide persistent **Preview** and **Download** buttons. **Edit** is the normal workspace, not an extra tab.
 - Section changes return focus and scroll to the new heading. Completed work auto-saves; large repeated fields cannot push the entire desktop page indefinitely.
-- Legacy tag groups stored as indexed keys must shift together with experience, skill, and project records on insertion/deletion. New records use stable UUIDs.
+- Legacy tag groups stored as indexed keys must shift together with experience, skill, and project records on insertion/deletion. Experience and projects display collapsible summary cards. New records use stable UUIDs.
 
 ## Cover letter
 

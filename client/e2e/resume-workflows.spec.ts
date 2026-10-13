@@ -106,6 +106,12 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
  await expect(page.getByText('Evidence-backed review')).toBeVisible({timeout:15000})
  await page.getByRole('button',{name:'Update sources'}).click()
  await expect(page.getByRole('textbox',{name:'Job description'})).toHaveValue(/customer support role/)
+ await page.getByRole('textbox',{name:'Job description'}).fill('A replacement job description that is different from the reviewed evidence and requires a new tailoring request.')
+ await expect(page.getByRole('button',{name:'Back to existing result'})).toHaveCount(0)
+ await expect(page.getByText(/Your sources have changed/)).toBeVisible()
+ await page.reload()
+ await expect(page.getByRole('textbox',{name:'Job description'})).toHaveValue(/replacement job description/)
+ await expect(page.getByRole('heading',{name:'Your tailored resume is ready'})).toHaveCount(0)
 })
 
 test('global tailoring widget survives navigation without a blocking loader', async ({page}) => {
