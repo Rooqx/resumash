@@ -64,7 +64,7 @@ export default function ResumePdfPreview({ template, snapshot, label = 'Actual r
       {previewUrl && <a className="underline" href={previewUrl} target="_blank" rel="noopener noreferrer">Open PDF in new tab</a>}
     </div>
     {error && <p role="alert" className="px-3 pb-3 text-sm text-red-700">{error}</p>}
-    {previewUrl ? <iframe key={previewUrl} title={label} src={previewUrl} className="h-[710px] w-full rounded-md bg-white"/> :
+    {previewUrl && !rendering ? <iframe key={previewUrl} title={label} src={previewUrl} className="h-[710px] w-full rounded-md bg-white"/> :
       <div className="flex h-[400px] items-center justify-center text-sm" role="status">Preparing preview…</div>}
     <p className="px-2 pt-2 text-xs text-neutral-500">Preview and download use the same PDF layout engine. On mobile, open in a new tab if your browser cannot display embedded PDFs.</p>
   </div>

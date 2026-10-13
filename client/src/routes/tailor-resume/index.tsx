@@ -73,7 +73,7 @@ function TailorPage() {
   // Persist review decisions without re-triggering the generation job.
   useEffect(() => {
     const persist = () => {
-      if (!jobDescription.trim() && !result) { clearTailorDraft(); return }
+      if (!jobDescription.trim() && !result && optimizationMode === 'full') { clearTailorDraft(); return }
       if (!saveTailorDraft({ version: 1, jobDescription, optimizationMode, result, approved, acceptedEdits: [...acceptedEdits], view, sourceDirty })) {
         setStorageWarning(true)
       }

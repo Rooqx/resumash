@@ -95,7 +95,7 @@ export function assertTailoredSkillTagsSupported(
   for (const [index, entry] of (resume.fields.skills ?? []).entries()) {
     const name = typeof entry.skillName === "string" ? entry.skillName.trim() : "";
     const tags = resume.tagFields?.[`skills-${index}`]?.tags ?? [];
-    for (const skill of [...tags, ...(name && !category.test(name) ? [name] : [])]) {
+    for (const skill of [...tags, ...(tags.length === 0 && name && !category.test(name) ? [name] : [])]) {
       const needle = compact(skill);
       if (needle.length >= 3 && !haystack.includes(needle)) {
         throw new AppError("AI returned a skill not clearly supported by the uploaded resume", 502);
