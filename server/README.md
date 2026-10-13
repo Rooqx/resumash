@@ -207,7 +207,9 @@ as synchronous tailoring. Never place the token in a query string.
 
 Both job capability and result expire 24 hours after submission. PDF bytes
 remain in the upload request only: parsed resume text and job description are
-queued in Redis and removed from BullMQ immediately after success or failure.
+held in an expiring Redis input key (never embedded in the BullMQ job payload).
+The input key expires after 24 hours even if no worker is available, and is
+deleted immediately after processing. BullMQ stores only an opaque job ID.
 Use an encrypted-at-rest Redis instance with TLS; disable persistence or
 configure retention appropriately for sensitive data. Redis must have enough
 memory for queued text, metadata and completed results. The queue is not a

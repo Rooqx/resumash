@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import IORedis from "ioredis";
 import { REDIS_URI } from "../configs/env.configs";
 import { logger } from "../utils/logger";
-import { TAILOR_QUEUE, completeJob, updateJob, jobRedis } from "../modules/tailoring/tailor-job-store";
+import { TAILOR_QUEUE, completeJob, updateJob, jobRedis, readJobInput, deleteJobInput } from "../modules/tailoring/tailor-job-store";
 import { tailorResumeFromText } from "../modules/tailoring/tailor.service";
 
 if (!REDIS_URI) throw new Error("REDIS_URI is required for the tailoring worker");
@@ -11,15 +11,20 @@ if (!REDIS_URI) throw new Error("REDIS_URI is required for the tailoring worker"
  * Run as a separate process: node dist/workers/tailor.worker.js
  * No automatic AI retries: a stalled paid request must not be charged twice.
  */
-const worker = new Worker<{ sourceText: string; jobDescription: string }>(
+const worker = new Worker<Record<string, never>>(
   TAILOR_QUEUE,
   async job => {
     // Ignore expired jobs even if the queue retained them during downtime.
     const record = await jobRedis().get(`resumash:tailor:job:${job.id}`);
     if (!record) return;
-    await updateJob(job.id!, "processing");
+    const input = await readJobInput(job.id!);
+    if (!input) {
+      await updateJob(job.id!, "failed", "Tailoring input expired before processing.");
+      return;
+    }
+    if (!await updateJob(job.id!, "processing")) return;
     try {
-      const result = await tailorResumeFromText(job.data.sourceText, job.data.jobDescription);
+      const result = await tailorResumeFromText(input.sourceText, input.jobDescription);
       await completeJob(job.id!, result);
       logger.info("tailor.job.completed", { event: "tailor.job.completed", jobId: job.id });
     } catch (error) {
@@ -28,6 +33,9 @@ const worker = new Worker<{ sourceText: string; jobDescription: string }>(
       logger.error("tailor.job.failed", { event: "tailor.job.failed", jobId: job.id,
         errorType: error instanceof Error ? error.constructor.name : "UnknownError" });
       throw error;
+    } finally {
+      // Remove candidate data immediately after work, even on provider failure.
+      await deleteJobInput(job.id!);
     }
   },
   {

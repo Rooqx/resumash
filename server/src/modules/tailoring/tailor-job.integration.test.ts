@@ -4,7 +4,7 @@ import { Worker } from "bullmq";
 import IORedis from "ioredis";
 import {
   TAILOR_QUEUE, completeJob, enqueueTailoring, getAuthorizedJob,
-  jobQueue, jobRedis, readJobResult, updateJob,
+  jobQueue, jobRedis, readJobResult, readJobInput, updateJob,
 } from "./tailor-job-store";
 
 const redisURL = process.env.REDIS_URI;
@@ -28,12 +28,15 @@ suite("anonymous job lifecycle with real Redis", () => {
   afterAll(async () => {
     await worker.close();
     await jobQueue().close();
-    await jobRedis().del(`resumash:tailor:job:${id}`, `resumash:tailor:result:${id}`);
+    await jobRedis().del(`resumash:tailor:job:${id}`, `resumash:tailor:result:${id}`, `resumash:tailor:input:${id}`);
     await jobRedis().quit();
   });
 
   it("queues once, securely retrieves the result and deduplicates an accepted replay", async () => {
     await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
+    expect((await readJobInput(id))?.sourceText).toBe("Synthetic resume");
+    const queuedJob = await jobQueue().getJob(id);
+    expect(JSON.stringify(queuedJob?.data)).not.toContain("Synthetic resume");
     await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
     await expect(getAuthorizedJob(id, wrongToken)).rejects.toMatchObject({ statusCode: 404 });
 

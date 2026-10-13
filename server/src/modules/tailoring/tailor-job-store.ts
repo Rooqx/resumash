@@ -19,6 +19,8 @@ export interface JobRecord {
 }
 const key = (id: string) => `resumash:tailor:job:${id}`;
 const resultKey = (id: string) => `resumash:tailor:result:${id}`;
+const inputKey = (id: string) => `resumash:tailor:input:${id}`;
+export interface TailoringInput { sourceText: string; jobDescription: string }
 
 let redis: IORedis | undefined;
 let queue: Queue | undefined;
@@ -78,11 +80,22 @@ export async function enqueueTailoring(
     throw new AppError("Tailoring job expired; submit a new request", 410);
   }
   try {
-    await jobQueue().add("tailor", { sourceText, jobDescription }, { jobId: id });
+    // Never put private candidate content in a non-expiring BullMQ entry.
+    // This Redis key expires even if workers are offline indefinitely.
+    await jobRedis().set(inputKey(id), JSON.stringify({ sourceText, jobDescription }), "EX", JOB_TTL_SECONDS);
+    await jobQueue().add("tailor", {}, { jobId: id });
   } catch {
-    await jobRedis().del(key(id));
+    await jobRedis().del(key(id), inputKey(id));
     throw new AppError("Could not queue resume tailoring", 503);
   }
+}
+
+export async function readJobInput(id: string): Promise<TailoringInput | null> {
+  const raw = await jobRedis().get(inputKey(id));
+  return raw ? JSON.parse(raw) as TailoringInput : null;
+}
+export async function deleteJobInput(id: string): Promise<void> {
+  await jobRedis().del(inputKey(id));
 }
 
 /** Preserve the original TTL: status updates must never extend access lifetime. */
