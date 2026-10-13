@@ -3,6 +3,7 @@ import { applyApprovedChanges } from './reviewChanges'
 import type { TailoringResponse } from './schemas'
 
 const sample: TailoringResponse = {
+ optimizationMode: 'conservative',
  inputValue: { fullName: 'Alex Example', summary: 'Assisted customers' },
  fields: { experience: [{ companyName: 'Retail Store', jobSummary: 'Updated inventory' }] },
  tagFields: {},

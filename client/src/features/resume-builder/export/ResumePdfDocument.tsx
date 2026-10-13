@@ -45,10 +45,12 @@ function Section({title,template,sidebar=false,children}:{title:string;template:
 }
 function Entry({title,subtitle,date,description,bullets=[],template,sidebar=false}:{title:string;subtitle?:string;date?:string;description?:string;bullets?:string[];template:ResumeTemplateId;sidebar?:boolean}){
  const serif=template==='classic'||template==='ats-essential'
- return <View style={[styles.entry,{marginBottom:sidebar?8:10}]} wrap={false}>
+ return <View style={[styles.entry,{marginBottom:sidebar?8:10}]}>
+  <View wrap={false}>
   {!!title&&<Text style={[styles.entryTitle,serif?{fontFamily:'Times-Bold'}:{},sidebar?{fontSize:8.5}:{}]}>{title}</Text>}
   {!!subtitle&&<Text style={[styles.subheading,sidebar?{fontSize:7.8}:{},sidebar&&template==='executive'?{color:'#e0dfdc'}:{}]}>{subtitle}</Text>}
   {!!date&&<Text style={[styles.date,sidebar?{fontSize:7.5}:{},sidebar&&template==='executive'?{color:'#d4d4d1'}:{}]}>{date}</Text>}
+  </View>
   {!!description&&<Text style={[styles.body,sidebar?{fontSize:8}:{}]}>{description}</Text>}
   {bullets.filter(Boolean).map((bullet,i)=><Text key={i} style={[styles.bullet,sidebar?{fontSize:7.8}:{}]}>• {bullet}</Text>)}
  </View>
@@ -71,11 +73,13 @@ function ContentSections({snapshot,template,keys,sidebar=false}:{snapshot:Resume
    subtitle={join([v.studyType,v.area],' in ')} date={join([v.startDate,v.endDate],' – ')} description={txt(v.gpa)?`GPA: ${txt(v.gpa)}`:undefined}/>)}
  </Section>
  const skillsSection=skills.length>0&&<Section title={template==='modern'?'Core Skills':'Skills'} template={template} sidebar={sidebar}>
-  <View style={template==='classic'?{flexDirection:'row',flexWrap:'wrap'}:{}}>
-   {skills.map((v,i)=><Text key={i} style={[styles.skill,sidebar?{fontSize:8}: {},
-     template==='classic'?{width:'33%',paddingRight:6}:{}
-   ]}>{txt(v.skillName)}{snapshot.tagFields[`skills-${i}`]?.tags?.length?
-    `: ${snapshot.tagFields[`skills-${i}`].tags.join(', ')}`:''}</Text>)}
+  <View>
+   {skills.every((_,i)=>!snapshot.tagFields[`skills-${i}`]?.tags?.length)
+    ? <Text style={styles.skill}>{skills.map(v=>txt(v.skillName)).filter(Boolean).join('  ·  ')}</Text>
+    : skills.map((v,i)=><Text key={i} style={[styles.skill,sidebar?{fontSize:8}:{}]}>
+       <Text style={{fontFamily:template==='ats-essential'||template==='classic'?'Times-Bold':'Helvetica-Bold'}}>{txt(v.skillName)}: </Text>
+       {snapshot.tagFields[`skills-${i}`]?.tags?.join(', ') ?? ''}
+      </Text>)}
   </View>
  </Section>
  const projectsSection=projects.length>0&&<Section title="Projects" template={template} sidebar={sidebar}>
@@ -118,7 +122,7 @@ function Header({snapshot,template}:{snapshot:ResumeSnapshot;template:ResumeTemp
   {(editorial||stone)&&<View style={editorial?{position:'absolute',right:0,top:0,width:170,alignItems:'flex-end'}:{position:'absolute',right:0,top:30,width:132}}>
    <Contact input={input}/></View>}
   {ats&&<View style={{borderTopWidth:1.5,borderBottomWidth:1.5,borderColor:'#444',paddingVertical:7,marginTop:14,width:'100%'}}>
-   <Text style={{textAlign:'center',fontFamily:'Times-Roman',fontSize:8.5}}>{join([input.phone,join([input.city,input.country],', '),input.email,input.linkdlnUrl],'  |  ')}</Text>
+   <Text style={{textAlign:'center',fontFamily:'Times-Roman',fontSize:8.5}}>{join([input.phone,join([input.city,input.country],', '),input.email,input.linkdlnUrl,input.githubUrl,input.portfolioUrl],'  |  ')}</Text>
   </View>}
  </View>
 }

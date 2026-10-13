@@ -13,7 +13,7 @@ Object.defineProperty(globalThis, 'localStorage', {
 })
 
 test('restore job text, selected review, and view after refresh', () => {
- const draft = {version:1 as const,jobDescription:'Sample hiring role',result:null,approved:true,acceptedEdits:[0,2],view:'comparison' as const}
+ const draft = {version:1 as const,jobDescription:'Sample hiring role',result:null,approved:true,acceptedEdits:[0,2],view:'comparison' as const,optimizationMode:'full' as const}
  expect(saveTailorDraft(draft)).toBe(true)
  expect(restoreTailorDraft()).toEqual(draft)
  clearTailorDraft()
@@ -39,7 +39,7 @@ test('corrupted local draft data never crashes restoration', () => {
 
 
 test('a modified source is tracked across refresh to prevent comparing old results with new inputs', () => {
- const draft = { version:1 as const, jobDescription:'Modified job description', result:null, approved:false, acceptedEdits:[], view:'tailored' as const, sourceDirty:true }
+ const draft = { version:1 as const, jobDescription:'Modified job description', result:null, approved:false, acceptedEdits:[], view:'tailored' as const, optimizationMode:'conservative' as const, sourceDirty:true }
  expect(saveTailorDraft(draft)).toBe(true)
  expect(restoreTailorDraft()?.sourceDirty).toBe(true)
  clearTailorDraft()
