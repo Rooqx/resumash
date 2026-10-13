@@ -63,7 +63,6 @@ export default function Award() {
             />
           </div>
           <Textarea
-            type="textarea"
             labelFor="awardSummary"
             value={field.awardSummary}
             onChange={(e) =>

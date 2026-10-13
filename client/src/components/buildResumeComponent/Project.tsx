@@ -43,7 +43,6 @@ export default function Project() {
             placeholder="Enter project name"
           />
           <Textarea
-            type="textarea"
             labelFor="description"
             value={field.description}
             onChange={(e) =>
