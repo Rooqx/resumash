@@ -30,6 +30,7 @@ test('can view the real PDF and download a valid PDF', async ({ page }) => {
 test('mobile A4 view fits and zoom works', async ({ page }) => {
  await page.setViewportSize({width:390,height:844})
  await page.goto('/build-resume/')
+ await page.getByRole('button',{name:'Build manually'}).click()
  await page.getByRole('button',{name:'Preview',exact:true}).click()
  await expect(page.getByRole('button',{name:'Fit A4 to available width'})).toBeVisible()
  const before=await page.locator('[aria-label="Resume preview"]').locator('..').getByText(/A4 ·/).textContent()
@@ -136,7 +137,7 @@ test('global tailoring widget survives navigation without a blocking loader', as
  await page.waitForTimeout(3400)
  await expect(page.getByRole('status',{name:'Loading...'})).toHaveCount(0)
  finished = true
- await expect(page.getByText('Your tailored resume is ready')).toBeVisible({timeout:16000})
+ await expect(page.getByText('Tailoring in progress')).toHaveCount(0,{timeout:16000})
  await expect(page).toHaveURL(/tailor-resume/,{timeout:15000})
  await expect(page.getByText('Evidence-backed review')).toBeVisible()
 })

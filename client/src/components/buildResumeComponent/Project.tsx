@@ -1,5 +1,6 @@
 import { Plus, Trash } from 'lucide-react'
 import Input from '@/components/Input'
+import Textarea from '@/components/Textarea'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
 import { useTagStore } from '@/lib/stores/useInputTags'
@@ -41,7 +42,7 @@ export default function Project() {
             inputTittle="Project Name"
             placeholder="Enter project name"
           />
-          <Input
+          <Textarea
             type="textarea"
             labelFor="description"
             value={field.description}

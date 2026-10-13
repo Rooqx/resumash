@@ -126,7 +126,7 @@ function BuilderPage(){
   <div className="rs-container pb-28 pt-10 md:py-16">
    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
-    <div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-outline" onClick={()=>setShowAiQuestionnaire(open=>!open)}><Sparkles size={16}/>{showAiQuestionnaire?'Build manually':'Build with AI'}</button><button className="rs-button rs-button-primary hidden lg:inline-flex" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
+    <div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-outline" onClick={()=>setShowAiQuestionnaire(open=>!open)}><Sparkles size={16}/>{showAiQuestionnaire?'Build manually':'Build with AI'}</button><button className="rs-button rs-button-primary hidden lg:inline-flex" disabled={downloading||showAiQuestionnaire} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
    </div>
    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
     <span className="text-xs" style={{color:'var(--rs-muted)'}}>{saveWarning?'Browser autosave is unavailable':'Saved automatically on this device'}</span>
@@ -156,10 +156,10 @@ function BuilderPage(){
    </div>
    </>}
   </div>
-  <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t p-3 pb-[max(12px,env(safe-area-inset-bottom))] lg:hidden" style={{background:'var(--rs-surface)',borderColor:'var(--rs-line)'}}>
+  {!showAiQuestionnaire && <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t p-3 pb-[max(12px,env(safe-area-inset-bottom))] lg:hidden" style={{background:'var(--rs-surface)',borderColor:'var(--rs-line)'}}>
     <button type="button" className="rs-button rs-button-outline flex-1" onClick={()=>setMobilePreview(true)}><Eye size={16}/> Preview</button>
     <button type="button" className="rs-button rs-button-primary flex-1" disabled={downloading} onClick={()=>void downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing…':'Download'}</button>
-   </div>
+   </div>}
    {mobilePreview&&<div role="dialog" aria-modal="true" aria-label="Resume preview" className="fixed inset-0 z-[70] overflow-y-auto p-3" style={{background:'var(--rs-page)'}}>
     <div className="sticky top-0 z-10 mb-3 flex flex-wrap items-center justify-between gap-3 border-b py-3" style={{background:'var(--rs-page)',borderColor:'var(--rs-line)'}}>
      <button type="button" className="rs-button rs-button-outline !min-h-10" onClick={()=>setMobilePreview(false)}><ArrowLeft size={16}/> Back to builder</button>

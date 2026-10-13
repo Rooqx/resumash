@@ -161,6 +161,7 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
 
   const forget = async () => {
     setActiveJob(null)
+    setResult(null)
     setError(null)
     await clearActiveTailorJob()
     // Forgetting a browser reference cannot cancel an already queued server job.

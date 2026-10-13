@@ -1,5 +1,6 @@
 import { Plus, Trash } from 'lucide-react'
 import Input from '@/components/Input'
+import Textarea from '@/components/Textarea'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 
 export default function Award() {
@@ -61,7 +62,7 @@ export default function Award() {
               placeholder="MM/YYYY"
             />
           </div>
-          <Input
+          <Textarea
             type="textarea"
             labelFor="awardSummary"
             value={field.awardSummary}
