@@ -30,14 +30,7 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
   const [portraitError,setPortraitError]=useState('')
   const setInputValue=useInputStore(s=>s.setInputValue)
   const savedPortrait=useInputStore(s=>s.inputValue.profilePhotoDataUrl)
-  const role = useInputStore(s=>s.inputValue.label??'')
-  const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
-  const earlyCareerEvidence = useFieldStores(s=>(s.fields.education?.length??0)+(s.fields.projects?.length??0))
-  const knownExperience = useFieldStores(s=>s.fields.experience?.filter(item=>Boolean(item.jobPosition||item.companyName)).length??0)
-  // Do not infer leadership merely because a target vacancy contains 'manager'.
-  const seniorRole = /(?:director|executive|head of|chief|vice president)/i.test(role)
-  const recommended: ResumeTemplateId = seniorRole && knownExperience>=2
-    ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'ats-essential'
+  const recommended: ResumeTemplateId = 'ats-essential'
   const uploadPortrait=async(file:File|undefined)=>{
     if(!file)return
     if(!['image/png','image/jpeg'].includes(file.type)||file.size>4*1024*1024){
@@ -64,12 +57,12 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
     <section className="mb-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>Choose your presentation</p>
-          <h2 className="mt-2 text-xl font-semibold">Five reference-inspired layouts. Your story, unchanged.</h2>
-          <p className="mt-1 text-sm" style={{color:'var(--rs-muted)'}}>Templates change presentation and section priority—not your facts. Sample content is fictional.</p>
+          <h2 className="mt-2 text-xl font-semibold">ATS-friendly first. Pick your presentation.</h2>
+          <p className="mt-1 text-sm" style={{color:'var(--rs-muted)'}}>ATS Essential is recommended for most online applications. Templates change presentation—not your facts. Sample content is fictional.</p>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
+        {[...resumeTemplates].sort((a,b)=>['ats-essential','classic','modern','executive-modern','executive'].indexOf(a.id)-['ats-essential','classic','modern','executive-modern','executive'].indexOf(b.id)).map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
           <SampleThumbnail template={item.id}/>
           <div className="mt-3 flex items-start justify-between gap-2">
             <div><h3 className="text-sm font-semibold">{item.name}</h3>
