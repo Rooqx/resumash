@@ -11,6 +11,8 @@ import { generateCoverLetter } from '@/features/cover-letter/services/generateCo
 import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
+import { restoreTailorDraft } from '@/lib/persistence/resumeDrafts'
+import { applyApprovedChanges } from '@/features/resume-tailor/reviewChanges'
 
 export const Route = createFileRoute('/cover-letter/')({ component: CoverLetterPage })
 const DRAFT_KEY = 'resumash:cover-letter:draft:v1'
@@ -33,10 +35,10 @@ function restore(): Draft {
 }
 
 /** Resume data is read only when the candidate chooses to use it. */
-function factsFromResume() {
-  const info = useInputStore.getState().inputValue
-  const rows = useFieldStores.getState().fields
-  const tags = useTagStore.getState().fields
+function factsFromResume(snapshot?: {inputValue: Record<string,string>, fields: Record<string,Array<Record<string,unknown>>>, tagFields?: Record<string,{tags:string[]}>}) {
+  const info = snapshot?.inputValue ?? useInputStore.getState().inputValue
+  const rows = snapshot?.fields ?? useFieldStores.getState().fields
+  const tags = snapshot?.tagFields ?? useTagStore.getState().fields
   const jobs = (rows.experience ?? []).map((job, index) => {
     const description = [job.jobSummary, ...(tags['jobHighlights-' + index]?.tags ?? [])].filter(Boolean).join('; ')
     return [job.jobPosition, job.companyName, description].filter(Boolean).join(' — ')
@@ -77,8 +79,12 @@ function CoverLetterPage() {
     return () => { document.body.style.overflow = old }
   }, [mobilePreview])
 
-  const useResume = () => {
-    const facts = factsFromResume()
+  const approvedTailor = restoreTailorDraft()
+  const hasTailored = Boolean(approvedTailor?.approved && approvedTailor.result)
+  const useResume = (tailored = false) => {
+    const original = tailored ? restoreTailorDraft() : null
+    if (tailored && (!original?.approved || !original.result)) {toast.error('Review and approve the tailored resume first.');return}
+    const facts = factsFromResume(original?.result ? applyApprovedChanges(original.result, new Set(original.acceptedEdits)) : undefined)
     if (!facts.name && !facts.experience) {
       toast.error('Build a resume first, or enter your details manually.')
       return
@@ -156,7 +162,10 @@ function CoverLetterPage() {
       <section className="rs-card min-w-0 p-5 md:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Application details</h2>
-          <button type="button" onClick={useResume} className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"><FileText size={15}/> Use my resume</button>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={()=>useResume(false)} className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"><FileText size={15}/> Use my resume</button>
+            {hasTailored && <button type="button" onClick={()=>useResume(true)} className="rs-button rs-button-outline !min-h-10 !px-3 text-xs">Use approved tailored resume</button>}
+          </div>
         </div>
         <form onSubmit={event => void generate(event)} className="mt-5 space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">

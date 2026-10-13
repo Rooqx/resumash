@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import axios from 'axios'
@@ -241,6 +241,6 @@ function TailoringProgress({ status, minimized, setMinimized }: {
       <button type="button" className="rs-button rs-button-outline !min-h-9 !p-2" aria-label="Expand tailoring progress" onClick={() => setMinimized(false)}><Maximize2 size={16}/></button>
     </div>
     <p className="mt-2 pl-6 text-xs" style={{ color: 'var(--rs-muted)' }}>{status === 'processing' ? 'Reviewing your experience…' : 'Queued or reconnecting…'}</p>
-    <a href="/tailor-resume" className="mt-2 inline-flex items-center gap-1 pl-6 text-xs underline"><FileCheck2 size={13}/> View tailoring</a>
+    <Link to="/tailor-resume" className="mt-2 inline-flex items-center gap-1 pl-6 text-xs underline"><FileCheck2 size={13}/> View tailoring</Link>
   </aside>
 }
