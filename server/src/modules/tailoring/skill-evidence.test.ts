@@ -20,6 +20,18 @@ test("short programming language names must be whole words in source", () => {
   expect(skillClearlyInSource("Commercial web projects", "R")).toBe(false);
 });
 
+test("does not accept substring lookalikes or erase meaningful language punctuation", () => {
+  expect(skillClearlyInSource("Built JavaScript applications", "Java")).toBe(false);
+  expect(skillClearlyInSource("Built Java applications", "JavaScript")).toBe(false);
+  expect(skillClearlyInSource("Applied TypeScript daily", "Script")).toBe(false);
+  expect(skillClearlyInSource("Built C services", "C++")).toBe(false);
+  expect(skillClearlyInSource("Built C++ services", "C++")).toBe(true);
+  expect(skillClearlyInSource("Used C# and .NET", "C#")).toBe(true);
+  expect(skillClearlyInSource("Built Node.js and Next.js services", "NodeJS")).toBe(true);
+  expect(skillClearlyInSource("Built Node.js and Next.js services", "NextJS")).toBe(true);
+  expect(skillClearlyInSource("Built with PostgreSQL", "Postgres")).toBe(true);
+});
+
 test("omits unsupported skill claims, preserves legitimate experience and reindexes skill tags", () => {
   const source = "Developed APIs using TypeScript and Postgres.";
   const original = {

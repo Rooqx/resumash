@@ -6,28 +6,34 @@
 const compact = (text: string) => text.normalize("NFKC").toLowerCase()
   .replace(/[^\p{L}\p{N}]+/gu, "");
 const spaced = (text: string) => text.normalize("NFKC").toLowerCase()
-  .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
 
-// Only narrowly equivalent written variants, not loosely related technology.
+// These refer to the same named technology, not adjacent technologies.
+// Whole-term boundaries below prevent Java from matching JavaScript.
 const aliases: Record<string, string[]> = {
   postgres: ["postgresql"],
   postgresql: ["postgres"],
-  express: ["expressjs"],
-  expressjs: ["express"],
-  react: ["reactjs"],
-  reactjs: ["react"],
-  vue: ["vuejs"],
-  vuejs: ["vue"],
+  express: ["expressjs", "express js"],
+  expressjs: ["express", "express js"],
+  react: ["reactjs", "react js"],
+  reactjs: ["react", "react js"],
+  vue: ["vuejs", "vue js"],
+  vuejs: ["vue", "vue js"],
+  nodejs: ["node js"],
+  nextjs: ["next js"],
 };
 const groupLabel = /^(languages|programming languages|frameworks|libraries|frontend|backend|web development|databases|data & storage|cloud & infrastructure|cloud|devops|infrastructure|tools|testing|testing & quality|data engineering|data & analytics|apis & integrations|other skills|technical skills|relevant skills|software)$/i;
 
 export function skillClearlyInSource(source: string, skill: string): boolean {
-  const needle = compact(skill);
+  const rawSkill = skill.normalize("NFKC").trim();
+  // Preserve distinguishing punctuation in language names.
+  if (/^c\+\+$/i.test(rawSkill)) return /(?:^|[^\p{L}\p{N}])c\s*\+\s*\+(?=$|[^\p{L}\p{N}])/iu.test(source);
+  if (/^c#$/i.test(rawSkill)) return /(?:^|[^\p{L}\p{N}])c\s*#(?=$|[^\p{L}\p{N}])/iu.test(source);
+  const needle = compact(rawSkill);
   if (!needle) return false;
-  const sourceCompact = compact(source);
-  // For short names ("Go", "C", "R"), avoid substring matches in unrelated words.
-  if (needle.length < 3) return spaced(source).split(" ").includes(needle);
-  return [needle, ...(aliases[needle] ?? [])].some(candidate => sourceCompact.includes(candidate));
+  const haystack = ` ${spaced(source)} `;
+  const variants = [spaced(rawSkill), ...(aliases[needle] ?? [])];
+  return variants.some(variant => variant.length > 0 && haystack.includes(` ${variant} `));
 }
 
 type SkillResume = {
