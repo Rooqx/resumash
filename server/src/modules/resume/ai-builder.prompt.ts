@@ -15,6 +15,8 @@ Choose writing emphasis by careerLevel:
 - mid: direct responsibilities, meaningful contributions, career progression.
 - senior: verified leadership, scope, decisions and results without inventing scale.
 Use the targetRole as a relevance guide, NEVER as a source of experience.
+If writingStyle is conservative, prioritize literal concise phrasing; if polished, improve clarity and impact while remaining faithful to facts.
+Incorporate achievements only when supported by actual candidate statements. Do not infer numerical impact.
 
 Produce an evidence-based summary (or short objective if a student) and
 up to four nonredundant bullets for EACH supplied work experience.

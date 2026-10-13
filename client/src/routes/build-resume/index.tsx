@@ -50,7 +50,7 @@ function BuilderPage(){
  const editorScroll=useRef<HTMLDivElement>(null)
  const [actualPdfOpen,setActualPdfOpen]=useState(false)
  const [downloading,setDownloading]=useState(false)
- const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(false)
+ const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(() => !savedView && !useInputStore.getState().inputValue.fullName && !useFieldStores.getState().fields.experience?.length)
  const client=useQueryClient()
  const [incomingResume] = useState(()=>client.getQueryData(['tailoredResume']))
  const [pendingImport,setPendingImport] = useState<TailoredResume|null>(null)
@@ -126,7 +126,7 @@ function BuilderPage(){
   <div className="rs-container pb-28 pt-10 md:py-16">
    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>02 / Resume builder</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">Make your experience count.</h1><p className="mt-3 text-sm" style={{color:'var(--rs-muted)'}}>Build your resume step by step. See every change as you make it.</p></div>
-    <div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-outline" onClick={()=>setShowAiQuestionnaire(open=>!open)}><Sparkles size={16}/>{showAiQuestionnaire?'Close AI Builder':'Build with AI'}</button><button className="rs-button rs-button-primary hidden lg:inline-flex" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
+    <div className="flex flex-wrap gap-2"><button type="button" className="rs-button rs-button-outline" onClick={()=>setShowAiQuestionnaire(open=>!open)}><Sparkles size={16}/>{showAiQuestionnaire?'Build manually':'Build with AI'}</button><button className="rs-button rs-button-primary hidden lg:inline-flex" disabled={downloading} onClick={()=>downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing PDF…':'Download PDF'}</button></div>
    </div>
    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
     <span className="text-xs" style={{color:'var(--rs-muted)'}}>{saveWarning?'Browser autosave is unavailable':'Saved automatically on this device'}</span>
@@ -140,7 +140,7 @@ function BuilderPage(){
      </div>
     </div>}
    {showAiQuestionnaire&&<AiResumeQuestionnaire onDraft={applyAiDraft} onClose={()=>setShowAiQuestionnaire(false)}/>}
-   {showGallery ? <TemplateGallery selected={template} onSelect={selected => {setTemplate(selected);setShowGallery(false)}}/> :
+   {!showAiQuestionnaire && <>{showGallery ? <TemplateGallery selected={template} onSelect={selected => {setTemplate(selected);setShowGallery(false)}}/> :
     <div className="rs-card mb-5 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
      <div className="flex items-center gap-3"><LayoutTemplate size={20}/><div><p className="text-sm font-semibold">{resumeTemplates.find(item=>item.id===template)?.name}</p><p className="text-xs" style={{color:'var(--rs-muted)'}}>Selected resume template</p></div></div>
      <button type="button" className="rs-button rs-button-outline !min-h-9 !px-3" onClick={()=>setShowGallery(true)}>Change template</button>
@@ -166,6 +166,6 @@ function BuilderPage(){
     </div>
     <A4Preview><ResumeDocument template={template}/></A4Preview>
    </div>}
-   {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
+   {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}</>}
  </ResumashShell>
 }

@@ -49,7 +49,7 @@ export async function buildResumeFromQuestionnaire(input: Questionnaire) {
         jobPosition: job.position,
         jobStartDate: job.startDate,
         jobEndDate: job.endDate,
-        jobSummary: job.responsibilities,
+        jobSummary: [job.responsibilities, job.achievements].filter(Boolean).join(' · '),
       })),
       education: input.education.map(edu => ({
         institution: edu.institution,

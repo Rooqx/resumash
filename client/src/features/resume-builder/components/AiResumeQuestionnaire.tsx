@@ -9,6 +9,7 @@ type Experience = {
   startDate: string
   endDate: string
   responsibilities: string
+  achievements: string
 }
 type Education = {
   institution: string
@@ -32,6 +33,7 @@ interface Answers {
   projects: Project[]
   skills: string
   additionalInfo: string
+  writingStyle: 'polished' | 'conservative'
 }
 
 interface QuestionnaireProps {
@@ -52,6 +54,7 @@ const initialAnswers: Answers = {
   projects: [],
   skills: '',
   additionalInfo: '',
+  writingStyle: 'polished',
 }
 
 const responseSchema = z.object({
@@ -67,14 +70,14 @@ const storedQuestionnaireSchema = z.object({
   careerLevel: z.enum(['student','entry','mid','senior']),
   experience: z.array(z.object({
    company:z.string(),position:z.string(),startDate:z.string(),
-   endDate:z.string(),responsibilities:z.string(),
+   endDate:z.string(),responsibilities:z.string(),achievements:z.string().default(''),
   })),
   education: z.array(z.object({
    institution:z.string(),degree:z.string(),dates:z.string(),
    startDate:z.string(),endDate:z.string(),
   })),
   projects: z.array(z.object({name:z.string(),description:z.string()})),
-  skills:z.string(), additionalInfo:z.string(),
+  skills:z.string(), additionalInfo:z.string(), writingStyle:z.enum(['polished','conservative']).default('polished'),
  }),
  draft: builderResponseSchema.nullable(),
 })
@@ -100,6 +103,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
   const [error, setError] = useState('')
   const [draft,setDraft] = useState<BuilderResponse|null>(restored?.draft??null)
   const acceptedRef=useRef(false)
+  const stepHeading=useRef<HTMLHeadingElement>(null)
   useEffect(()=>{
    const persistNow=()=>{
     if(acceptedRef.current)return
@@ -151,7 +155,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
     setError('')
     if (answers.fullName.trim().length < 2 || answers.targetRole.trim().length < 2) {
       setError('Enter your name and the role you are targeting.')
-      setStep(0)
+      changeStep(0)
       return
     }
     if (!answers.experience.length && !answers.education.length &&
@@ -205,15 +209,22 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
       setError('Your name and target role are required.')
       return
     }
-    setStep(current => Math.min(3, current + 1))
+    changeStep(Math.min(3, step + 1))
   }
 
+  const changeStep = (nextStep: number) => {
+    setStep(nextStep)
+    window.requestAnimationFrame(() => {
+      stepHeading.current?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})
+      stepHeading.current?.focus({preventScroll:true})
+    })
+  }
   return (
     <section className="rs-card mb-8 p-5 md:p-8" aria-label="AI resume questionnaire">
       <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="rs-eyebrow" style={{ color: 'var(--rs-muted)' }}>Optional AI assistant</p>
-          <h2 className="rs-editorial mt-2 text-3xl md:text-4xl">Tell us your story.</h2>
+          <h2 ref={stepHeading} tabIndex={-1} className="rs-editorial mt-2 scroll-mt-28 text-3xl outline-none md:text-4xl">Tell us your story.</h2>
           <p className="mt-2 text-sm leading-6" style={{ color: 'var(--rs-muted)' }}>
             Answer a few questions. AI will help draft your resume; you can edit everything afterward.
           </p>
@@ -279,6 +290,12 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
                       value={item.responsibilities}
                       onChange={e => updateItem('experience', index, 'responsibilities', e.target.value)} />
                   </label>
+                  <label className="mt-3 block text-sm">Did you achieve or improve anything? (optional)
+                    <textarea className={fieldClass} style={fieldStyle} rows={3}
+                      value={item.achievements}
+                      onChange={e => updateItem('experience', index, 'achievements', e.target.value)}
+                      placeholder="Describe genuine results; numbers are optional." />
+                  </label>
                   <button className="mt-4 flex items-center gap-2 text-xs" type="button"
                     onClick={() => removeItem('experience', index)}><Trash2 size={14}/> Remove role</button>
                 </div>
@@ -287,7 +304,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
             <button type="button" className="rs-button rs-button-outline mt-4"
               onClick={() => update('experience', [
                 ...answers.experience,
-                { company: '', position: '', startDate: '', endDate: '', responsibilities: '' },
+                { company: '', position: '', startDate: '', endDate: '', responsibilities: '', achievements: '' },
               ])}><Plus size={16}/> Add a role</button>
           </div>
         )}
@@ -355,7 +372,8 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
                 onChange={e => update('additionalInfo', e.target.value)}
                 placeholder="Achievements, volunteering, certifications or background details..." />
             </label>
-            <p className="text-xs leading-6" style={{ color: 'var(--rs-muted)' }}>
+            <label className="flex items-start gap-3 rounded-xl border p-3 text-sm" style={{borderColor:'var(--rs-line)'}}><input className="mt-1" type="checkbox" checked={answers.writingStyle==='polished'} onChange={event=>update('writingStyle',event.target.checked?'polished':'conservative')}/><span><strong>Help polish my wording.</strong> Improve clarity and tone without adding unverified facts.</span></label>
+            <p className="text-xs leading-6" style={{ color: 'var(--rs-muted)' }>
               AI may improve the wording, but it cannot verify every fact. Review your draft before sending applications.
               Answers are sent to the resume-generation service for processing.
             </p>
@@ -365,7 +383,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
         {!!error && <p role="alert" className="mt-5 text-sm text-red-500">{error}</p>}
         <div className="mt-8 flex flex-wrap justify-between gap-3">
           <button type="button" className="rs-button rs-button-outline" disabled={step === 0 || loading}
-            onClick={() => { setError(''); setStep(current => Math.max(0, current - 1)) }}>
+            onClick={() => { setError(''); changeStep(Math.max(0, step - 1)) }}>
             <ArrowLeft size={16}/> Previous
           </button>
           <button type="submit" className="rs-button rs-button-primary" disabled={loading}>
