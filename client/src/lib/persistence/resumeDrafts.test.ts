@@ -36,3 +36,11 @@ test('corrupted local draft data never crashes restoration', () => {
  expect(restoreTailorDraft()).toBeNull()
  clearTailorDraft()
 })
+
+
+test('a modified source is tracked across refresh to prevent comparing old results with new inputs', () => {
+ const draft = { version:1 as const, jobDescription:'Modified job description', result:null, approved:false, acceptedEdits:[], view:'tailored' as const, sourceDirty:true }
+ expect(saveTailorDraft(draft)).toBe(true)
+ expect(restoreTailorDraft()?.sourceDirty).toBe(true)
+ clearTailorDraft()
+})

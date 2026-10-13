@@ -18,7 +18,8 @@ function TailorPage() {
   const [jobDescription, setJobDescription] = useState(saved?.jobDescription ?? '')
   const [file, setFile] = useState<File | null>(null)
   const [result, setResult] = useState<TailoringResponse | null>(saved?.result ?? null)
-  const [mode, setMode] = useState<'setup' | 'review'>(saved?.result ? 'review' : 'setup')
+  const [mode, setMode] = useState<'setup' | 'review'>(saved?.result && !saved.sourceDirty ? 'review' : 'setup')
+  const [sourceDirty, setSourceDirty] = useState(saved?.sourceDirty ?? false)
   const [approved, setApproved] = useState(saved?.approved ?? false)
   const [acceptedEdits, setAcceptedEdits] = useState<Set<number>>(() => new Set(saved?.acceptedEdits ?? []))
   const [view, setView] = useState<'tailored' | 'original' | 'comparison'>(saved?.view ?? 'tailored')
@@ -54,6 +55,7 @@ function TailorPage() {
       setResult(job.result)
       setAcceptedEdits(new Set())
       setApproved(false)
+      setSourceDirty(false)
       setMode('review')
       setChangingSource(false)
       window.requestAnimationFrame(() => reviewHeading.current?.focus())
@@ -68,7 +70,7 @@ function TailorPage() {
   useEffect(() => {
     const persist = () => {
       if (!jobDescription.trim() && !result) { clearTailorDraft(); return }
-      if (!saveTailorDraft({ version: 1, jobDescription, result, approved, acceptedEdits: [...acceptedEdits], view })) {
+      if (!saveTailorDraft({ version: 1, jobDescription, result, approved, acceptedEdits: [...acceptedEdits], view, sourceDirty })) {
         setStorageWarning(true)
       }
     }
@@ -78,7 +80,7 @@ function TailorPage() {
       window.clearTimeout(timer)
       window.removeEventListener('pagehide', persist)
     }
-  }, [jobDescription, result, approved, acceptedEdits, view])
+  }, [jobDescription, result, approved, acceptedEdits, view, sourceDirty])
 
   const submit = async () => {
     if (working || !file || !jobDescription.trim()) return
@@ -86,8 +88,9 @@ function TailorPage() {
     setApproved(false)
     setAcceptedEdits(new Set())
     setChangingSource(false)
+    setSourceDirty(false)
     // The global handler may finish while this route is unmounted.
-    if (!saveTailorDraft({ version: 1, jobDescription, result: null, approved: false, acceptedEdits: [], view: 'tailored' })) {
+    if (!saveTailorDraft({ version: 1, jobDescription, result: null, approved: false, acceptedEdits: [], view: 'tailored', sourceDirty: false })) {
       setStorageWarning(true)
     }
     try {
@@ -110,6 +113,7 @@ function TailorPage() {
     setAcceptedEdits(new Set())
     setMode('setup')
     setChangingSource(false)
+    setSourceDirty(false)
     query.removeQueries({ queryKey: ['tailoredResume'], exact: true })
     toast.success('Local tailoring data cleared')
   }
@@ -120,6 +124,8 @@ function TailorPage() {
       return
     }
     fileRevision.current++
+    // A newly selected PDF cannot be compared as the original of the old AI result.
+    if (result) { setSourceDirty(true); setApproved(false) }
     setFile(next)
     if (next) void saveUploadedResume(next).catch(() => setStorageWarning(true))
     else void clearUploadedResume().catch(() => setStorageWarning(true))
@@ -145,11 +151,11 @@ function TailorPage() {
         <div className="mx-auto max-w-3xl">
           <form className="rs-card space-y-6 p-5 md:p-8" onSubmit={event => { event.preventDefault(); void submit() }}>
             {changingSource && result && <div role="note" className="rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--rs-line)' }}>
-              Your previous tailored result is saved. Submit again to generate a new result for changed inputs.
-              <button type="button" className="mt-2 flex items-center gap-1 text-sm underline" onClick={() => { setMode('review'); setChangingSource(false) }}><ArrowLeft size={14}/> Back to existing result</button>
+              {sourceDirty ? 'Your sources have changed. Submit a new tailoring job before reviewing these inputs: the previous result refers to the older source.' : 'Your previous tailored result is saved. Submit again to generate a new result for changed inputs.'}
+              {!sourceDirty && <button type="button" className="mt-2 flex items-center gap-1 text-sm underline" onClick={() => { setMode('review'); setChangingSource(false) }}><ArrowLeft size={14}/> Back to existing result</button>}
             </div>}
             <div><span className="rs-eyebrow" style={{ color: 'var(--rs-muted)' }}>Step 01</span><h2 className="mt-2 text-xl font-semibold">Job description</h2><p className="mt-2 text-sm" style={{ color: 'var(--rs-muted)' }}>Paste the job listing you want to apply for.</p></div>
-            <textarea required aria-label="Job description" className="min-h-[180px] w-full resize-y rounded-xl border bg-transparent p-4 text-sm leading-6" style={{ borderColor: 'var(--rs-line)' }} value={jobDescription} disabled={working} onChange={event => setJobDescription(event.target.value)} placeholder="Paste the full job description…"/>
+            <textarea required aria-label="Job description" className="min-h-[180px] w-full resize-y rounded-xl border bg-transparent p-4 text-sm leading-6" style={{ borderColor: 'var(--rs-line)' }} value={jobDescription} disabled={working} onChange={event => { if (result && event.target.value !== jobDescription) { setSourceDirty(true); setApproved(false) } setJobDescription(event.target.value) }} placeholder="Paste the full job description…"/>
             <div><span className="rs-eyebrow" style={{ color: 'var(--rs-muted)' }}>Step 02</span><h2 className="mt-2 text-xl font-semibold">Your resume</h2></div>
             <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-5 text-center" style={{ borderColor: 'var(--rs-line)' }}>
               {file ? <FileCheck size={24}/> : <UploadCloud size={24}/>}

@@ -80,6 +80,7 @@ export function TailoringJobProvider({ children }: { children: ReactNode }) {
           approved: false,
           acceptedEdits: [],
           view: 'tailored',
+          sourceDirty: false,
         })
         if (!saved) toast.error('Could not save this result locally. Please review it before closing the tab.')
         setResult(parsed.data)
