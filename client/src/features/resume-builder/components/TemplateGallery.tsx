@@ -6,6 +6,16 @@ import ResumeDocument from '../templates/ResumeDocument'
 import A4Preview from './A4Preview'
 import useInputStore from '@/lib/stores/useInputStores'
 
+// Ordered for typical online hiring: ATS-friendly layouts first, then visual styles.
+const preference: Record<ResumeTemplateId, number> = {
+  'ats-essential': 0,
+  'classic': 1,
+  'modern': 2,
+  'executive-modern': 3,
+  'executive': 4,
+}
+const orderedTemplates = [...resumeTemplates].sort((a,b)=>preference[a.id]-preference[b.id])
+
 const SampleThumbnail = memo(function SampleThumbnail({ template }: {template:ResumeTemplateId}) {
  return <div aria-hidden="true" className="rs-template-thumbnail">
    <div className="rs-template-thumbnail-paper">
@@ -57,12 +67,12 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
     <section className="mb-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>Choose your presentation</p>
-          <h2 className="mt-2 text-xl font-semibold">Five reference-inspired layouts. Your story, unchanged.</h2>
-          <p className="mt-1 text-sm" style={{color:'var(--rs-muted)'}}>Templates change presentation and section priority—not your facts. Sample content is fictional.</p>
+          <h2 className="mt-2 text-xl font-semibold">ATS-friendly first. Your story, unchanged.</h2>
+          <p className="mt-1 text-sm" style={{color:'var(--rs-muted)'}}>ATS Essential is recommended for most online applications. Templates change presentation, not your facts. Samples are fictional.</p>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {resumeTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
+        {orderedTemplates.map(item=><article key={item.id} className="rs-card overflow-hidden p-3">
           <SampleThumbnail template={item.id}/>
           <div className="mt-3 flex items-start justify-between gap-2">
             <div><h3 className="text-sm font-semibold">{item.name}</h3>
