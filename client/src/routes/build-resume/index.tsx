@@ -154,6 +154,7 @@ function BuilderPage(){
     </section>
     <section className="rs-card hidden min-w-0 p-4 md:p-6 lg:block"><div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Live resume preview</h2><button type="button" className="rs-button rs-button-outline !min-h-8 text-xs" onClick={()=>setActualPdfOpen(true)}>Inspect actual PDF pages</button></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
    </div>
+   </>}
   </div>
   <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t p-3 pb-[max(12px,env(safe-area-inset-bottom))] lg:hidden" style={{background:'var(--rs-surface)',borderColor:'var(--rs-line)'}}>
     <button type="button" className="rs-button rs-button-outline flex-1" onClick={()=>setMobilePreview(true)}><Eye size={16}/> Preview</button>
@@ -166,6 +167,6 @@ function BuilderPage(){
     </div>
     <A4Preview><ResumeDocument template={template}/></A4Preview>
    </div>}
-   {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}</>}
+   {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
  </ResumashShell>
 }

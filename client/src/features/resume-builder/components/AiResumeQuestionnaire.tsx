@@ -373,7 +373,7 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
                 placeholder="Achievements, volunteering, certifications or background details..." />
             </label>
             <label className="flex items-start gap-3 rounded-xl border p-3 text-sm" style={{borderColor:'var(--rs-line)'}}><input className="mt-1" type="checkbox" checked={answers.writingStyle==='polished'} onChange={event=>update('writingStyle',event.target.checked?'polished':'conservative')}/><span><strong>Help polish my wording.</strong> Improve clarity and tone without adding unverified facts.</span></label>
-            <p className="text-xs leading-6" style={{ color: 'var(--rs-muted)' }>
+            <p className="text-xs leading-6" style={{ color: 'var(--rs-muted)' }}>
               AI may improve the wording, but it cannot verify every fact. Review your draft before sending applications.
               Answers are sent to the resume-generation service for processing.
             </p>
