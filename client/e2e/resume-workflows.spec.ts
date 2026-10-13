@@ -129,6 +129,14 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
  finished=true
  await page.reload()
  await expect(page.getByText('Evidence-backed review')).toBeVisible({timeout:15000})
+ // Tailored review must show the real ATS HTML template, not an auto-refreshing PDF.
+ await expect(page.locator('article.rs-document.rs-template-ats-essential')).toBeVisible()
+ await expect(page.getByText('ATS Essential · live preview')).toBeVisible()
+ await expect(page.getByRole('button',{name:'Fit A4 to available width'})).toBeVisible()
+ await page.getByRole('button',{name:'Inspect actual PDF pages'}).click()
+ await expect(page.getByRole('dialog',{name:'Real PDF page preview'})).toBeVisible()
+ await expect(page.getByTitle('Selectable A4 resume PDF')).toBeVisible({timeout:30000})
+ await page.getByRole('button',{name:'Close'}).click()
  await page.getByRole('button',{name:'Update sources'}).click()
  await expect(page.getByRole('textbox',{name:'Job description'})).toHaveValue(/customer support role/)
  await page.getByRole('textbox',{name:'Job description'}).fill('A replacement job description that is different from the reviewed evidence and requires a new tailoring request.')
