@@ -25,7 +25,7 @@ export function applyApprovedChanges(
       if (inputValue.summary === item.original) inputValue.summary = item.proposed
       return
     }
-    if (section === 'tagFields' && /^jobHighlights-\\d+$/.test(key) && field === 'tags' && row !== undefined && Number.isInteger(row) && row >= 0) {
+    if (section === 'tagFields' && /^jobHighlights-\d+$/.test(key) && field === 'tags' && row !== undefined && Number.isInteger(row) && row >= 0) {
       const bullets = tagFields[key]?.tags
       if (bullets && bullets[row] === item.original) bullets[row] = item.proposed
       return
