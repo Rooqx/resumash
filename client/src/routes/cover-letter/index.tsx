@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { createElement, type ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
 import { createFileRoute } from '@tanstack/react-router'
-import { Download, FileText, Sparkles, RefreshCw, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Download, FileText, Sparkles, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveAs } from 'file-saver'
 import { z } from 'zod'
@@ -13,7 +13,6 @@ import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 
 export const Route = createFileRoute('/cover-letter/')({ component: CoverLetterPage })
-type Tone = 'Professional' | 'Conversational' | 'Enthusiastic' | 'Concise'
 const DRAFT_KEY = 'resumash:cover-letter:draft:v1'
 const draftSchema = z.object({
   name: z.string(), role: z.string(), company: z.string(),
