@@ -35,7 +35,7 @@ export default function ResumeReview({ result, originalUrl, view, onViewChange, 
       </div>}
       {(view === 'tailored' || view === 'comparison') && <div className="min-w-0">
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{color:'var(--rs-muted)'}}>ATS Essential · actual PDF pages</p>
-        {result ? <ResumePdfPreview template="ats-essential" snapshot={result} label="Tailored ATS Essential PDF preview"/> :
+        {result ? <ResumePdfPreview template="ats-essential" snapshot={{ inputValue: result.inputValue, fields: result.fields, tagFields: result.tagFields ?? {} }} label="Tailored ATS Essential PDF preview"/> :
           <p className="p-6 text-center text-sm">Your reviewed resume will appear here.</p>}
       </div>}
     </div>
