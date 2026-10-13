@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { Download, ChevronRight, FileText, Sparkles, Eye, ArrowLeft, LayoutTemplate } from 'lucide-react'
@@ -161,13 +162,17 @@ function BuilderPage(){
     <button type="button" className="rs-button rs-button-outline flex-1" onClick={()=>setMobilePreview(true)}><Eye size={16}/> Preview</button>
     <button type="button" className="rs-button rs-button-primary flex-1" disabled={downloading} onClick={()=>void downloadResume(filename,setDownloading,template)}><Download size={16}/>{downloading?'Preparing…':'Download'}</button>
    </div>}
-   {mobilePreview&&<div role="dialog" aria-modal="true" aria-label="Resume preview" className="fixed inset-0 z-[70] overflow-y-auto p-3" style={{background:'var(--rs-page)'}}>
+   <Dialog.Root open={mobilePreview} onOpenChange={setMobilePreview}><Dialog.Portal>
+    <Dialog.Overlay className="fixed inset-0 z-[65] bg-black/55"/>
+    <Dialog.Content className="fixed inset-0 z-[70] overflow-y-auto p-3" style={{background:'var(--rs-page)'}}>
+     <Dialog.Title className="sr-only">Resume preview</Dialog.Title>
+     <Dialog.Description className="sr-only">Inspect the current resume and return to the editor.</Dialog.Description>
     <div className="sticky top-0 z-10 mb-3 flex flex-wrap items-center justify-between gap-3 border-b py-3" style={{background:'var(--rs-page)',borderColor:'var(--rs-line)'}}>
      <button type="button" className="rs-button rs-button-outline !min-h-10" onClick={()=>setMobilePreview(false)}><ArrowLeft size={16}/> Back to builder</button>
      <button type="button" className="rs-button rs-button-primary !min-h-10" disabled={downloading} onClick={()=>void downloadResume(filename,setDownloading,template)}><Download size={15}/> Download</button>
     </div>
     <A4Preview><ResumeDocument template={template}/></A4Preview>
-   </div>}
+    </Dialog.Content></Dialog.Portal></Dialog.Root>
    {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
  </ResumashShell>
 }

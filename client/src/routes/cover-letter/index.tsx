@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { createElement, type ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
 import { createFileRoute } from '@tanstack/react-router'
@@ -200,12 +201,16 @@ function CoverLetterPage() {
       <button type="button" className="rs-button rs-button-outline flex-1" onClick={()=>setMobilePreview(true)}><FileText size={15}/> Preview</button>
       <button type="button" className="rs-button rs-button-primary flex-1" disabled={!data.letter.trim()||isExporting} onClick={()=>void download()}><Download size={15}/> Download</button>
     </div>
-    {mobilePreview && <div role="dialog" aria-modal="true" aria-label="Cover letter preview" className="fixed inset-0 z-[70] overflow-y-auto p-3" style={{background:'var(--rs-page)'}}>
+    <Dialog.Root open={mobilePreview} onOpenChange={setMobilePreview}><Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-[65] bg-black/55"/>
+      <Dialog.Content className="fixed inset-0 z-[70] overflow-y-auto p-3" style={{background:'var(--rs-page)'}}>
+        <Dialog.Title className="sr-only">Cover letter preview</Dialog.Title>
+        <Dialog.Description className="sr-only">Read and download your current cover letter draft.</Dialog.Description>
       <div className="sticky top-0 z-10 mb-3 flex items-center justify-between border-b py-3" style={{background:'var(--rs-page)',borderColor:'var(--rs-line)'}}>
         <button type="button" onClick={()=>setMobilePreview(false)} className="rs-button rs-button-outline !min-h-10"><ArrowLeft size={16}/> Back to editor</button>
         <button type="button" onClick={()=>void download()} disabled={!data.letter.trim()||isExporting} className="rs-button rs-button-primary !min-h-10"><Download size={16}/> PDF</button>
       </div>
       {preview}
-    </div>}
+      </Dialog.Content></Dialog.Portal></Dialog.Root>
   </div></ResumashShell>
 }
