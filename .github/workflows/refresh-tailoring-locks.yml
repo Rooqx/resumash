@@ -1,0 +1,30 @@
+name: Refresh Tailoring Dependency Locks
+on:
+  push:
+    branches: [feat/durable-anonymous-tailoring]
+    paths:
+      - 'server/package.json'
+      - '.github/workflows/refresh-tailoring-locks.yml'
+permissions:
+  contents: write
+jobs:
+  lockfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/durable-anonymous-tailoring
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+        working-directory: server
+      - run: npm install --package-lock-only --ignore-scripts
+        working-directory: server
+      - name: Commit regenerated lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/bun.lock server/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: lock BullMQ and ioredis dependencies"
+            git push origin HEAD:feat/durable-anonymous-tailoring
+          fi

@@ -33,7 +33,7 @@ function TailorPage(){
  useEffect(()=>{
   let cancelled=false
   void restoreActiveTailorJob().then(saved=>{
-   if(!cancelled&&saved&&!restored?.result)setActiveJob(saved)
+   if(!cancelled&&saved){setResult(null);setActiveJob(saved)}
   }).catch(()=>setStorageWarning(true)).finally(()=>{if(!cancelled)setRestoringJob(false)})
   return ()=>{cancelled=true}
  },[restored])
@@ -134,6 +134,8 @@ function TailorPage(){
   if(status==='completed'){
    const parsed=tailoringResponseSchema.safeParse(payload)
    if(parsed.success){
+    // Write the finished document synchronously before discarding the token.
+    if(!saveTailorDraft({version:1,jobDescription,result:parsed.data,approved:false,acceptedEdits:[],view}))setStorageWarning(true)
     setResult(parsed.data)
     setApproved(false)
     setAcceptedEdits(new Set())
@@ -151,7 +153,7 @@ function TailorPage(){
   }else return
   setActiveJob(null)
   void clearActiveTailorJob().catch(()=>setStorageWarning(true))
- },[activeJob,statusQuery.data,query])
+ },[activeJob,statusQuery.data,query,jobDescription,view])
  useEffect(()=>{
   if(!activeJob||!axios.isAxiosError(statusQuery.error))return
   const code=statusQuery.error.response?.status
@@ -167,7 +169,7 @@ function TailorPage(){
  return <ResumashShell>
   <SEO title="Tailor your resume | Resumash" description="Tailor your resume to a job description and refine the result." />
   <div className="rs-container py-10 md:py-16">
-   <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><span className="text-xs opacity-70">{storageWarning?'Local saving unavailable in this browser':'Draft automatically saved on this device'}</span><button type="button" className="rs-button rs-button-outline !min-h-9 text-xs" onClick={clearSavedWork}>Clear saved tailoring</button></div>
+   <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><span className="text-xs opacity-70">{storageWarning?'Local saving unavailable in this browser':'Draft automatically saved on this device'}</span><button type="button" className="rs-button rs-button-outline !min-h-9 text-xs" onClick={clearSavedWork} disabled={restoringJob}>Clear saved tailoring</button></div>
    <div className="mb-9"><p className="rs-eyebrow" style={{color:'var(--rs-muted)'}}>01 / Resume tailoring</p><h1 className="rs-editorial mt-3 text-5xl md:text-7xl">The right story for the right role.</h1><p className="mt-4 max-w-2xl text-sm leading-7" style={{color:'var(--rs-muted)'}}>Upload your resume, add the job description, and review a tailored version built around your actual experience.</p></div>
    <div className={`grid items-start gap-5 ${view==='comparison' ? 'lg:grid-cols-[minmax(270px,.65fr)_minmax(0,2fr)]' : 'lg:grid-cols-[minmax(280px,1fr)_minmax(360px,1.3fr)_minmax(250px,.8fr)]'}`}>
     <form className="rs-card space-y-6 p-5 md:p-6" onSubmit={e=>{e.preventDefault();if(!working)mutation.mutate()}}>

@@ -1,4 +1,4 @@
-import { Router, type Request } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 
 import {
   generateResumePDF,
@@ -17,7 +17,7 @@ const resumeRouter = Router();
 const upload = uploadMiddleware();
 // Check for a previously accepted idempotency key before charging quota again.
 // Replay never starts another model request, including after the first response was lost.
-resumeRouter.post("/tailor", asyncHandler(async (req, res, next) => {
+resumeRouter.post("/tailor", asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Cache-Control", "no-store");
   const id = req.header("X-Resume-Job-Id");
   const token = req.header("X-Resume-Job-Token");

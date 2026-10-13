@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import IORedis from "ioredis";
 import { REDIS_URI } from "../configs/env.configs";
 import { logger } from "../utils/logger";
-import { TAILOR_QUEUE, completeJob, getAuthorizedJob, updateJob, jobRedis } from "../modules/tailoring/tailor-job-store";
+import { TAILOR_QUEUE, completeJob, updateJob, jobRedis } from "../modules/tailoring/tailor-job-store";
 import { tailorResumeFromText } from "../modules/tailoring/tailor.service";
 
 if (!REDIS_URI) throw new Error("REDIS_URI is required for the tailoring worker");

@@ -92,7 +92,7 @@ export async function updateJob(id: string, status: JobStatus, error?: string): 
   const record = JSON.parse(raw) as JobRecord;
   return (await jobRedis().set(key(id),
     JSON.stringify({ ...record, status, updatedAt: Date.now(), ...(error ? { error } : {}) }),
-    "XX", "KEEPTTL")) === "OK";
+    "KEEPTTL", "XX")) === "OK";
 }
 export async function completeJob(id: string, result: unknown): Promise<void> {
   // The job may have expired during a long wait. Don't retain private data beyond expiry.
