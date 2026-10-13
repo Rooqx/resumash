@@ -158,6 +158,11 @@ export default function AiResumeQuestionnaire({ onDraft, onClose }: Questionnair
       changeStep(0)
       return
     }
+    if (answers.experience.some(job => !job.company.trim() || !job.position.trim() || (job.responsibilities.trim().length < 10 && job.achievements.trim().length < 10))) {
+      setError('Complete or remove each job entry. Include a real duty or achievement.')
+      changeStep(1)
+      return
+    }
     if (!answers.experience.length && !answers.education.length &&
         !answers.projects.length && !answers.skills.trim()) {
       setError('Add some experience, education, projects or skills so AI has facts to work with.')

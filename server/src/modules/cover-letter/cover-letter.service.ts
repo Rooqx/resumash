@@ -17,6 +17,8 @@ markdown, placeholders masquerading as verified facts, or irrelevant embellishme
     coverLetterDraftSchema,
   );
   // Never allow an AI-produced numerical achievement without source evidence.
-  assertNumericalClaimsSupported(JSON.stringify(input), [draft.letter]);
+  // The job listing describes desired qualifications, not the applicant's
+  // verified achievements. Only the applicant biography is evidence.
+  assertNumericalClaimsSupported(input.experience, [draft.letter]);
   return { ...draft, requiresReview: true };
 }

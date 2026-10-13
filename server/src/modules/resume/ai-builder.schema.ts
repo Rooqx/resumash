@@ -20,6 +20,8 @@ export const questionnaireSchema = z.object({
     endDate: z.string().trim().max(40).default(""),
     responsibilities: z.string().trim().max(2_000),
     achievements: z.string().trim().max(2_000).optional().default(''),
+  }).refine(job => job.responsibilities.length >= 10 || job.achievements.length >= 10, {
+    message: 'Describe at least one real responsibility or achievement.',
   })).max(10).default([]),
   education: z.array(z.object({
     institution: z.string().trim().min(1).max(160),
