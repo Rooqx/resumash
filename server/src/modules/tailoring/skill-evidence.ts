@@ -61,7 +61,12 @@ export function omitUnverifiedSkills<T extends SkillResume>(
       removedCount += candidates.length - supported.length;
       if (supported.length === 0) continue;
       const next = retainedRows.length;
-      retainedRows.push(row);
+      // Non-category labels can themselves assert proficiency, even when
+      // their tags are supported. Replace unsupported labels with a neutral
+      // category, rather than displaying an AI-invented skill as the heading.
+      const verifiedLabel = label && (groupLabel.test(label) || skillClearlyInSource(source, label));
+      if (!verifiedLabel) removedCount++;
+      retainedRows.push(verifiedLabel ? row : { ...row, skillName: "Relevant Skills" });
       retainedTags[`skills-${next}`] = { ...original!, tags: supported };
     } else if (label && !groupLabel.test(label) && skillClearlyInSource(source, label)) {
       retainedRows.push(row);

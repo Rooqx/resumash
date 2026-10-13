@@ -78,3 +78,13 @@ test("critical numeric and employer checks still reject invented claims", () => 
     experience:[{companyName:"Fictional New Employer"}],
   })).toThrow();
 });
+
+test("unsupported skill headings are also removed when their tags are supported", () => {
+  const result = omitUnverifiedSkills("Used TypeScript at work.", {
+    fields: { skills: [{skillName: "Python"}] },
+    tagFields: { "skills-0": {tags:["TypeScript"],...fact} },
+  });
+  expect(result.removedCount).toBe(1);
+  expect(result.resume.fields.skills).toEqual([{skillName:"Relevant Skills"}]);
+  expect(result.resume.tagFields?.["skills-0"]?.tags).toEqual(["TypeScript"]);
+});
