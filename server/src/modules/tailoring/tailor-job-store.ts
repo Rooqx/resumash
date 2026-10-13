@@ -86,13 +86,26 @@ export async function enqueueTailoring(
 }
 
 /** Preserve the original TTL: status updates must never extend access lifetime. */
+/**
+ * Perform a status transition atomically. A late "failed" update from a
+ * polling request must never overwrite a successfully saved completed result.
+ * SET KEEPTTL preserves the 24-hour privacy expiry.
+ */
+const TRANSITION_SCRIPT = `
+local original = redis.call('GET', KEYS[1])
+if not original then return 0 end
+local record = cjson.decode(original)
+if record.status == 'completed' or record.status == 'failed' then return 0 end
+if ARGV[1] == 'processing' and record.status ~= 'queued' then return 0 end
+if ARGV[1] == 'completed' and record.status ~= 'processing' then return 0 end
+record.status = ARGV[1]
+record.updatedAt = tonumber(ARGV[2])
+if ARGV[3] ~= '' then record.error = ARGV[3] end
+redis.call('SET', KEYS[1], cjson.encode(record), 'KEEPTTL')
+return 1
+`;
 export async function updateJob(id: string, status: JobStatus, error?: string): Promise<boolean> {
-  const raw = await jobRedis().get(key(id));
-  if (!raw) return false;
-  const record = JSON.parse(raw) as JobRecord;
-  return (await jobRedis().set(key(id),
-    JSON.stringify({ ...record, status, updatedAt: Date.now(), ...(error ? { error } : {}) }),
-    "KEEPTTL", "XX")) === "OK";
+  return (await jobRedis().eval(TRANSITION_SCRIPT, 1, key(id), status, Date.now(), error ?? "")) === 1;
 }
 export async function completeJob(id: string, result: unknown): Promise<void> {
   // The job may have expired during a long wait. Don't retain private data beyond expiry.

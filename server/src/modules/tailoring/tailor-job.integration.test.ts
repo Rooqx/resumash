@@ -35,7 +35,7 @@ suite("anonymous job lifecycle with real Redis", () => {
   it("queues once, securely retrieves the result and deduplicates an accepted replay", async () => {
     await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
     await enqueueTailoring(id, token, "Synthetic resume", "Synthetic role description");
-    expect(getAuthorizedJob(id, wrongToken)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(getAuthorizedJob(id, wrongToken)).rejects.toMatchObject({ statusCode: 404 });
 
     let record = await getAuthorizedJob(id, token);
     for (let n = 0; n < 100 && record?.status !== "completed"; n++) {
@@ -44,6 +44,9 @@ suite("anonymous job lifecycle with real Redis", () => {
     }
     expect(record?.status).toBe("completed");
     expect(await readJobResult(id)).toMatchObject({ requiresReview: true });
+    // A late failure transition must not undo the completed result.
+    expect(await updateJob(id, "failed", "This is too late")).toBe(false);
+    expect((await getAuthorizedJob(id, token))?.status).toBe("completed");
     await enqueueTailoring(id, token, "Different text", "Different role");
     await new Promise(resolve => setTimeout(resolve, 200));
     expect(calls).toBe(1);

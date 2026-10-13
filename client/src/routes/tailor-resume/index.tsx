@@ -24,7 +24,6 @@ function TailorPage(){
  const [originalUrl,setOriginalUrl]=useState<string|null>(null)
  const [storageWarning,setStorageWarning]=useState(false)
  const fileRevision=useRef(0)
- const generationRevision=useRef(0)
  const [activeJob,setActiveJob]=useState<TailorJobCredentials|null>(null)
  const [restoringJob,setRestoringJob]=useState(true)
  const [jobMessage,setJobMessage]=useState<string|null>(null)
@@ -75,7 +74,6 @@ function TailorPage(){
  },[jobDescription,result,approved,acceptedEdits,view])
 
  const clearSavedWork=()=>{
-  generationRevision.current++
   fileRevision.current++
   clearTailorDraft()
   void clearActiveTailorJob().catch(()=>setStorageWarning(true))
@@ -89,7 +87,8 @@ function TailorPage(){
   setApproved(false)
   setAcceptedEdits(new Set())
   setView('tailored')
-  toast.success('Locally saved tailoring draft cleared')
+  if(activeJob)toast.message('Local data cleared. The remote job may still finish before it expires.')
+  else toast.success('Locally saved tailoring draft cleared')
  }
  const navigate=useNavigate()
  const mutation=useMutation({
@@ -105,10 +104,10 @@ function TailorPage(){
    await submitTailoringJob({file,jobDescription,credentials})
   },
   onError:(error:Error)=>{
-   if(axios.isAxiosError(error)&&error.response){
+   if(!axios.isAxiosError(error)||error.response){
     setActiveJob(null)
     void clearActiveTailorJob().catch(()=>setStorageWarning(true))
-    const message=typeof error.response.data?.message==='string'?error.response.data.message:error.message
+    const message=axios.isAxiosError(error)&&typeof error.response?.data?.message==='string'?error.response.data.message:error.message
     setJobMessage(message)
     toast.error(message)
    }else{
@@ -180,7 +179,7 @@ function TailorPage(){
       {file?<FileCheck size={25}/>:<UploadCloud size={25}/>}
       <span className="max-w-full break-all text-sm font-semibold">{file?file.name:'Choose your resume'}</span>
       <span className="text-xs" style={{color:'var(--rs-muted)'}}>PDF resume • up to 10 MB</span>
-      <input type="file" className="sr-only" disabled={working} accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}generationRevision.current++;fileRevision.current++;setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set());if(next){void saveUploadedResume(next).catch(()=>setStorageWarning(true))}else{void clearUploadedResume().catch(()=>{})}}}/>
+      <input type="file" className="sr-only" disabled={working} accept=".pdf,application/pdf" onChange={e=>{const next=e.target.files?.[0]??null;if(next&&next.size>10*1024*1024){toast.error('Maximum file size is 10 MB');setFile(null);return}fileRevision.current++;setFile(next);setResult(null);setApproved(false);setAcceptedEdits(new Set());if(next){void saveUploadedResume(next).catch(()=>setStorageWarning(true))}else{void clearUploadedResume().catch(()=>{})}}}/>
      </label>
      <button className="rs-button rs-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50" disabled={!file||!jobDescription.trim()||working} type="submit"><Sparkles size={17}/>{working?'Tailoring your resume…':'Tailor my resume'}<ArrowRight size={16}/></button>
      <div role="status" aria-live="polite" className="text-xs leading-6" style={{color:'var(--rs-muted)'}}>
