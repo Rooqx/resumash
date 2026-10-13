@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import Image from './Image'
 import useInputStore from '@/lib/stores/useInputStores'
 
@@ -26,7 +26,7 @@ export default function Input({
   // inputWidth = "full",
   value,
   onChange,
-  inputBG = '#F7F8FA',
+  inputBG: _inputBG = '#F7F8FA',
   labelFor,
   imgSrc,
   type,
@@ -35,23 +35,23 @@ export default function Input({
   userInputContent,
   passwordVisibility = false,
   className,
-  focusBorder = true,
+  focusBorder: _focusBorder = true,
 }: InputProps) {
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)
+  const id = useId()
   // Zustand store selectors
   const { inputValue, setInputValue } = useInputStore()
 
   // Handle input change and update store
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(labelFor, e.target.value)
-    console.log(inputValue)
   }
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
       <div className="flex flex-col gap-[8px] w-full text-xs urbanist">
-        <label htmlFor={labelFor} className="p-1 font-[500]">
+        <label htmlFor={id} className="p-1 font-[500]">
           {inputTittle}
         </label>
         <div className="relative">
@@ -65,7 +65,7 @@ export default function Input({
             />
           )}
           <input
-            id={labelFor}
+            id={id}
             name={labelFor}
             type={type === 'password' && seePassword ? 'text' : type}
             placeholder={placeholder}
@@ -81,17 +81,9 @@ export default function Input({
                 handleChange(e) // Zustand fallback
               }
             }}
-            className={`${
-              !className
-                ? `bg-[${inputBG}] placeholder-text-[4px] text-[#ededed] font-[500] w-full rounded-[4px] border border-[#E5E7EB] py-[10px] pr-[16px] ${
-                    imgSrc ? 'pl-[44px]' : 'pl-[16px]'
-                  } `
-                : className
-            }`}
+            className={className ?? 'w-full rounded-lg border px-3 py-2.5 text-sm outline-offset-2'}
+            style={{ backgroundColor: 'var(--rs-page)', color: 'var(--rs-ink)', borderColor: 'var(--rs-line)' }}
             autoComplete="off"
-            style={{
-              borderColor: focusBorder ? 'indigo-700' : 'transparent',
-            }}
           />
           {passwordVisibility && (
             <button
@@ -104,7 +96,7 @@ export default function Input({
           )}
         </div>
       </div>
-      <p className="w-full text-[14px] font-[400] mt-1 text-[#2F2F30] urbanist">
+      <p className="w-full text-[14px] font-[400] mt-1 text-[var(--rs-muted)] urbanist">
         {userInputContent}
       </p>
       <div className="flex items-center justify-end w-full"></div>

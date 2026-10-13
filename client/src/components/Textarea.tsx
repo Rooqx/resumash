@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import Image from './Image'
 import useInputStore from '@/lib/stores/useInputStores'
 
@@ -7,7 +7,7 @@ interface InputProps {
   inputTittle?: string
   inputWidth?: string
   value?: string // optional controlled value
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void // controlled change handler
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void // controlled change handler
   inputBG?: string
   inputHeight?: string
   labelFor: string
@@ -37,25 +37,22 @@ export default function Textarea({
   userInputContent,
   passwordVisibility = false,
   className,
-  focusBorder = true,
-  noBorder = true,
-  rounded = true,
 }: InputProps) {
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)
+  const id = useId()
   // Zustand store selectors
   const { inputValue, setInputValue } = useInputStore()
 
   // Handle input change and update store
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(labelFor, e.target.value)
-    console.log(inputValue)
   }
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
       <div className="flex flex-col gap-[8px] w-full text-xs urbanist">
-        <label htmlFor={labelFor} className="p-1 font-[500]">
+        <label htmlFor={id} className="p-1 font-[500]">
           {inputTittle}
         </label>
         <div className="relative">
@@ -69,7 +66,7 @@ export default function Textarea({
             />
           )}
           <textarea
-            id={labelFor}
+            id={id}
             name={labelFor}
             placeholder={placeholder}
             value={
@@ -79,21 +76,16 @@ export default function Textarea({
             }
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
               if (onChange) {
-                onChange(e as any) // controlled case
+                onChange(e) // controlled case
               } else {
-                handleChange(e as any) // Zustand fallback
+                handleChange(e) // Zustand fallback
               }
             }}
-            className={`${
-              !className
-                ? `outline-none text-[#ededed] font-[500] w-full min-h-[150px] resize-none ${rounded ? 'rounded-[4px]' : 'rounded-2xl'} ${noBorder ? 'border border-[#E5E7EB]' : ''} py-[10px] pr-[16px] ${
-                    imgSrc ? 'pl-[44px]' : 'pl-[16px]'
-                  } `
-                : className
-            }`}
+            className={className ?? 'min-h-[140px] w-full resize-y rounded-lg border px-3 py-2.5 text-sm outline-offset-2'}
             autoComplete="off"
             style={{
-              borderColor: focusBorder ? 'indigo-700' : 'transparent',
+              borderColor: 'var(--rs-line)',
+              color: 'var(--rs-ink)',
               height: inputHeight,
               backgroundColor: inputBG,
             }}
@@ -109,7 +101,7 @@ export default function Textarea({
           )}
         </div>
       </div>
-      <p className="w-full text-xs font-[400] mt-1 text-[#2F2F30] urbanist">
+      <p className="w-full text-xs font-[400] mt-1 text-[var(--rs-muted)] urbanist">
         {userInputContent}
       </p>
       <div className="flex items-center justify-end w-full"></div>

@@ -18,7 +18,10 @@ export const questionnaireSchema = z.object({
     position: z.string().trim().min(1).max(120),
     startDate: z.string().trim().max(40).default(""),
     endDate: z.string().trim().max(40).default(""),
-    responsibilities: z.string().trim().min(10).max(2_000),
+    responsibilities: z.string().trim().max(2_000),
+    achievements: z.string().trim().max(2_000).optional().default(''),
+  }).refine(job => job.responsibilities.length >= 10 || job.achievements.length >= 10, {
+    message: 'Describe at least one real responsibility or achievement.',
   })).max(10).default([]),
   education: z.array(z.object({
     institution: z.string().trim().min(1).max(160),
@@ -32,6 +35,7 @@ export const questionnaireSchema = z.object({
     description: z.string().trim().min(5).max(1_500),
   })).max(10).default([]),
   additionalInfo: z.string().trim().max(3_000).default(""),
+  writingStyle: z.enum(["polished","conservative"]).default("polished"),
 }).strict();
 
 export type Questionnaire = z.infer<typeof questionnaireSchema>;

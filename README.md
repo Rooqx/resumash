@@ -37,6 +37,16 @@ recovery even when the original HTTP 202 acknowledgement is lost. The
 server stores a SHA-256 digest, never the plaintext token. Do not put the
 token in a URL, console log, or analytics event.
 
+## Workspace UX
+
+The current UI includes a root-level background tailoring widget, a two-mode tailoring
+review flow, AI-first interview with manual resume editing, ATS-first templates,
+mobile preview/export controls, and an editable locally saved cover letter with
+browser PDF export. The completed tailoring result remains evidence-gated.
+
+See [Workspace UX contracts](docs/UX_REDESIGN.md) for lifecycle, privacy,
+accessibility, operational caveats and acceptance requirements.
+
 ## Local development
 
 Requires a running Redis/Valkey instance compatible with BullMQ, Bun,

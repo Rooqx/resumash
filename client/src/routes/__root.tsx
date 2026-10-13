@@ -1,16 +1,16 @@
 import { Outlet, createRootRoute, useRouterState } from '@tanstack/react-router'
-import { useIsFetching } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
+import { TailoringJobProvider } from '@/features/resume-tailor/components/TailoringJobManager'
+import { ToasterProvider } from '@/components/Toaster'
 
 // Loading component
 function NavigationLoader() {
-  const isFetching = useIsFetching()
   const routerState = useRouterState()
   const isNavigating = routerState.isLoading // TanStack Router's navigation state
 
-  // Show spinner for either data fetching OR navigation
-  const showLoader = isFetching > 0 || isNavigating
+  // Background polling and stale-data refreshes never block the workspace.
+  const showLoader = isNavigating
 
   if (!showLoader) return null
 
@@ -30,7 +30,8 @@ const isProd = import.meta.env.PROD
 export const Route = createRootRoute({
   component: () => (
     <>
-      <Outlet />
+      <TailoringJobProvider><Outlet /></TailoringJobProvider>
+      <ToasterProvider />
       <NavigationLoader />
       {isProd ? (
         ''

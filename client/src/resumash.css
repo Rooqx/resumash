@@ -135,11 +135,18 @@
 .rs-legacy-builder input::placeholder,
 .rs-legacy-builder textarea::placeholder { color: var(--rs-muted) !important; }
 .rs-legacy-builder .border { border-color: var(--rs-line); }
-.rs-legacy-builder button { color: var(--rs-ink); border-color: var(--rs-line); }
-.rs-legacy-builder button.bg-\\[white\\] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
+.rs-legacy-builder button:not(.rs-button):not([class*="bg-"]) { color: var(--rs-ink); border-color: var(--rs-line); }
+.rs-legacy-builder button[class*="bg-"][class*="inverse"] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
+.rs-legacy-builder button.rs-button-primary { background: var(--rs-inverse); color: var(--rs-inverse-text); }
 
 .rs-letter-print { display: none; }
 @media print {
  .rs-letter-print { display: block !important; color: #111 !important; }
  .rs-cover-preview textarea { display: none !important; }
 }
+
+/* Shared workspace input surface: inherits theme values in light and dark modes. */
+.rs-form-input { display:block; margin-top:8px; width:100%; min-width:0; border:1px solid var(--rs-line); border-radius:10px; padding:12px; background:var(--rs-page); color:var(--rs-ink); font-size:14px; line-height:1.6; outline-offset:2px; }
+.rs-form-input::placeholder { color:var(--rs-muted); }
+.rs-form-input:focus-visible { outline:2px solid var(--rs-ink); }
+@media (max-width:640px) { .rs-letter-page { min-height:0; } }

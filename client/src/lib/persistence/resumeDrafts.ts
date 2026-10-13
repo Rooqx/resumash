@@ -14,6 +14,8 @@ const tailorDraftSchema = z.object({
   approved: z.boolean(),
   acceptedEdits: z.array(z.number().int().nonnegative()).max(100),
   view: z.enum(['original', 'tailored', 'comparison']),
+  /** True if the job description or PDF changed after a result was generated. */
+  sourceDirty: z.boolean().optional(),
 })
 export type TailorDraft = z.infer<typeof tailorDraftSchema>
 

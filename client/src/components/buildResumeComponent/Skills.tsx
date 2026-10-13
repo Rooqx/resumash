@@ -6,7 +6,7 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 
 export default function Skills() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
-  const { removeField } = useTagStore()
+  const { shiftIndexedTags } = useTagStore()
   const isEmpty = fields['skills']?.length === 0
 
   /** */
@@ -16,10 +16,7 @@ export default function Skills() {
         <h3 className="text-sm font-semibold">Skills</h3>
         {isEmpty && (
           <button
-            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
-             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
-             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
-              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+            className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
               addField('skills', 0)
             }}
@@ -32,7 +29,7 @@ export default function Skills() {
         )}
       </span>
       {fields['skills']?.map((field: any, i) => (
-        <div key={i} className="border p-4 rounded-md">
+        <div key={field.id ?? i} className="border p-4 rounded-md">
           <Input
             type="text"
             labelFor="skillName"
@@ -44,24 +41,24 @@ export default function Skills() {
             placeholder="e.g., Frontend Development, Cybersecurity, DevOps"
           />
           <TagInput
-            key={field.i}
+            key={field.id ?? i}
             name={`skills-${i}`} // unique per field
             onChange={(t) => t}
           />{' '}
           <div className="mt-4 space-y-3">
             <button
-              className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+              className="rs-button rs-button-outline mt-4 w-full"
               onClick={() => {
                 deleteField('skills', i)
-                removeField(`skills-${i}`)
+                shiftIndexedTags('skills', i, 'remove')
               }}
             >
-              <Trash className="hover:text-black z-1" size={16} />
-              <p className="z-2 hover:text-black "> Delete Skill</p>
+              <Trash  size={16} />
+              <p > Delete Skill</p>
             </button>{' '}
             <button
-              className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-              onClick={() => addField('skills', i)}
+              className="rs-button rs-button-primary w-full"
+              onClick={() => { shiftIndexedTags('skills', i, 'insert'); addField('skills', i) }}
             >
               <Plus size={16} /> Add new skill
             </button>

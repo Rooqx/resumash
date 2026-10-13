@@ -1,4 +1,5 @@
-import { Plus, Trash } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash, ChevronDown } from 'lucide-react'
 import Input from '@/components/Input'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
@@ -7,8 +8,15 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 
 export default function Experience() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
-  const { removeField } = useTagStore()
+  const { shiftIndexedTags } = useTagStore()
   const isEmpty = fields['experience']?.length === 0
+  const [openNewId, setOpenNewId] = useState<string | null>(null)
+  const addEntry = (index?: number) => {
+    addField('experience', index)
+    const current=useFieldStores.getState().fields['experience'] ?? []
+    const addedIndex=index === undefined ? current.length - 1 : Math.min(index+1,current.length-1)
+    setOpenNewId(current[addedIndex]?.id ?? null)
+  }
   /**  */
   return (
     <div className="space-y-4 mt-6">
@@ -16,12 +24,9 @@ export default function Experience() {
         <h3 className="text-sm font-semibold">Experiences</h3>
         {isEmpty && (
           <button
-            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
-             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
-             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
-              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+            className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
-              addField('experience', 0)
+              addEntry()
             }}
           >
             <span className="flex gap-2 items-center z-10">
@@ -32,7 +37,14 @@ export default function Experience() {
         )}
       </span>
       {fields['experience']?.map((field: any, i: number) => (
-        <div key={i} className="border p-4 rounded-md">
+        <details key={field.id ?? i} open={openNewId === null ? i === 0 : openNewId === String(field.id ?? i)}
+          onToggle={event => {
+            const id=String(field.id ?? i)
+            const opened=event.currentTarget.open
+            setOpenNewId(current=>opened ? id : current===id ? '' : current)
+          }} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-4 text-sm font-semibold"><span>{field.jobPosition || field.companyName || 'Untitled experience'}</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180"/></summary>
+          <div className="space-y-4 p-4 pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="text"
@@ -93,23 +105,24 @@ export default function Experience() {
           />
           <div className="mt-4 space-y-3">
             <button
-              className={`py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white`}
+              className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
               onClick={() => {
                 deleteField('experience', i)
-                removeField(`jobHighlights-${i}`)
+                shiftIndexedTags('jobHighlights', i, 'remove')
               }}
             >
-              <Trash className="hover:text-black z-1" size={16} />
-              <p className="z-2 hover:text-black "> Delete Experience</p>
+              <Trash  size={16} />
+              <p > Delete Experience</p>
             </button>{' '}
             <button
-              className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-              onClick={() => addField('experience', i)}
+              className="rs-button rs-button-primary w-full"
+              onClick={() => { shiftIndexedTags('jobHighlights', i, 'insert'); addEntry(i) }}
             >
               <Plus size={16} /> Add New Experience
             </button>
           </div>
-        </div>
+          </div>
+        </details>
       ))}
     </div>
   )

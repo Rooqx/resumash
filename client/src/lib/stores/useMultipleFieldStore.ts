@@ -28,7 +28,8 @@ const useFieldStores = create<MultipleFieldStores>()(persist((set) => ({
   addField: (section, index) =>
     set((state) => {
       const currentFields = state.fields[section] || [] // fallback to empty object
-      const newField = {}
+      // Stable identity prevents React from reusing an unrelated item on insertion.
+      const newField = { id: crypto.randomUUID() }
 
       const fields = [...currentFields]
       if (typeof index === 'number' && index >= 0 && index < fields.length) {

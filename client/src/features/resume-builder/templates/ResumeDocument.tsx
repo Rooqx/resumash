@@ -89,7 +89,7 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
  </Section>
  const projects=entries.projects.length>0&&<Section title="Projects">
   {entries.projects.map((item,i)=><Entry key={i} heading={text(item.name)} detail={text(item.description)}
-   items={tags[`projectHighlights-${i}`]?.tags}/>)}
+   items={[...(tags[`projectHighlights-${i}`]?.tags ?? []), ...(tags[`projectTechnologies-${i}`]?.tags?.length ? [`Technologies: ${tags[`projectTechnologies-${i}`].tags.join(", ")}`] : [])]}/>)}
  </Section>
  const additional=(entries.certificates.length>0||entries.awards.length>0)&&<Section title={selected==='executive'?'Professional Development':'Additional'}>
   {entries.certificates.map((item,i)=><Entry key={`c-${i}`} heading={text(item.certificateName)} subheading={text(item.certificateIssuer)} date={text(item.certificateDate)}/>)}

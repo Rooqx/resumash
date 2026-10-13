@@ -1,5 +1,7 @@
-import { Plus, Trash } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash, ChevronDown } from 'lucide-react'
 import Input from '@/components/Input'
+import Textarea from '@/components/Textarea'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
 import { useTagStore } from '@/lib/stores/useInputTags'
@@ -7,19 +9,23 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['projects']?.length === 0
-  const { removeField } = useTagStore()
+  const [openNewId, setOpenNewId] = useState<string | null>(null)
+  const addEntry = (index?: number) => {
+    addField('projects', index)
+    const current=useFieldStores.getState().fields['projects'] ?? []
+    const addedIndex=index === undefined ? current.length - 1 : Math.min(index+1,current.length-1)
+    setOpenNewId(current[addedIndex]?.id ?? null)
+  }
+  const { shiftIndexedTags } = useTagStore()
   return (
     <div className="space-y-4 mt-6">
       <span className="w-full flex justify-between items-start">
         <h3 className="text-sm font-semibold">Projects</h3>
         {isEmpty && (
-          <button
-            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
-             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
-             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
-              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+          <button type="button"
+            className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
-              addField('projects', 0)
+              addEntry()
             }}
           >
             <span className="flex gap-2 items-center z-10">
@@ -30,7 +36,14 @@ export default function Project() {
         )}
       </span>
       {fields['projects']?.map((field: any, i: number) => (
-        <div key={i} className="border p-4 rounded-md">
+        <details key={field.id ?? i} open={openNewId === null ? i === 0 : openNewId === String(field.id ?? i)}
+          onToggle={event => {
+            const id=String(field.id ?? i)
+            const opened=event.currentTarget.open
+            setOpenNewId(current=>opened ? id : current===id ? '' : current)
+          }} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-4 text-sm font-semibold"><span>{field.name || 'Untitled project'}</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180"/></summary>
+          <div className="space-y-4 p-4 pt-0">
           <Input
             type="text"
             labelFor="name"
@@ -41,8 +54,7 @@ export default function Project() {
             inputTittle="Project Name"
             placeholder="Enter project name"
           />
-          <Input
-            type="textarea"
+          <Textarea
             labelFor="description"
             value={field.description}
             onChange={(e) =>
@@ -51,6 +63,7 @@ export default function Project() {
             inputTittle="Project Description"
             placeholder="Describe the project, your role, and key features"
           />
+          <TagInput name={`projectHighlights-${i}`} tagTitle="Project highlights" placeholder="Enter real project contributions or achievements"/>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="url"
@@ -66,31 +79,32 @@ export default function Project() {
             <TagInput
               tagTitle="Technologies Used"
               labelFor="projectTechnologies"
-              key={field.i}
+              key={field.id ?? i}
               name={`projectTechnologies-${i}`} // unique per field
               placeholder="List technologies used in your project"
-              onChange={(t) => t}
             />
           </div>
           <div className="mt-4 space-y-3">
             <button
-              className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+              className="rs-button rs-button-outline mt-4 w-full"
               onClick={() => {
                 deleteField('projects', i)
-                removeField(`projectTechnologies-${i}`)
+                shiftIndexedTags('projectHighlights', i, 'remove')
+                shiftIndexedTags('projectTechnologies', i, 'remove')
               }}
             >
-              <Trash className="hover:text-black z-1" size={16} />
-              <p className="z-2 hover:text-black "> Delete Project</p>
+              <Trash  size={16} />
+              <p > Delete Project</p>
             </button>
             <button
-              className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-              onClick={() => addField('projects', i)}
+              className="rs-button rs-button-primary w-full"
+              onClick={() => { shiftIndexedTags('projectHighlights', i, 'insert'); shiftIndexedTags('projectTechnologies', i, 'insert'); addEntry(i) }}
             >
               <Plus size={16} /> Add new project
             </button>
           </div>
-        </div>
+          </div>
+        </details>
       ))}
     </div>
   )

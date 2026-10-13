@@ -1,6 +1,7 @@
 import { generateJson } from "../../shared/ai/generate-json";
 import { coverLetterDraftSchema, type coverLetterInputSchema } from "./cover-letter.schema";
 import type { z } from "zod";
+import { assertNumericalClaimsSupported } from "../../shared/ai/numeric-evidence";
 
 type CoverLetterInput = z.infer<typeof coverLetterInputSchema>;
 
@@ -15,5 +16,9 @@ markdown, placeholders masquerading as verified facts, or irrelevant embellishme
     input,
     coverLetterDraftSchema,
   );
+  // Never allow an AI-produced numerical achievement without source evidence.
+  // The job listing describes desired qualifications, not the applicant's
+  // verified achievements. Only the applicant biography is evidence.
+  assertNumericalClaimsSupported(input.experience, [draft.letter]);
   return { ...draft, requiresReview: true };
 }
