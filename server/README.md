@@ -193,7 +193,7 @@ credentials remain separately configurable.
 ## Durable, account-free tailoring jobs
 
 For the browser workflow use `POST /api/v1/resumes/tailor` (multipart PDF and
-job description). The browser generates a random UUID and a cryptographically
+job description and optional `optimizationMode`: `full` (default) or `conservative`). The browser generates a random UUID and a cryptographically
 random 32-byte hex recovery token **before** sending the upload, and persists
 both in IndexedDB. Send them in `X-Resume-Job-Id` and
 `X-Resume-Job-Token` headers. The API responds quickly with HTTP 202:
@@ -201,7 +201,7 @@ both in IndexedDB. Send them in `X-Resume-Job-Id` and
 
 Poll `GET /api/v1/resumes/tailor/:jobId` with the token in the same
 `X-Resume-Job-Token` header. The response has a `status` of `queued`,
-`processing`, `completed` (with `result`), or `failed` (with a safe
+`processing`, `completed` (with `result`, including `optimizationMode`), or `failed` (with a safe
 `error` message). The result retains the same evidence/approval checks
 as synchronous tailoring. Never place the token in a query string.
 
@@ -247,3 +247,22 @@ A *new* job counts toward the existing allowance (10/IP/5 hours).
 6. Kill a worker during generation; verify that job transitions to failed,
    rather than creating an automatic duplicate paid request.
 7. Run the backend and frontend CI checks before deploying.
+
+
+### Optimization modes (October 2026)
+The tailoring UI defaults to **Full optimization**. In this mode, the AI
+proposes a complete job-targeted resume directly in the returned `resume`
+fields, with supported summaries, grouped skills and rewritten experience
+bullets. The optimized result remains review-required: the user must compare
+it to their original and explicitly approve before importing it. The model
+cannot infer missing qualifications from the job description; a lexical
+skill/tag gate and numeric/entity safeguards reject obvious inventions.
+
+Switch **Full optimization** off to use the old conservative baseline plus
+individually approved prose suggestions. Jobs persist their selected mode
+inside the Redis input key so the worker honors it even across deployments.
+Old jobs missing the field remain conservative for backwards compatibility.
+
+Tailoring review and builder now show actual A4 PDF pages generated with
+the same React-PDF component as Download, not independent HTML mockups.
+`ResumeDocument` remains used for layout gallery thumbnails.

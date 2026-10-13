@@ -15,7 +15,7 @@ export type TailoredResume = z.infer<typeof tailoredResumeSchema>
 const reviewSuggestionSchema = z.object({
  section: z.string(),
  target: z.object({
-  section: z.enum(['inputValue','fields']),
+  section: z.enum(['inputValue','fields','tagFields']),
   key: z.string(),
   index: z.number().int().min(0).optional(),
   field: z.string().optional(),
@@ -39,6 +39,7 @@ const requirementSchema = z.object({
  sourceQuote: z.string(),
 })
 export const tailoringResponseSchema = tailoredResumeSchema.extend({
+ optimizationMode: z.enum(['full','conservative']).default('conservative'),
  suggestions: z.array(reviewSuggestionSchema).default([]),
  requirements: z.array(requirementSchema).default([]),
  missingRequirements: z.array(z.string()).default([]),

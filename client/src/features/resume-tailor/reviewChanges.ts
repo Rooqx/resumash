@@ -13,6 +13,7 @@ export function applyApprovedChanges(
 ): TailoredResume {
   const inputValue = { ...baseline.inputValue }
   const fields = structuredClone(baseline.fields)
+  const tagFields = structuredClone(baseline.tagFields ?? {})
   const used = new Set<string>()
   baseline.suggestions.forEach((item: Suggestion, index: number) => {
     if (!approvedIndices.has(index)) return
@@ -24,6 +25,11 @@ export function applyApprovedChanges(
       if (inputValue.summary === item.original) inputValue.summary = item.proposed
       return
     }
+    if (section === 'tagFields' && /^jobHighlights-\d+$/.test(key) && field === 'tags' && row !== undefined && Number.isInteger(row) && row >= 0) {
+      const bullets = tagFields[key]?.tags
+      if (bullets && bullets[row] === item.original) bullets[row] = item.proposed
+      return
+    }
     if (section === 'fields' && row !== undefined && Number.isInteger(row) &&
       ((key === 'experience' && field === 'jobSummary') ||
        (key === 'projects' && field === 'description'))) {
@@ -31,5 +37,5 @@ export function applyApprovedChanges(
       if (entry && entry[field] === item.original) entry[field] = item.proposed
     }
   })
-  return { inputValue, fields, tagFields: structuredClone(baseline.tagFields ?? {}) }
+  return { inputValue, fields, tagFields }
 }

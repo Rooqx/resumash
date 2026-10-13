@@ -10,6 +10,7 @@ const MAX_UPLOAD = 10 * 1024 * 1024
 const tailorDraftSchema = z.object({
   version: z.literal(1),
   jobDescription: z.string().max(20000),
+  optimizationMode: z.enum(['full','conservative']).default('full'),
   result: tailoringResponseSchema.nullable(),
   approved: z.boolean(),
   acceptedEdits: z.array(z.number().int().nonnegative()).max(100),

@@ -1,7 +1,8 @@
 import { AppError } from "../../middlewares/error.middleware";
 import { generateJson } from "../../shared/ai/generate-json";
 import { parseResumePdf } from "../resume/parse-pdf";
-import { TAILOR_INSTRUCTIONS } from "./tailor.prompt";
+import { TAILOR_INSTRUCTIONS, TAILOR_FULL_INSTRUCTIONS } from "./tailor.prompt";
+import type { OptimizationMode } from "./optimization-mode";
 import { tailoringResultSchema } from "./tailor.schema";
 import { validatedReviewSuggestions } from "./review-target";
 import { assertBaselineProseSupported } from "./baseline-evidence";
@@ -23,15 +24,15 @@ function quoteExists(source: string, quote: string): boolean {
  * All claims still require candidate review; structural validation and
  * numeric checks reduce mistakes but cannot prove semantic truth.
  */
-export async function tailorResume(file: Buffer, jobDescription: string) {
+export async function tailorResume(file: Buffer, jobDescription: string, optimizationMode: OptimizationMode = "full") {
   const sourceText = await parseResumePdf(file);
-  return tailorResumeFromText(sourceText, jobDescription);
+  return tailorResumeFromText(sourceText, jobDescription, optimizationMode);
 }
 
 /** Runs in a background worker on already extracted PDF text. */
-export async function tailorResumeFromText(sourceText: string, jobDescription: string) {
+export async function tailorResumeFromText(sourceText: string, jobDescription: string, optimizationMode: OptimizationMode = "full") {
   const generated = await generateJson(
-    TAILOR_INSTRUCTIONS,
+    optimizationMode === "full" ? TAILOR_FULL_INSTRUCTIONS : TAILOR_INSTRUCTIONS,
     { candidateResume: sourceText, jobDescription },
     tailoringResultSchema,
     // Temporary diagnostic: one Atria attempt of up to 5 minutes.
@@ -43,7 +44,8 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
   // The proposed change is never applied server-side; validate its numeric claims too.
   assertNumericalClaimsSupported(sourceText, generated.suggestions.map(item => item.proposed));
   assertSourceEntitiesPreserved(sourceText, generated.resume.fields);
-  assertBaselineProseSupported(sourceText, generated.resume);
+  if (optimizationMode === "conservative") assertBaselineProseSupported(sourceText, generated.resume);
+  else assertTailoredSkillTagsSupported(sourceText, generated.resume);
   // Each review suggestion must refer to a distinct, real job requirement.
   const requirementIds = new Set(generated.requirements.map(item => item.id));
   if (requirementIds.size !== generated.requirements.length) {
@@ -65,6 +67,7 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
   });
   return {
     ...generated.resume,
+    optimizationMode,
     suggestions: verifiedSuggestions.map(item => ({ ...item, requiresReview: true })),
     requirements: verifiedRequirements,
     missingRequirements: generated.missingRequirements,
@@ -74,4 +77,29 @@ export async function tailorResumeFromText(sourceText: string, jobDescription: s
     writingNotes: [...new Set([...generated.writingNotes, ...auditResumeWriting(resumeProse(generated.resume))])],
     requiresReview: true,
   };
+}
+
+
+/**
+ * Full mode must never add requested job-listing skills unsupported by the
+ * candidate's resume. Accept equivalent punctuation (NextJs vs Next.js).
+ * Plain category labels do not themselves claim proficiency.
+ */
+export function assertTailoredSkillTagsSupported(
+  source: string,
+  resume: { fields: Record<string, Array<Record<string, unknown>>>; tagFields?: Record<string, { tags: string[] }> },
+): void {
+  const compact = (s: string) => s.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  const haystack = compact(source);
+  const category = /^(languages|programming languages|frameworks|libraries|frontend|backend|web development|databases|data & storage|cloud & infrastructure|cloud|devops|infrastructure|tools|testing|testing & quality|data engineering|data & analytics|apis & integrations|other skills|technical skills)$/i;
+  for (const [index, entry] of (resume.fields.skills ?? []).entries()) {
+    const name = typeof entry.skillName === "string" ? entry.skillName.trim() : "";
+    const tags = resume.tagFields?.[`skills-${index}`]?.tags ?? [];
+    for (const skill of [...tags, ...(tags.length === 0 && name && !category.test(name) ? [name] : [])]) {
+      const needle = compact(skill);
+      if (needle.length >= 3 && !haystack.includes(needle)) {
+        throw new AppError("AI returned a skill not clearly supported by the uploaded resume", 502);
+      }
+    }
+  }
 }

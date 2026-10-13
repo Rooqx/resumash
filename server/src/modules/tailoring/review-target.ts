@@ -11,6 +11,9 @@ export function validReviewTarget(resume: ReviewResult["resume"], item: Suggesti
   if (section === "inputValue") {
     if (key !== "summary" || index !== undefined || field !== undefined) return false;
     current = resume.inputValue[key];
+  } else if (section === "tagFields") {
+    if (!/^jobHighlights-\d+$/.test(key) || field !== "tags" || !Number.isInteger(index) || index === undefined || index < 0) return false;
+    current = resume.tagFields?.[key]?.tags[index];
   } else {
     if (!Number.isInteger(index) || index === undefined) return false;
     if (!((key === "experience" && field === "jobSummary") ||

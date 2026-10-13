@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { TailorJobCredentials } from '@/lib/persistence/resumeDrafts'
 
+export type OptimizationMode = 'full' | 'conservative'
 type JobStatus = 'queued' | 'processing' | 'completed' | 'failed'
 export interface TailoringJobResponse {
   jobId: string
@@ -26,15 +27,17 @@ export function createTailorJobCredentials(): TailorJobCredentials {
 }
 
 export async function submitTailoringJob({
-  jobDescription, file, credentials,
+  jobDescription, file, credentials, optimizationMode,
 }: {
   jobDescription: string
   file: File
   credentials: TailorJobCredentials
+  optimizationMode: OptimizationMode
 }): Promise<TailoringJobResponse> {
   if (!jobDescription.trim()) throw new Error('Please enter a job description.')
   const form = new FormData()
   form.append('jobDescription', jobDescription)
+  form.append('optimizationMode', optimizationMode)
   form.append('resume', file)
   const response = await axios.post<TailoringJobResponse>(url(), form, {
     timeout: 45_000, // Only includes upload and PDF parsing, not model inference.

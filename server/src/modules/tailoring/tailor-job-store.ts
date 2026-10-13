@@ -3,6 +3,7 @@ import { Queue } from "bullmq";
 import IORedis from "ioredis";
 import { REDIS_URI } from "../../configs/env.configs";
 import { AppError } from "../../middlewares/error.middleware";
+import type { OptimizationMode } from "./optimization-mode";
 
 /** Anonymous capability grants expire 24 hours after submission. */
 export const JOB_TTL_SECONDS = 24 * 60 * 60;
@@ -20,7 +21,7 @@ export interface JobRecord {
 const key = (id: string) => `resumash:tailor:job:${id}`;
 const resultKey = (id: string) => `resumash:tailor:result:${id}`;
 const inputKey = (id: string) => `resumash:tailor:input:${id}`;
-export interface TailoringInput { sourceText: string; jobDescription: string }
+export interface TailoringInput { sourceText: string; jobDescription: string; optimizationMode?: OptimizationMode }
 
 let redis: IORedis | undefined;
 let queue: Queue | undefined;
@@ -68,7 +69,7 @@ export async function getAuthorizedJob(id: string, token: string): Promise<JobRe
 
 /** Reserve a random job ID; a repeat with the same token is safe and free of AI work. */
 export async function enqueueTailoring(
-  id: string, token: string, sourceText: string, jobDescription: string,
+  id: string, token: string, sourceText: string, jobDescription: string, optimizationMode: OptimizationMode = "full",
 ): Promise<void> {
   const now = Date.now();
   const record: JobRecord = { tokenHash: digest(token), status: "queued", createdAt: now, updatedAt: now };
@@ -82,7 +83,7 @@ export async function enqueueTailoring(
   try {
     // Never put private candidate content in a non-expiring BullMQ entry.
     // This Redis key expires even if workers are offline indefinitely.
-    await jobRedis().set(inputKey(id), JSON.stringify({ sourceText, jobDescription }), "EX", JOB_TTL_SECONDS);
+    await jobRedis().set(inputKey(id), JSON.stringify({ sourceText, jobDescription, optimizationMode }), "EX", JOB_TTL_SECONDS);
     await jobQueue().add("tailor", {}, { jobId: id });
   } catch {
     await jobRedis().del(key(id), inputKey(id));

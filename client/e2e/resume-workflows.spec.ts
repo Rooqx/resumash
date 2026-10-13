@@ -27,16 +27,13 @@ test('can view the real PDF and download a valid PDF', async ({ page }) => {
  expect(file.suggestedFilename()).toMatch(/\.pdf$/)
 })
 
-test('mobile A4 view fits and zoom works', async ({ page }) => {
+test('mobile preview uses the same page-accurate PDF renderer as download', async ({ page }) => {
  await page.setViewportSize({width:390,height:844})
  await page.goto('/build-resume/')
  await page.getByRole('button',{name:'Build manually'}).click()
  await page.getByRole('button',{name:'Preview',exact:true}).click()
- await expect(page.getByRole('button',{name:'Fit A4 to available width'})).toBeVisible()
- const before=await page.getByRole('dialog',{name:'Resume preview'}).getByText(/A4 ·/).textContent()
- await page.getByRole('button',{name:'Zoom in'}).click()
- const after=await page.getByRole('dialog',{name:'Resume preview'}).getByText(/A4 ·/).textContent()
- expect(after).not.toBe(before)
+ await expect(page.getByRole('dialog',{name:'Resume preview'}).getByTitle('Actual resume PDF pages')).toBeVisible({timeout:30000})
+ await expect(page.getByRole('dialog',{name:'Resume preview'}).getByText('A4 · page-accurate PDF preview')).toBeVisible({timeout:30000})
 })
 
 test('tailoring restores original uploaded PDF and clears it on request',async ({page})=>{
@@ -73,6 +70,9 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
    return
   }
   const request=route.request()
+  // A newly submitted job must use the default source-grounded full optimization.
+  expect(request.postData()).toContain('name="optimizationMode"')
+  expect(request.postData()).toContain('full')
   submissionId=request.headers()['x-resume-job-id']??''
   secret=request.headers()['x-resume-job-token']??''
   expect(submissionId).toMatch(/^[0-9a-f-]{36}$/)
@@ -201,4 +201,17 @@ test('mobile resume sections scroll to the active step, with adequate button con
   return {color:css.color,background:css.backgroundColor}
  })
  expect(colors.color).not.toBe(colors.background)
+})
+
+
+test('full optimization is enabled by default and can be disabled', async ({page})=>{
+ await page.goto('/tailor-resume/')
+ const toggle=page.getByRole('switch',{name:'Full optimization'})
+ await expect(toggle).toHaveAttribute('aria-checked','true')
+ await toggle.click()
+ await expect(toggle).toHaveAttribute('aria-checked','false')
+ await page.reload()
+ await expect(toggle).toHaveAttribute('aria-checked','false')
+ await toggle.click()
+ await expect(toggle).toHaveAttribute('aria-checked','true')
 })
