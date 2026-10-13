@@ -146,7 +146,7 @@ export const TagInput: React.FC<TagInputProps> = ({
                 }}
                 onMouseEnter={() => setFocusedSuggestion(idx)}
                 className={`px-3 py-2 text-xs cursor-pointer ${
-                  isActive ? 'bg-gray-100' : 'hover:bg-gray-50'
+                  isActive ? 'bg-[var(--rs-page)]' : 'hover:bg-[var(--rs-page)]'
                 }`}
               >
                 {s}

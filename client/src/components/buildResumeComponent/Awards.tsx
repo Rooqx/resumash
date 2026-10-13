@@ -13,10 +13,7 @@ export default function Award() {
         <h3 className="text-sm font-semibold">Awards</h3>
         {isEmpty && (
           <button
-            className={`py-2  px-4 relative overflow-hidden bg-[transparent] rounded-xs justify-center cursor-pointer
-             text-white text-xs font-normal flex gap-2 items-center mb-3 before:content-[''] 
-             before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all
-              before:duration-300 hover:before:w-full hover:text-black border border-white`}
+            className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
               addField('awards', 0)
             }}
@@ -73,13 +70,13 @@ export default function Award() {
           />
           <div className="mt-4 space-y-3">
             <button
-              className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
+              className="rs-button rs-button-outline mt-4 w-full"
               onClick={() => {
                 deleteField('awards', i)
               }}
             >
-              <Trash className="hover:text-black z-1" size={16} />
-              <p className="z-2 hover:text-black "> Delete Award</p>
+              <Trash  size={16} />
+              <p > Delete Award</p>
             </button>{' '}
             <button
               className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"

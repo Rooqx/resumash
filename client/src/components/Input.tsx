@@ -96,7 +96,7 @@ export default function Input({
           )}
         </div>
       </div>
-      <p className="w-full text-[14px] font-[400] mt-1 text-[#2F2F30] urbanist">
+      <p className="w-full text-[14px] font-[400] mt-1 text-[var(--rs-muted)] urbanist">
         {userInputContent}
       </p>
       <div className="flex items-center justify-end w-full"></div>
