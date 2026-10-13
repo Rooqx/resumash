@@ -8,6 +8,13 @@ on:
 jobs:
   typecheck-and-build:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 10
     defaults:
       run:
         working-directory: server
@@ -18,6 +25,8 @@ jobs:
       - name: TypeScript
         run: bun run typecheck
       - name: Focused regression tests
+        env:
+          REDIS_URI: redis://localhost:6379
         run: bun test
       - name: Production build
         run: bun run build

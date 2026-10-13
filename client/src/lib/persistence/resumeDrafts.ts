@@ -110,3 +110,36 @@ export async function restoreUploadedResume(): Promise<File | null> {
 export async function clearUploadedResume(): Promise<void> {
   await enqueueFileOperation(()=>withFileStore('readwrite', store => store.delete(FILE_KEY)))
 }
+
+/**
+ * Recovery capability: IndexedDB avoids putting bearer secrets in links,
+ * browser history or long-lived draft JSON. Anyone with the token can read
+ * this job's result, so do not include it in telemetry or URLs.
+ */
+export interface TailorJobCredentials {
+  jobId: string
+  token: string
+  submittedAt: number
+}
+const JOB_KEY = 'tailor-active-job'
+const savedJobSchema = z.object({
+  jobId: z.string().uuid(),
+  token: z.string().regex(/^[a-f0-9]{64}$/),
+  submittedAt: z.number().int().positive(),
+})
+export async function saveActiveTailorJob(job: TailorJobCredentials): Promise<void> {
+  savedJobSchema.parse(job)
+  await enqueueFileOperation(() => withFileStore('readwrite', store => store.put(job, JOB_KEY)))
+}
+export async function restoreActiveTailorJob(): Promise<TailorJobCredentials | null> {
+  const item = await enqueueFileOperation(() => withFileStore<unknown>('readonly', store => store.get(JOB_KEY)))
+  const parsed = savedJobSchema.safeParse(item)
+  if (!parsed.success || Date.now() - parsed.data.submittedAt >= 24 * 60 * 60 * 1000) {
+    await clearActiveTailorJob()
+    return null
+  }
+  return parsed.data
+}
+export async function clearActiveTailorJob(): Promise<void> {
+  await enqueueFileOperation(() => withFileStore('readwrite', store => store.delete(JOB_KEY)))
+}

@@ -25,6 +25,11 @@ function quoteExists(source: string, quote: string): boolean {
  */
 export async function tailorResume(file: Buffer, jobDescription: string) {
   const sourceText = await parseResumePdf(file);
+  return tailorResumeFromText(sourceText, jobDescription);
+}
+
+/** Runs in a background worker on already extracted PDF text. */
+export async function tailorResumeFromText(sourceText: string, jobDescription: string) {
   const generated = await generateJson(
     TAILOR_INSTRUCTIONS,
     { candidateResume: sourceText, jobDescription },
