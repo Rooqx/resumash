@@ -37,9 +37,6 @@ export default function Textarea({
   userInputContent,
   passwordVisibility = false,
   className,
-  focusBorder = true,
-  noBorder = true,
-  rounded = true,
 }: InputProps) {
   // Local state for password visibility toggle
   const [seePassword, setSeePassword] = useState(false)

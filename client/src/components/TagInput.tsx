@@ -20,7 +20,6 @@ export const TagInput: React.FC<TagInputProps> = ({
   pasteSeparators = /[\n,]+/,
   className = '',
   tagTitle,
-  labelFor,
 }) => {
   const { fields, setInput, addTag, addTags, removeTag } = useTagStore((s) => s)
 

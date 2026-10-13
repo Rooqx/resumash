@@ -29,14 +29,8 @@ export default function TemplateGallery({ selected, onSelect }: Props) {
   const [portraitError,setPortraitError]=useState('')
   const setInputValue=useInputStore(s=>s.setInputValue)
   const savedPortrait=useInputStore(s=>s.inputValue.profilePhotoDataUrl)
-  const role = useInputStore(s=>s.inputValue.label??'')
-  const experienceCount = useFieldStores(s=>s.fields.experience?.length??0)
-  const earlyCareerEvidence = useFieldStores(s=>(s.fields.education?.length??0)+(s.fields.projects?.length??0))
-  const knownExperience = useFieldStores(s=>s.fields.experience?.filter(item=>Boolean(item.jobPosition||item.companyName)).length??0)
-  // Do not infer leadership merely because a target vacancy contains 'manager'.
-  const seniorRole = /(?:director|executive|head of|chief|vice president)/i.test(role)
-  const recommended: ResumeTemplateId = seniorRole && knownExperience>=2
-    ? 'executive' : experienceCount===0&&earlyCareerEvidence>0 ? 'classic' : 'ats-essential'
+  // ATS Essential is the safest default for most online applications.
+  const recommended: ResumeTemplateId = 'ats-essential'
   const uploadPortrait=async(file:File|undefined)=>{
     if(!file)return
     if(!['image/png','image/jpeg'].includes(file.type)||file.size>4*1024*1024){
