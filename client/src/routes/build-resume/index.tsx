@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Download, ChevronRight, FileText, Sparkles, Eye, ArrowLeft, LayoutTemplate } from 'lucide-react'
 import ResumashShell from '@/components/ResumashShell'
 import SEO from '@/components/SEO'
-import ResumeDocument from '@/features/resume-builder/templates/ResumeDocument'
 import { resumeTemplates, type ResumeTemplateId } from '@/features/resume-builder/templates/registry'
 import BasicInfoAndSummary from '@/components/buildResumeComponent/BasicInfoAndSummary'
 import Experience from '@/components/buildResumeComponent/Experience'
@@ -20,7 +19,7 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 import { downloadResume } from '@/lib/serverActions/downloadPDF'
 import { tailoredResumeSchema, type TailoredResume } from '@/features/resume-tailor/schemas'
 import AiResumeQuestionnaire from '@/features/resume-builder/components/AiResumeQuestionnaire'
-import A4Preview from '@/features/resume-builder/components/A4Preview'
+import ResumePdfPreview from '@/features/resume-builder/components/ResumePdfPreview'
 import ActualPdfPreview from '@/features/resume-builder/components/ActualPdfPreview'
 import TemplateGallery from '@/features/resume-builder/components/TemplateGallery'
 import { restoreBuilderView, saveBuilderView, clearBuilderDraft } from '@/lib/persistence/resumeDrafts'
@@ -154,7 +153,7 @@ function BuilderPage(){
      <div ref={editorScroll} className="rs-legacy-builder mt-5 rounded-xl p-3 lg:max-h-[min(75vh,780px)] lg:overflow-y-auto lg:overscroll-contain md:p-5">{StepComponent&&<StepComponent/>}</div>
      <div className="mt-6 flex justify-between gap-3"><button onClick={()=>selectStep(active-1)} disabled={active===0} className="rs-button rs-button-outline disabled:opacity-40">Previous</button><button onClick={()=>selectStep(active+1)} disabled={active===steps.length-1} className="rs-button rs-button-primary disabled:opacity-40">Next step <ChevronRight size={16}/></button></div>
     </section>
-    <section className="rs-card hidden min-w-0 p-4 md:p-6 lg:sticky lg:top-24 lg:block"><div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Live resume preview</h2><button type="button" className="rs-button rs-button-outline !min-h-8 text-xs" onClick={()=>setActualPdfOpen(true)}>Inspect actual PDF pages</button></div><A4Preview><ResumeDocument template={template}/></A4Preview></section>
+    <section className="rs-card hidden min-w-0 p-4 md:p-6 lg:sticky lg:top-24 lg:block"><div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Live resume preview</h2><button type="button" className="rs-button rs-button-outline !min-h-8 text-xs" onClick={()=>setActualPdfOpen(true)}>Inspect actual PDF pages</button></div><ResumePdfPreview template={template}/></section>
    </div>
    </>}
   </div>
@@ -171,7 +170,7 @@ function BuilderPage(){
      <button type="button" className="rs-button rs-button-outline !min-h-10" onClick={()=>setMobilePreview(false)}><ArrowLeft size={16}/> Back to builder</button>
      <button type="button" className="rs-button rs-button-primary !min-h-10" disabled={downloading} onClick={()=>void downloadResume(filename,setDownloading,template)}><Download size={15}/> Download</button>
     </div>
-    <A4Preview><ResumeDocument template={template}/></A4Preview>
+    <ResumePdfPreview template={template}/>
     </Dialog.Content></Dialog.Portal></Dialog.Root>
    {actualPdfOpen&&<ActualPdfPreview template={template} onClose={()=>setActualPdfOpen(false)}/>}
  </ResumashShell>

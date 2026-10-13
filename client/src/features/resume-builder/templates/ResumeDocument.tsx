@@ -84,8 +84,10 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
    detail={text(item.gpa)?`GPA: ${text(item.gpa)}`:undefined}/>)}
  </Section>
  const skills=entries.skills.length>0&&<Section title={selected==='modern'?'Core Skills':'Skills'}>
-  {entries.skills.map((item,i)=><div className="resume-skill" key={i}><strong>{text(item.skillName)}</strong>
-   {tags[`skills-${i}`]?.tags?.length>0&&<span>{tags[`skills-${i}`]?.tags?.join(', ')}</span>}</div>)}
+  {entries.skills.every((_,i)=>!tags[`skills-${i}`]?.tags?.length)
+   ? <p className="resume-skill">{entries.skills.map(item=>text(item.skillName)).filter(Boolean).join('  ·  ')}</p>
+   : entries.skills.map((item,i)=><div className="resume-skill" key={i}><strong>{text(item.skillName)}: </strong>
+      {tags[`skills-${i}`]?.tags?.length>0&&<span>{tags[`skills-${i}`]?.tags?.join(', ')}</span>}</div>)}
  </Section>
  const projects=entries.projects.length>0&&<Section title="Projects">
   {entries.projects.map((item,i)=><Entry key={i} heading={text(item.name)} detail={text(item.description)}
@@ -102,7 +104,7 @@ export default function ResumeDocument({template='ats-essential',printPayload=fa
   {selected==='executive-modern'&&<div className="rs-monogram">{initials}</div>}
   <div className="rs-name-block"><h1>{selected==='executive'&&familyName?<><span>{givenNames} </span><span className="rs-family-name">{familyName}</span></>:name}</h1>{text(input.label)&&<p className="resume-role">{text(input.label)}</p>}</div>
   {(selected==='classic'||selected==='modern'||selected==='ats-essential')&&<div className="resume-contacts">
-    {selected==='ats-essential'?<p>{[input.phone,location,input.email,text(input.linkdlnUrl)].map(text).filter(Boolean).join('  |  ')}</p>:contactBlock}
+    {selected==='ats-essential'?<p>{[input.phone,location,input.email,text(input.linkdlnUrl),text(input.githubUrl),text(input.portfolioUrl)].map(text).filter(Boolean).join('  |  ')}</p>:contactBlock}
   </div>}
  </header>
  const photo=safePortrait(input.profilePhotoDataUrl)
