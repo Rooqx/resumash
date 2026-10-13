@@ -1,4 +1,5 @@
-import { Plus, Trash } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash, ChevronDown } from 'lucide-react'
 import Input from '@/components/Input'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { TagInput } from '@/components/TagInput'
@@ -9,6 +10,13 @@ export default function Experience() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const { shiftIndexedTags } = useTagStore()
   const isEmpty = fields['experience']?.length === 0
+  const [openNewId, setOpenNewId] = useState<string | null>(null)
+  const addEntry = (index?: number) => {
+    addField('experience', index)
+    const current=useFieldStores.getState().fields['experience'] ?? []
+    const addedIndex=index === undefined ? current.length - 1 : Math.min(index+1,current.length-1)
+    setOpenNewId(current[addedIndex]?.id ?? null)
+  }
   /**  */
   return (
     <div className="space-y-4 mt-6">
@@ -18,7 +26,7 @@ export default function Experience() {
           <button
             className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
-              addField('experience', 0)
+              addEntry()
             }}
           >
             <span className="flex gap-2 items-center z-10">
@@ -29,7 +37,9 @@ export default function Experience() {
         )}
       </span>
       {fields['experience']?.map((field: any, i: number) => (
-        <div key={field.id ?? i} className="border p-4 rounded-md">
+        <details key={field.id ?? i} name="resumash-experience" defaultOpen={openNewId ? openNewId === field.id : i === 0} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-4 text-sm font-semibold"><span>{field.jobPosition || field.companyName || 'Untitled experience'}</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180"/></summary>
+          <div className="space-y-4 p-4 pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="text"
@@ -101,12 +111,13 @@ export default function Experience() {
             </button>{' '}
             <button
               className="rs-button rs-button-primary w-full"
-              onClick={() => { shiftIndexedTags('jobHighlights', i, 'insert'); addField('experience', i) }}
+              onClick={() => { shiftIndexedTags('jobHighlights', i, 'insert'); addEntry(i) }}
             >
               <Plus size={16} /> Add New Experience
             </button>
           </div>
-        </div>
+          </div>
+        </details>
       ))}
     </div>
   )

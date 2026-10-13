@@ -1,4 +1,5 @@
-import { Plus, Trash } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash, ChevronDown } from 'lucide-react'
 import Input from '@/components/Input'
 import Textarea from '@/components/Textarea'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
@@ -8,6 +9,13 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['projects']?.length === 0
+  const [openNewId, setOpenNewId] = useState<string | null>(null)
+  const addEntry = (index?: number) => {
+    addField('projects', index)
+    const current=useFieldStores.getState().fields['projects'] ?? []
+    const addedIndex=index === undefined ? current.length - 1 : Math.min(index+1,current.length-1)
+    setOpenNewId(current[addedIndex]?.id ?? null)
+  }
   const { shiftIndexedTags } = useTagStore()
   return (
     <div className="space-y-4 mt-6">
@@ -17,7 +25,7 @@ export default function Project() {
           <button type="button"
             className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
-              addField('projects', 0)
+              addEntry()
             }}
           >
             <span className="flex gap-2 items-center z-10">
@@ -28,7 +36,9 @@ export default function Project() {
         )}
       </span>
       {fields['projects']?.map((field: any, i: number) => (
-        <div key={field.id ?? i} className="border p-4 rounded-md">
+        <details key={field.id ?? i} name="resumash-projects" defaultOpen={openNewId ? openNewId === field.id : i === 0} className="group rounded-lg border" style={{borderColor:'var(--rs-line)'}}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-4 text-sm font-semibold"><span>{field.name || 'Untitled project'}</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180"/></summary>
+          <div className="space-y-4 p-4 pt-0">
           <Input
             type="text"
             labelFor="name"
@@ -83,12 +93,13 @@ export default function Project() {
             </button>
             <button
               className="rs-button rs-button-primary w-full"
-              onClick={() => { shiftIndexedTags('projectHighlights', i, 'insert'); shiftIndexedTags('projectTechnologies', i, 'insert'); addField('projects', i) }}
+              onClick={() => { shiftIndexedTags('projectHighlights', i, 'insert'); shiftIndexedTags('projectTechnologies', i, 'insert'); addEntry(i) }}
             >
               <Plus size={16} /> Add new project
             </button>
           </div>
-        </div>
+          </div>
+        </details>
       ))}
     </div>
   )
