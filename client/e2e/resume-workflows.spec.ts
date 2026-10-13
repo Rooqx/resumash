@@ -136,7 +136,7 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
  await page.getByRole('button',{name:'Inspect actual PDF pages'}).click()
  await expect(page.getByRole('dialog',{name:'Real PDF page preview'})).toBeVisible()
  await expect(page.getByTitle('Selectable A4 resume PDF')).toBeVisible({timeout:30000})
- await page.getByRole('button',{name:'Close'}).click()
+ await page.getByRole('dialog',{name:'Real PDF page preview'}).getByRole('button',{name:'Close',exact:true}).click()
  await page.getByRole('button',{name:'Update sources'}).click()
  await expect(page.getByRole('textbox',{name:'Job description'})).toHaveValue(/customer support role/)
  await page.getByRole('textbox',{name:'Job description'}).fill('A replacement job description that is different from the reviewed evidence and requires a new tailoring request.')
