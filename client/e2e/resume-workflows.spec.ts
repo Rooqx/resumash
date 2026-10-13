@@ -63,20 +63,29 @@ test('anonymous tailoring survives refresh and fetches a completed resume with i
  let secret=''
  let statusChecks=0
  let finished=false
+ const mockHeaders={'access-control-allow-origin':'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'x-resume-job-id,x-resume-job-token,content-type'}
  await page.route('**/api/v1/resumes/tailor',async route=>{
+  if(route.request().method()==='OPTIONS'){
+   await route.fulfill({status:204,headers:mockHeaders})
+   return
+  }
   const request=route.request()
   submissionId=request.headers()['x-resume-job-id']??''
   secret=request.headers()['x-resume-job-token']??''
   expect(submissionId).toMatch(/^[0-9a-f-]{36}$/)
   expect(secret).toMatch(/^[0-9a-f]{64}$/)
-  await route.fulfill({status:202,contentType:'application/json',body:JSON.stringify({jobId:submissionId,status:'queued'})})
+  await route.fulfill({status:202,headers:mockHeaders,contentType:'application/json',body:JSON.stringify({jobId:submissionId,status:'queued'})})
  })
  await page.route('**/api/v1/resumes/tailor/*',async route=>{
+  if(route.request().method()==='OPTIONS'){
+   await route.fulfill({status:204,headers:mockHeaders})
+   return
+  }
   const request=route.request()
   expect(request.url()).toContain(submissionId)
   expect(request.headers()['x-resume-job-token']).toBe(secret)
   statusChecks++
-  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(
+  await route.fulfill({status:200,headers:mockHeaders,contentType:'application/json',body:JSON.stringify(
    finished?{jobId:submissionId,status:'completed',result:{inputValue:{fullName:'Synthetic Candidate'},fields:{},suggestions:[],requirements:[],missingRequirements:[],clarificationQuestions:[],writingNotes:[],requiresReview:true}}:{jobId:submissionId,status:'queued'}
   )})
  })
