@@ -170,7 +170,8 @@ test('ATS recommendation appears first and selected template stays collapsed aft
  await page.goto('/build-resume/')
  await page.getByRole('button',{name:'Build manually'}).click()
  await expect(page.getByRole('heading',{name:'ATS Essential'})).toBeVisible()
- await page.getByRole('button',{name:'Use template'}).first().click()
+ await expect(page.getByRole('heading',{level:3}).first()).toHaveText('ATS Essential')
+ await page.getByRole('button',{name:'Selected',exact:true}).click()
  await expect(page.getByRole('button',{name:'Change template'})).toBeVisible()
  await page.reload()
  await expect(page.getByRole('button',{name:'Change template'})).toBeVisible()
@@ -181,7 +182,7 @@ test('mobile resume sections scroll to the active step, with adequate button con
  await page.setViewportSize({width:390,height:844})
  await page.goto('/build-resume/')
  await page.getByRole('button',{name:'Build manually'}).click()
- await page.getByRole('button',{name:/Experience.*Work history/}).click()
+ await page.getByRole('navigation',{name:'Resume sections'}).getByRole('button',{name:/Experience/}).click()
  await page.getByRole('button',{name:'Add Experience'}).click()
  for(let index=0;index<5;index++)await page.getByRole('button',{name:'Add New Experience'}).last().click()
  const next=page.getByRole('button',{name:'Next step'})
@@ -193,7 +194,7 @@ test('mobile resume sections scroll to the active step, with adequate button con
   return rect?.y??999
  }).toBeLessThan(250)
  // Theme tokens must not produce white text on a white primary button.
- await page.getByRole('button',{name:/Experience.*Work history/}).click()
+ await page.getByRole('navigation',{name:'Resume sections'}).getByRole('button',{name:/Experience/}).click()
  const add=page.getByRole('button',{name:'Add New Experience'}).first()
  const colors=await add.evaluate(element=>{
   const css=getComputedStyle(element)
