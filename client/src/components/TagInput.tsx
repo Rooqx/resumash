@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { useTagStore } from '../lib/stores/useInputTags'
 
 type TagInputProps = {
@@ -30,6 +30,7 @@ export const TagInput: React.FC<TagInputProps> = ({
   const [focusedSuggestion, setFocusedSuggestion] = useState<number>(-1)
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const id = useId()
 
   useEffect(() => {
     if (onChange) onChange(tags)
@@ -75,14 +76,14 @@ export const TagInput: React.FC<TagInputProps> = ({
 
   return (
     <div
-      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-xs text-white urbanist ${className}`}
+      className={`relative w-full max-w-lg flex flex-col gap-[8px] text-xs urbanist ${className}`}
     >
-      <label htmlFor={labelFor} className="p-1 font-[500]">
+      <label htmlFor={id} className="p-1 font-[500]">
         {tagTitle}
       </label>
       <div
         className="
-          flex flex-wrap items-center gap-2 rounded-[4px] text-white border border-gray-300 
+          flex flex-wrap items-center gap-2 rounded-[4px] border 
           bg-transparent px-3 py-[10px] focus-within:ring-2 focus-within:ring-gray-500
         "
       >
@@ -107,7 +108,7 @@ export const TagInput: React.FC<TagInputProps> = ({
 
         <input
           ref={inputRef}
-          id={labelFor}
+          id={id}
           name={name}
           value={input || ''}
           onChange={(e) => setInput(name, e.target.value || '')}
@@ -118,7 +119,7 @@ export const TagInput: React.FC<TagInputProps> = ({
           placeholder={placeholder}
           className={`${
             !className
-              ? ` text-[white] font-[500] 
+              ? ` font-[500] 
             flex-1 bg-transparent outline-none border-none text-xs
             min-w-[100px] placeholder-gray-400
                      } `
@@ -132,7 +133,7 @@ export const TagInput: React.FC<TagInputProps> = ({
         <ul
           className="
             absolute left-0 mt-2 w-full rounded-xl border border-gray-200 
-            bg-white shadow-md z-10 max-h-48 overflow-y-auto
+            bg-[var(--rs-surface)] shadow-md z-10 max-h-48 overflow-y-auto
           "
         >
           {suggestions.map((s, idx) => {

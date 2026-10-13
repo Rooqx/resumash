@@ -7,7 +7,7 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 
 export default function Experience() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
-  const { removeField } = useTagStore()
+  const { shiftIndexedTags } = useTagStore()
   const isEmpty = fields['experience']?.length === 0
   /**  */
   return (
@@ -32,7 +32,7 @@ export default function Experience() {
         )}
       </span>
       {fields['experience']?.map((field: any, i: number) => (
-        <div key={i} className="border p-4 rounded-md">
+        <div key={field.id ?? i} className="border p-4 rounded-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="text"
@@ -96,15 +96,15 @@ export default function Experience() {
               className={`py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white`}
               onClick={() => {
                 deleteField('experience', i)
-                removeField(`jobHighlights-${i}`)
+                shiftIndexedTags('jobHighlights', i, 'remove')
               }}
             >
               <Trash className="hover:text-black z-1" size={16} />
               <p className="z-2 hover:text-black "> Delete Experience</p>
             </button>{' '}
             <button
-              className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-              onClick={() => addField('experience', i)}
+              className="py-2 px-4 bg-[var(--rs-inverse)] justify-center w-full  rounded-md cursor-pointer text-[var(--rs-inverse-text)] text-base font-medium flex gap-2 items-center"
+              onClick={() => { shiftIndexedTags('jobHighlights', i, 'insert'); addField('experience', i) }}
             >
               <Plus size={16} /> Add New Experience
             </button>

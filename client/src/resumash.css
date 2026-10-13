@@ -135,8 +135,9 @@
 .rs-legacy-builder input::placeholder,
 .rs-legacy-builder textarea::placeholder { color: var(--rs-muted) !important; }
 .rs-legacy-builder .border { border-color: var(--rs-line); }
-.rs-legacy-builder button { color: var(--rs-ink); border-color: var(--rs-line); }
-.rs-legacy-builder button.bg-\\[white\\] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
+.rs-legacy-builder button:not(.rs-button):not([class*="bg-"]) { color: var(--rs-ink); border-color: var(--rs-line); }
+.rs-legacy-builder button[class*="bg-"][class*="inverse"] { background: var(--rs-inverse); color: var(--rs-inverse-text); }
+.rs-legacy-builder button.rs-button-primary { background: var(--rs-inverse); color: var(--rs-inverse-text); }
 
 .rs-letter-print { display: none; }
 @media print {

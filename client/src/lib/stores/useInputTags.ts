@@ -18,6 +18,7 @@ type TagStore = {
   setSuggestions: (name: string, suggestions: Array<string>) => void
   getTags: (name: string) => Array<string>
   removeField: (name: string) => void
+  shiftIndexedTags: (prefix: string, index: number, operation: 'insert' | 'remove') => void
 }
 
 export const useTagStore = create<TagStore>()(persist((set, get) => ({
@@ -122,6 +123,21 @@ export const useTagStore = create<TagStore>()(persist((set, get) => ({
     }),
 
   getTags: (name) => get().fields[name]?.tags || [],
+  // Existing drafts store tag groups under numbered keys. Keep those keys in
+  // lockstep with their records when inserting or removing a field.
+  shiftIndexedTags: (prefix, index, operation) => set(state => {
+    const next: typeof state.fields = {}
+    for (const [key, value] of Object.entries(state.fields)) {
+      if (!key.startsWith(prefix + '-')) { next[key] = value; continue }
+      const indexText = key.slice(prefix.length + 1)
+      if (!/^\d+$/.test(indexText)) { next[key] = value; continue }
+      const current = Number(indexText)
+      if (operation === 'remove' && current === index) continue
+      const adjusted = current > index ? (operation === 'insert' ? current + 1 : current - 1) : current
+      next[prefix + '-' + adjusted] = value
+    }
+    return { fields: next }
+  }),
   removeField: (name: string) =>
     set((state) => {
       const { [name]: _, ...rest } = state.fields

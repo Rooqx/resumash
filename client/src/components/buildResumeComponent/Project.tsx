@@ -7,7 +7,7 @@ import { useTagStore } from '@/lib/stores/useInputTags'
 export default function Project() {
   const { fields, addField, updateField, deleteField } = useFieldStores()
   const isEmpty = fields['projects']?.length === 0
-  const { removeField } = useTagStore()
+  const { shiftIndexedTags } = useTagStore()
   return (
     <div className="space-y-4 mt-6">
       <span className="w-full flex justify-between items-start">
@@ -30,7 +30,7 @@ export default function Project() {
         )}
       </span>
       {fields['projects']?.map((field: any, i: number) => (
-        <div key={i} className="border p-4 rounded-md">
+        <div key={field.id ?? i} className="border p-4 rounded-md">
           <Input
             type="text"
             labelFor="name"
@@ -77,15 +77,15 @@ export default function Project() {
               className="py-2 mt-5 px-4 relative overflow-hidden bg-[transparent] rounded-md justify-center w-full cursor-pointer text-white text-base font-medium flex gap-2 items-center mb-3 before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-white before:transition-all before:duration-300 hover:before:w-full hover:text-black border border-white"
               onClick={() => {
                 deleteField('projects', i)
-                removeField(`projectTechnologies-${i}`)
+                shiftIndexedTags('projectTechnologies', i, 'remove')
               }}
             >
               <Trash className="hover:text-black z-1" size={16} />
               <p className="z-2 hover:text-black "> Delete Project</p>
             </button>
             <button
-              className="py-2 px-4 bg-[white] justify-center w-full  rounded-md cursor-pointer text-black text-base font-medium flex gap-2 items-center"
-              onClick={() => addField('projects', i)}
+              className="py-2 px-4 bg-[var(--rs-inverse)] justify-center w-full  rounded-md cursor-pointer text-[var(--rs-inverse-text)] text-base font-medium flex gap-2 items-center"
+              onClick={() => { shiftIndexedTags('projectHighlights', i, 'insert'); shiftIndexedTags('projectTechnologies', i, 'insert'); addField('projects', i) }}
             >
               <Plus size={16} /> Add new project
             </button>
