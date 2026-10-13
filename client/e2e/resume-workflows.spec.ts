@@ -170,7 +170,7 @@ test('ATS recommendation appears first and selected template stays collapsed aft
  await page.goto('/build-resume/')
  await page.getByRole('button',{name:'Build manually'}).click()
  await expect(page.getByRole('heading',{name:'ATS Essential'})).toBeVisible()
- await expect(page.getByRole('heading',{level:3}).first()).toHaveText('ATS Essential')
+ await expect(page.locator('article.rs-card').first().getByRole('heading',{name:'ATS Essential'})).toBeVisible()
  await page.getByRole('button',{name:'Selected',exact:true}).click()
  await expect(page.getByRole('button',{name:'Change template'})).toBeVisible()
  await page.reload()
