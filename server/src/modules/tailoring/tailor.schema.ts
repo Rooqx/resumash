@@ -6,7 +6,7 @@ export const tailoringResultSchema = z.object({
   suggestions: z.array(z.object({
     section: z.string().max(80),
     target: z.object({
-      section: z.enum(["inputValue", "fields"]),
+      section: z.enum(["inputValue", "fields", "tagFields"]),
       key: z.string().max(60),
       index: z.number().int().min(0).optional(),
       field: z.string().max(60).optional(),

@@ -15,7 +15,7 @@ export type TailoredResume = z.infer<typeof tailoredResumeSchema>
 const reviewSuggestionSchema = z.object({
  section: z.string(),
  target: z.object({
-  section: z.enum(['inputValue','fields']),
+  section: z.enum(['inputValue','fields','tagFields']),
   key: z.string(),
   index: z.number().int().min(0).optional(),
   field: z.string().optional(),
