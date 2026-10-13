@@ -159,3 +159,39 @@ test('cover letter can reuse saved resume facts and export a text PDF',async({pa
  await page.getByRole('button',{name:'Download PDF'}).click()
  expect((await download).suggestedFilename()).toMatch(/Cover_Letter\.pdf$/)
 })
+
+test('ATS recommendation appears first and selected template stays collapsed after refresh',async({page})=>{
+ await page.goto('/build-resume/')
+ await page.getByRole('button',{name:'Build manually'}).click()
+ await expect(page.getByRole('heading',{name:'ATS Essential'})).toBeVisible()
+ await page.getByRole('button',{name:'Use template'}).first().click()
+ await expect(page.getByRole('button',{name:'Change template'})).toBeVisible()
+ await page.reload()
+ await expect(page.getByRole('button',{name:'Change template'})).toBeVisible()
+ await expect(page.getByText('ATS Essential',{exact:true})).toBeVisible()
+})
+
+test('mobile resume sections scroll to the active step, with adequate button contrast',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto('/build-resume/')
+ await page.getByRole('button',{name:'Build manually'}).click()
+ await page.getByRole('button',{name:/Experience.*Work history/}).click()
+ await page.getByRole('button',{name:'Add Experience'}).click()
+ for(let index=0;index<5;index++)await page.getByRole('button',{name:'Add New Experience'}).last().click()
+ const next=page.getByRole('button',{name:'Next step'})
+ await next.click()
+ const heading=page.getByRole('heading',{name:'Education',exact:true})
+ await expect(heading).toBeFocused()
+ await expect.poll(async()=>{
+  const rect=await heading.boundingBox()
+  return rect?.y??999
+ }).toBeLessThan(250)
+ // Theme tokens must not produce white text on a white primary button.
+ await page.getByRole('button',{name:/Experience.*Work history/}).click()
+ const add=page.getByRole('button',{name:'Add New Experience'}).first()
+ const colors=await add.evaluate(element=>{
+  const css=getComputedStyle(element)
+  return {color:css.color,background:css.backgroundColor}
+ })
+ expect(colors.color).not.toBe(colors.background)
+})
