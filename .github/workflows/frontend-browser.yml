@@ -2,7 +2,7 @@ name: Frontend browser acceptance
 
 on:
   push:
-    branches: [feat/frontend-redesign]
+    branches: [main, feat/frontend-redesign]
     paths:
       - 'client/**'
       - '.github/workflows/frontend-browser.yml'
