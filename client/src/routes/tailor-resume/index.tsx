@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowRight, ArrowLeft, FileCheck, FileText, Sparkles, UploadCloud, Pencil } from 'lucide-react'
+import { ArrowRight, ArrowLeft, FileCheck, FileText, Sparkles, UploadCloud, Pencil, Eye, ClipboardCheck } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import ResumashShell from '@/components/ResumashShell'
@@ -28,6 +28,8 @@ function TailorPage() {
   const [changingSource, setChangingSource] = useState(false)
   const fileRevision = useRef(0)
   const reviewHeading = useRef<HTMLHeadingElement>(null)
+  const previewPanel = useRef<HTMLDivElement>(null)
+  const changesPanel = useRef<HTMLElement>(null)
   const query = useQueryClient()
   const navigate = useNavigate()
   const job = useTailoringJob()
@@ -133,7 +135,7 @@ function TailorPage() {
 
   return <ResumashShell>
     <SEO title="Tailor your resume | Resumash" description="Tailor your resume for a role, then review evidence-backed changes."/>
-    <div className="rs-container py-8 md:py-12">
+    <div className="rs-container pb-28 pt-8 md:py-12">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs" style={{ color: 'var(--rs-muted)' }}>{storageWarning ? 'Local saving is unavailable' : 'Your work is automatically saved on this device'}</span>
         <button type="button" className="rs-button rs-button-outline !min-h-9 !px-3 text-xs" onClick={() => void clearWork()} disabled={job.restoring}>Clear local work</button>
@@ -174,7 +176,7 @@ function TailorPage() {
           <button type="button" className="rs-button rs-button-outline !min-h-10" onClick={() => { setMode('setup'); setChangingSource(true) }}><Pencil size={15}/> Update sources</button>
         </div>
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(290px,.75fr)]">
-          <ResumeReview
+          <div ref={previewPanel} className="min-w-0 scroll-mt-24"><ResumeReview
             result={{ ...result, ...applyApprovedChanges(result, acceptedEdits) }}
             originalUrl={originalUrl}
             view={view}
@@ -185,8 +187,8 @@ function TailorPage() {
               query.setQueryData(['tailoredResume'], applyApprovedChanges(result, acceptedEdits))
               void navigate({ to: '/build-resume' })
             }}
-          />
-          <aside className="rs-card min-w-0 p-5 md:p-6">
+          /></div>
+          <aside ref={changesPanel} className="rs-card min-w-0 scroll-mt-24 p-5 md:p-6">
             <div className="flex items-center gap-2"><Sparkles size={18}/><h2 className="text-lg font-semibold">Evidence-backed review</h2></div>
             <p className="mt-3 text-sm leading-6" style={{ color: 'var(--rs-muted)' }}>All proposed edits begin unselected. Accept only changes supported by your real experience.</p>
             <div className="mt-5 max-h-[min(75vh,760px)] space-y-4 overflow-y-auto pr-1">
@@ -216,6 +218,10 @@ function TailorPage() {
               void navigate({ to: '/build-resume' })
             }}><FileText size={16}/> Continue editing <ArrowRight size={16}/></button>
           </aside>
+        </div>
+        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t p-3 pb-[max(12px,env(safe-area-inset-bottom))] xl:hidden" style={{background:'var(--rs-surface)',borderColor:'var(--rs-line)'}}>
+          <button type="button" className="rs-button rs-button-outline flex-1" onClick={()=>previewPanel.current?.scrollIntoView({behavior:'smooth',block:'start'})}><Eye size={16}/> Preview</button>
+          <button type="button" className="rs-button rs-button-primary flex-1" onClick={()=>changesPanel.current?.scrollIntoView({behavior:'smooth',block:'start'})}><ClipboardCheck size={16}/> Review changes</button>
         </div>
       </>}
     </div>
