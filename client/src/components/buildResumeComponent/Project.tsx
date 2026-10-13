@@ -14,7 +14,7 @@ export default function Project() {
       <span className="w-full flex justify-between items-start">
         <h3 className="text-sm font-semibold">Projects</h3>
         {isEmpty && (
-          <button
+          <button type="button"
             className="rs-button rs-button-outline !min-h-10 !px-3 text-xs"
             onClick={() => {
               addField('projects', 0)
@@ -48,6 +48,7 @@ export default function Project() {
             inputTittle="Project Description"
             placeholder="Describe the project, your role, and key features"
           />
+          <TagInput name={`projectHighlights-${i}`} tagTitle="Project highlights" placeholder="Enter real project contributions or achievements"/>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
               type="url"
@@ -66,7 +67,6 @@ export default function Project() {
               key={field.id ?? i}
               name={`projectTechnologies-${i}`} // unique per field
               placeholder="List technologies used in your project"
-              onChange={(t) => t}
             />
           </div>
           <div className="mt-4 space-y-3">

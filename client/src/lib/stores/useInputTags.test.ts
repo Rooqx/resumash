@@ -28,3 +28,20 @@ test('inserting a new record shifts following tags and retains existing details'
   expect(after['projectHighlights-1']).toBeUndefined()
   expect(after['projectHighlights-2'].tags).toEqual(['Built storefront'])
 })
+
+test('removing a project moves technologies and AI-generated highlights together', () => {
+ const state=useTagStore.getState()
+ state.setTags({
+  'projectHighlights-0':empty(['Real result A']),
+  'projectHighlights-1':empty(['Real result B']),
+  'projectTechnologies-0':empty(['TypeScript']),
+  'projectTechnologies-1':empty(['Go']),
+ })
+ state.shiftIndexedTags('projectHighlights',0,'remove')
+ state.shiftIndexedTags('projectTechnologies',0,'remove')
+ const values=useTagStore.getState().fields
+ expect(values['projectHighlights-0'].tags).toEqual(['Real result B'])
+ expect(values['projectTechnologies-0'].tags).toEqual(['Go'])
+ expect(values['projectHighlights-1']).toBeUndefined()
+ expect(values['projectTechnologies-1']).toBeUndefined()
+})
