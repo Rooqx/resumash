@@ -41,6 +41,7 @@ function AdditionalSections(){
 }
 
 function BuilderPage(){
+ const client=useQueryClient()
  const [savedView] = useState(()=>restoreBuilderView())
  const [active,setActive]=useState(savedView?.active??0)
  const [template,setTemplate]=useState<ResumeTemplateId>(()=>resumeTemplates.some(t=>t.id===savedView?.template)?savedView!.template as ResumeTemplateId:'ats-essential')
@@ -50,8 +51,7 @@ function BuilderPage(){
  const editorScroll=useRef<HTMLDivElement>(null)
  const [actualPdfOpen,setActualPdfOpen]=useState(false)
  const [downloading,setDownloading]=useState(false)
- const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(() => !savedView && !useInputStore.getState().inputValue.fullName && !useFieldStores.getState().fields.experience?.length)
- const client=useQueryClient()
+ const [showAiQuestionnaire,setShowAiQuestionnaire]=useState(() => !savedView && !client.getQueryData(['tailoredResume']) && !useInputStore.getState().inputValue.fullName && !useFieldStores.getState().fields.experience?.length)
  const [incomingResume] = useState(()=>client.getQueryData(['tailoredResume']))
  const [pendingImport,setPendingImport] = useState<TailoredResume|null>(null)
  const updateInput=useInputStore(s=>s.setInputData)
@@ -79,6 +79,7 @@ function BuilderPage(){
   client.removeQueries({queryKey:['tailoredResume'],exact:true})
   const parsed=tailoredResumeSchema.safeParse(incomingResume)
   if(!parsed.success)return
+  setShowAiQuestionnaire(false)
   const currentInput=useInputStore.getState().inputValue
   const currentFields=useFieldStores.getState().fields
   const hasPreviousWork=Object.values(currentInput).some(value=>typeof value==='string'&&value.trim().length>0) ||
@@ -135,7 +136,7 @@ function BuilderPage(){
    {pendingImport&&<div className="rs-card mb-5 flex flex-wrap items-center justify-between gap-3 p-4" role="alert">
      <p className="max-w-xl text-sm">You already have an autosaved resume. A reviewed tailored draft is ready. Replace the current editor only if you want to use that draft.</p>
      <div className="flex flex-wrap gap-2">
-      <button type="button" className="rs-button rs-button-primary" onClick={()=>{updateInput(pendingImport.inputValue);updateFields(pendingImport.fields);updateTags(pendingImport.tagFields??{});setPendingImport(null);setActive(0)}}>Use tailored draft</button>
+      <button type="button" className="rs-button rs-button-primary" onClick={()=>{updateInput(pendingImport.inputValue);updateFields(pendingImport.fields);updateTags(pendingImport.tagFields??{});setPendingImport(null);setActive(0);setShowAiQuestionnaire(false)}}>Use tailored draft</button>
       <button type="button" className="rs-button rs-button-outline" onClick={()=>setPendingImport(null)}>Keep my saved resume</button>
      </div>
     </div>}
