@@ -5,15 +5,18 @@ import useInputStore from '@/lib/stores/useInputStores'
 import useFieldStores from '@/lib/stores/useMultipleFieldStore'
 import { useTagStore } from '@/lib/stores/useInputTags'
 import type { ResumeTemplateId } from '../templates/registry'
+import type { ResumeSnapshot } from '../export/ResumePdfDocument'
 
 /**
  * Opt-in PDF proof uses the exact React-PDF renderer used by Download.
  * A browser PDF viewer owns real A4 page boundaries, text and pagination.
  * No network call or second layout implementation is involved.
  */
-export default function ActualPdfPreview({ template, onClose }: {
+export default function ActualPdfPreview({ template, onClose, snapshot: providedSnapshot }: {
   template: ResumeTemplateId
   onClose: () => void
+  /** Tailoring passes its reviewed result; builder defaults to editor stores. */
+  snapshot?: ResumeSnapshot
 }) {
   const [url,setUrl]=useState<string|null>(null)
   const [error,setError]=useState('')
@@ -22,10 +25,15 @@ export default function ActualPdfPreview({ template, onClose }: {
     let objectUrl:string|null=null
     const render=async()=>{
       try {
+        const current=providedSnapshot ?? {
+          inputValue:useInputStore.getState().inputValue,
+          fields:useFieldStores.getState().fields,
+          tagFields:useTagStore.getState().fields,
+        }
         const snapshot={
-          inputValue:{...useInputStore.getState().inputValue},
-          fields:structuredClone(useFieldStores.getState().fields),
-          tagFields:structuredClone(useTagStore.getState().fields),
+          inputValue:{...current.inputValue},
+          fields:structuredClone(current.fields),
+          tagFields:structuredClone(current.tagFields),
         }
         const [{pdf},{default:ResumePdfDocument}]=await Promise.all([
           import('@react-pdf/renderer'),
@@ -42,6 +50,7 @@ export default function ActualPdfPreview({ template, onClose }: {
     }
     void render()
     return ()=>{disposed=true;if(objectUrl)URL.revokeObjectURL(objectUrl)}
+  // This proof is mounted on demand; snapshot is captured at opening time.
   },[template])
   return <div role="dialog" aria-modal="true" aria-label="Real PDF page preview" className="fixed inset-0 z-50 bg-black/80 p-2 md:p-6">
     <div className="mx-auto flex h-full max-w-5xl flex-col rounded-xl bg-[var(--rs-surface)] p-3 md:p-5">

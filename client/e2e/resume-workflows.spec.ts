@@ -27,13 +27,38 @@ test('can view the real PDF and download a valid PDF', async ({ page }) => {
  expect(file.suggestedFilename()).toMatch(/\.pdf$/)
 })
 
-test('mobile preview uses the same page-accurate PDF renderer as download', async ({ page }) => {
+test('mobile live HTML preview fits, zooms, and never embeds generated PDF', async ({ page }) => {
  await page.setViewportSize({width:390,height:844})
  await page.goto('/build-resume/')
  await page.getByRole('button',{name:'Build manually'}).click()
+ await page.getByPlaceholder('Enter your full name').fill('Live Preview Example')
  await page.getByRole('button',{name:'Preview',exact:true}).click()
- await expect(page.getByRole('dialog',{name:'Resume preview'}).getByTitle('Actual resume PDF pages')).toBeVisible({timeout:30000})
- await expect(page.getByRole('dialog',{name:'Resume preview'}).getByText('A4 · page-accurate PDF preview')).toBeVisible({timeout:30000})
+ const dialog = page.getByRole('dialog',{name:'Resume preview'})
+ await expect(dialog.locator('article.rs-document.rs-template-ats-essential')).toBeVisible()
+ await expect(dialog.getByText('Live Preview Example')).toBeVisible()
+ await expect(dialog.locator('iframe')).toHaveCount(0)
+ await expect(dialog.getByRole('button',{name:'Fit A4 to available width'})).toBeVisible()
+ const before = await dialog.getByText(/A4 ·/).textContent()
+ await dialog.getByRole('button',{name:'Zoom in'}).click()
+ const after = await dialog.getByText(/A4 ·/).textContent()
+ expect(after).not.toBe(before)
+})
+
+test('desktop live preview updates text without rebuilding a PDF iframe', async ({page})=>{
+ await page.goto('/build-resume/')
+ await page.getByRole('button',{name:'Build manually'}).click()
+ const preview = page.locator('section').filter({has:page.getByRole('heading',{name:'Live resume preview'})}).last()
+ await expect(preview.locator('article.rs-document')).toBeVisible()
+ await expect(preview.locator('iframe')).toHaveCount(0)
+ const name=page.getByPlaceholder('Enter your full name')
+ await name.fill('First Draft')
+ await expect(preview.locator('.resume-header h1')).toContainText('First Draft')
+ await name.fill('Updated Draft')
+ await expect(preview.locator('.resume-header h1')).toContainText('Updated Draft')
+ await expect(preview.locator('iframe')).toHaveCount(0)
+ await preview.getByRole('button',{name:'Inspect actual PDF pages'}).click()
+ await expect(page.getByRole('dialog',{name:'Real PDF page preview'})).toBeVisible()
+ await expect(page.getByTitle('Selectable A4 resume PDF')).toBeVisible({timeout:30000})
 })
 
 test('tailoring restores original uploaded PDF and clears it on request',async ({page})=>{
